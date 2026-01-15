@@ -1,0 +1,44 @@
+{
+  "model": {
+    "latent_channels": 4,
+    "latent_size": 64,
+    "hidden_dim": 384,
+    "num_layers": 12,
+    "num_styles": 2,
+    "kernel_size": 7
+  },
+  "training": {
+    "batch_size": 12,
+    "num_epochs": 500,
+    "learning_rate": 0.0001,
+    "weight_decay": 0.01,
+    "gradient_clip_norm": 1.0,
+    "use_amp": true,
+    "num_workers": 4,
+    "inference_every_n_epochs": 5
+  },
+  "data": {
+    "content_dir": "F:\\monet2photo\\latents\\monet2photo",
+    "style_root": "F:\\monet2photo\\latents\\monet2photo",
+    "num_classes": 2
+  },
+  "checkpoint": {
+    "resume_from": "auto",
+    "save_dir": "checkpoints",
+    "save_every_n_epochs": 10
+  },
+  "inference": {
+    "steps": 20,
+    "noise_strength": 0.8
+  },
+  "eval_samples": [
+    {
+      "img_dir": "F:\\monet2photo\\monet2photo\\testA",
+      "target_styles": [0, 1]
+    },
+    {
+      "img_dir": "F:\\monet2photo\\monet2photo\\testB",
+      "target_styles": [0, 1]
+    }
+  ]
+}
