@@ -9,48 +9,76 @@ from config import Config
 
 
 @torch.no_grad()
-def teleport_latent(content_latent, target_style_id, steps, model, device, noise_strength=1.0):
+def generate_style_transfer_cfg(
+    content_latent, 
+    target_style_id, 
+    model, 
+    device, 
+    steps=25, 
+    cfg_scale=4.0
+):
     """
-    使用欧拉法求解ODE，实现条件风格生成 (SA-Flow Mapping)
+    SA-Flow v2 推理：使用 CFG (Classifier-Free Guidance) 进行锐化生成
     
     Args:
-        content_latent: [1, 4, 64, 64] - 内容图的latent（作为结构控制）
+        content_latent: [1, 4, 64, 64] - 内容图的latent
         target_style_id: int - 目标风格ID
-        steps: int - 积分步数（推荐 10-20 步即可）
-        model: 训练好的 SAFlowModel (SAFModel)
+        model: SAFModel
         device: cuda/cpu
-        noise_strength: float - 噪声强度
+        steps: int - 积分步数
+        cfg_scale: float - CFG 强度 (3.0-5.0 推荐)
     
     Returns:
-        stylized_latent: [1, 4, 64, 64] - 风格化后的latent
+        stylized_latent: [1, 4, 64, 64]
     """
     model.eval()
-    
     content_latent = content_latent.to(device)
-    style_id = torch.tensor([target_style_id], dtype=torch.long, device=device)
+    style_tensor = torch.tensor([target_style_id], dtype=torch.long, device=device)
     
-    # 1. 起点
-    noise = torch.randn_like(content_latent)
-    x_t = content_latent * (1 - noise_strength) + noise * noise_strength
+    # 🔴 v2: 从纯噪声开始 (与训练一致)
+    x_t = torch.randn_like(content_latent)
     
-    # 2. 结构条件
-    cond_latent = content_latent
+    # 准备条件
+    cond_input = content_latent
+    uncond_input = torch.zeros_like(content_latent)  # 空条件 (用于CFG)
     
-    # 3. 计算步长
     dt = 1.0 / steps
     
-    # 4. 欧拉法迭代
+    # 欧拉积分 + CFG
     for i in range(steps):
-        # 当前时间
         t_current = torch.tensor([i * dt], device=device)
         
-        # 预测速度: SA-Flow 会根据局部卷积特征保持结构
-        velocity = model(x_t, cond_latent, t_current, style_id)
+        # A. 有条件预测 (看着内容图画)
+        v_cond = model(x_t, cond_input, t_current, style_tensor)
         
-        # 更新位置 (标准欧拉步)
-        x_t = x_t + dt * velocity
+        # B. 无条件预测 (盲画)
+        v_uncond = model(x_t, uncond_input, t_current, style_tensor)
+        
+        # C. CFG 外推 (Extrapolation)
+        # 公式: v_uncond + cfg_scale * (v_cond - v_uncond)
+        # 作用: 放大"内容图"带来的特征，强力抑制模糊
+        v_final = v_uncond + cfg_scale * (v_cond - v_uncond)
+        
+        # 更新位置
+        x_t = x_t + dt * v_final
     
     return x_t
+
+
+@torch.no_grad()
+def teleport_latent(content_latent, target_style_id, steps, model, device, noise_strength=1.0):
+    """
+    兼容性包装：调用新的 CFG 采样
+    (保留旧接口以兼容现有代码)
+    """
+    return generate_style_transfer_cfg(
+        content_latent, 
+        target_style_id, 
+        model, 
+        device, 
+        steps=steps, 
+        cfg_scale=4.0  # 默认 CFG scale
+    )
 
 
 def load_vae_encoder_decoder():
@@ -149,15 +177,15 @@ def main():
     # ========== 推理参数 ==========
     CHECKPOINT_PATH = "auto"
     INPUT_IMAGE = "test.jpg"
-    TARGET_STYLE_ID = 1  # 目标风格ID
-    STEPS = inf_cfg.get('steps', 20)      # SA-Flow 步数少，20步足够
-    NOISE_STRENGTH = inf_cfg.get('noise_strength', 0.8)
+    TARGET_STYLE_ID = 1
+    STEPS = inf_cfg.get('steps', 25)
+    CFG_SCALE = inf_cfg.get('cfg_scale', 4.0)  # 🔴 新增 CFG 参数
     OUTPUT_ROOT = "inference_results"
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
     # ========== 加载模型 ==========
-    print("Loading SA-Flow model...")
+    print("Loading SA-Flow v2 model...")
     model = SAFModel(**model_cfg).to(device)
     
     if CHECKPOINT_PATH == "auto":
@@ -185,24 +213,25 @@ def main():
     
     input_base = Path(INPUT_IMAGE).stem
     style_str = f"style_{TARGET_STYLE_ID}"
-    subdir = Path(OUTPUT_ROOT) / f"{input_base}_{style_str}"
+    subdir = Path(OUTPUT_ROOT) / f"{input_base}_{style_str}_cfg{CFG_SCALE}"
     subdir.mkdir(parents=True, exist_ok=True)
     output_image_path = subdir / "output.jpg"
     
-    print(f"Transferring to style {TARGET_STYLE_ID} with {STEPS} steps...")
-    stylized_latent = teleport_latent(
+    print(f"Transferring to style {TARGET_STYLE_ID} with {STEPS} steps (CFG={CFG_SCALE})...")
+    stylized_latent = generate_style_transfer_cfg(
         content_latent,
         TARGET_STYLE_ID,
-        STEPS,
         model,
         device,
-        noise_strength=NOISE_STRENGTH
+        steps=STEPS,
+        cfg_scale=CFG_SCALE
     )
     
     print("Decoding output image...")
     output_image = latent_to_image(stylized_latent, vae, device)
     output_image.save(output_image_path)
-    print(f"Saved result to {output_image_path}")
+    print(f"✅ Saved result to {output_image_path}")
+    print(f"💡 Tip: Try different CFG scales (3.0, 5.0, 7.0) for sharpness control")
 
 
 if __name__ == "__main__":

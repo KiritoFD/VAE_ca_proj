@@ -79,8 +79,7 @@ class RandomPairDataset(Dataset):
         if x_style.dim() == 4:
             x_style = x_style.squeeze(0)
         
-        # 🔴 核心修改: 手动乘上 SD 的缩放系数
-        # 这一步能让数据分布从 std=0.9 降到 std=0.18 左右
+        # SD latent scaling (保持与VAE编码一致)
         x_content = x_content * 0.18215
         x_style = x_style * 0.18215
 

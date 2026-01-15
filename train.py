@@ -78,93 +78,93 @@ def load_checkpoint(checkpoint_path, model, optimizer=None, scheduler=None, scal
 
 def compute_loss(model, batch, device):
     """
-    计算Flow Matching损失（内容到风格的映射模式）
-    同时返回诊断指标：方向对齐度、强度比、结构保留度
+    SA-Flow v2 损失计算：
+    Flow Path: Noise -> Style (防止代数泄露)
+    Condition: Content (with Augmentation & CFG Dropout)
     """
     x_content, x_style, style_label = batch
     x_content = x_content.to(device, non_blocking=True)
     x_style = x_style.to(device, non_blocking=True)
     style_label = style_label.to(device, non_blocking=True)
-    
     batch_size = x_content.shape[0]
     
-    # 🔴 核心修改：映射模式 - 从内容流形到风格流形
-    x_0 = x_content  # 起点：内容图
-    x_1 = x_style    # 终点：风格图
+    # 🔴 修正点 1: 路径重定义 (防止泄露)
+    # 起点 x0 = 纯噪声 (不是内容图!)
+    # 终点 x1 = 风格图
+    # 这样模型必须学会生成，而不是做减法
+    x_0 = torch.randn_like(x_style)
+    x_1 = x_style
     
-    # 采样随机时间 t ~ U(0, 1)
+    # 🔴 修正点 2: 条件增强 (Condition Augmentation)
+    # 给条件加一点噪声，防止过拟合到像素级对齐
+    x_cond = x_content + torch.randn_like(x_content) * 0.05
+    
+    # 🔴 修正点 3: CFG Training (Dropout)
+    # 15% 概率把条件置零，让模型学会"盲画"
+    # 这是推理时能做 CFG 锐化的前提！
+    cfg_dropout_mask = torch.rand(batch_size, device=device) < 0.15
+    if cfg_dropout_mask.any():
+        x_cond[cfg_dropout_mask] = 0.0
+    
+    # Flow Matching 插值
     t = torch.rand(batch_size, device=device)
+    t_exp = t[:, None, None, None]
     
-    # 线性插值：x_t = (1-t)*x_0 + t*x_1
-    t_expanded = t[:, None, None, None]
-    # 添加微量噪声增强数值稳定性
-    x_t = (1 - t_expanded) * x_0 + t_expanded * x_1 + torch.randn_like(x_0) * 0.01
+    # x_t 混合路径: 从噪声到风格图
+    x_t = (1 - t_exp) * x_0 + t_exp * x_1
     
-    # 真值速度场：v_true = x_1 - x_0
+    # 目标速度: v = x_1 - x_0
     v_true = x_1 - x_0
     
-    # 模型预测速度
-    v_pred = model(x_t, x_content, t, style_label)
+    # 预测速度
+    v_pred = model(x_t, x_cond, t, style_label)
     
-    # MSE损失
+    # MSE 损失
     loss = nn.functional.mse_loss(v_pred, v_true)
     
-    # --- 🔍 诊断指标计算 ---
+    # --- 诊断指标 ---
     with torch.no_grad():
-        # 1. 方向对齐度 (Cosine Similarity)
-        # 越接近1.0说明模型知道"往哪画"
         v_true_flat = v_true.reshape(batch_size, -1)
         v_pred_flat = v_pred.reshape(batch_size, -1)
+        
+        # 方向对齐度
         cos_sim = nn.functional.cosine_similarity(v_true_flat, v_pred_flat, dim=1).mean().item()
         
-        # 2. 强度比 (Magnitude Ratio)
-        # 越接近1.0说明画得越"用力"，低于0.5会导致模糊
+        # 强度比
         mag_true = torch.norm(v_true_flat, dim=1).mean().item()
         mag_pred = torch.norm(v_pred_flat, dim=1).mean().item()
         mag_ratio = mag_pred / (mag_true + 1e-6)
         
-        # 3. 结构保留度
-        # 确保预测改动没有破坏原图结构
-        struct_corr = nn.functional.cosine_similarity(
-            x_content.reshape(batch_size, -1), 
-            v_pred.reshape(batch_size, -1),
-            dim=1
-        ).mean().item()
-        
-        # 4. 速度场标准差
+        # v_true 标准差
         v_true_std = v_true.std().item()
 
     debug_info = {
-        "cos_sim": cos_sim,      # 方向是否正确
-        "mag_ratio": mag_ratio,  # 强度是否足够（关键！）
-        "struct_corr": struct_corr,
-        "v_true_std": v_true_std
+        "cos_sim": cos_sim,
+        "mag_ratio": mag_ratio,
+        "v_true_std": v_true_std,
+        "cfg_dropout_rate": cfg_dropout_mask.float().mean().item()
     }
     
     return loss, debug_info
 
 
 def train_one_epoch(model, dataloader, optimizer, device, epoch, scaler):
-    """增强版训练循环：实时监控速度场质量"""
+    """SA-Flow v2 训练循环"""
     model.train()
-    total_metrics = {"loss": 0.0, "cos_sim": 0.0, "mag_ratio": 0.0, "struct_corr": 0.0}
+    total_metrics = {"loss": 0.0, "cos_sim": 0.0, "mag_ratio": 0.0}
     
     pbar = tqdm(enumerate(dataloader), total=len(dataloader), desc=f"Epoch {epoch}")
     
     for step, batch in pbar:
-        # 🔴 第一个batch的数据检查
+        # 第一个batch的数据检查
         if step == 0 and epoch == 1:
             x_content, x_style, _ = batch
             print(f"\n🔍 DEBUG: Data Statistics Check:")
-            print(f"   Content - Mean: {x_content.mean():.4f}, Std: {x_content.std():.4f}, Range: [{x_content.min():.4f}, {x_content.max():.4f}]")
-            print(f"   Style   - Mean: {x_style.mean():.4f}, Std: {x_style.std():.4f}, Range: [{x_style.min():.4f}, {x_style.max():.4f}]")
-            expected_std = 0.18215
-            if abs(x_content.std() - expected_std) > 0.1:
-                print(f"   ⚠️  WARNING: Std should be ~{expected_std}, but got {x_content.std():.4f}")
+            print(f"   Content - Mean: {x_content.mean():.4f}, Std: {x_content.std():.4f}")
+            print(f"   Style   - Mean: {x_style.mean():.4f}, Std: {x_style.std():.4f}")
         
         optimizer.zero_grad()
         
-        # 混合精度训练
         with torch.cuda.amp.autocast():
             loss, debug = compute_loss(model, batch, device)
         
@@ -178,27 +178,24 @@ def train_one_epoch(model, dataloader, optimizer, device, epoch, scaler):
         total_metrics["loss"] += loss.item()
         total_metrics["cos_sim"] += debug["cos_sim"]
         total_metrics["mag_ratio"] += debug["mag_ratio"]
-        total_metrics["struct_corr"] += debug["struct_corr"]
         
-        # 🔴 实时监控进度条 - 关键指标
+        # 进度条显示
         pbar.set_postfix({
             "L": f"{loss.item():.4f}",
-            "Cos": f"{debug['cos_sim']:.3f}",  # 方向对吗？
-            "Mag": f"{debug['mag_ratio']:.3f}"  # 够清晰吗？（关键！）
+            "Cos": f"{debug['cos_sim']:.3f}",
+            "Mag": f"{debug['mag_ratio']:.3f}"
         })
         
-        # 每100步打印详细统计
+        # 每100步详细统计
         if step > 0 and step % 100 == 0:
-            print(f"\n[Step {step}] V_True_Std: {debug['v_true_std']:.4f} | Structure_Corr: {debug['struct_corr']:.3f}")
+            print(f"\n[Step {step}] V_True_Std: {debug['v_true_std']:.4f}")
     
     avg_metrics = {k: v / len(dataloader) for k, v in total_metrics.items()}
     return avg_metrics
 
 
 def run_inference_samples(model, vae, eval_configs, epoch, config, device):
-    """
-    运行推理采样
-    """
+    """SA-Flow v2 推理：支持 CFG"""
     from torchvision import transforms
 
     model.eval()
@@ -206,8 +203,8 @@ def run_inference_samples(model, vae, eval_configs, epoch, config, device):
     root_dir.mkdir(exist_ok=True)
 
     inf_cfg = config.inference
-    steps = inf_cfg.get('steps', 20) # SA-Flow 推荐 20 步
-    noise_strength = inf_cfg.get('noise_strength', 0.8)
+    steps = inf_cfg.get('steps', 25)
+    cfg_scale = inf_cfg.get('cfg_scale', 4.0)  # 🔴 新增 CFG 参数
 
     for eval_idx, eval_cfg in enumerate(eval_configs):
         img_dir = eval_cfg["img_dir"]
@@ -226,15 +223,13 @@ def run_inference_samples(model, vae, eval_configs, epoch, config, device):
             transforms.Normalize([0.5], [0.5])
         ])
         img_tensor = transform(img).unsqueeze(0).to(device)
+        
         with torch.no_grad():
             latent = vae.encode(img_tensor).latent_dist.sample()
-            # 注意：SA-Flow 依然使用 SD1.5 的 Latent 空间，保持 scaling
-            latent = latent * 0.18215
+            latent = latent * 0.18215  # SD scaling
 
-        # 规范化输出目录
         eval_subdir = root_dir / f"epoch_{epoch:03d}" / f"eval{eval_idx}"
         eval_subdir.mkdir(parents=True, exist_ok=True)
-        # 保存原图
         img.save(eval_subdir / "input.jpg")
 
         for style_id in target_styles:
@@ -242,28 +237,32 @@ def run_inference_samples(model, vae, eval_configs, epoch, config, device):
             style_subdir.mkdir(parents=True, exist_ok=True)
             style_tensor = torch.tensor([style_id], dtype=torch.long, device=device)
             
-            # 准备初始噪声
-            noise = torch.randn_like(latent)
-            x_t = latent * (1 - noise_strength) + noise * noise_strength
+            # 🔴 v2: 从纯噪声开始 (与训练一致)
+            x_t = torch.randn_like(latent)
             cond_latent = latent
+            uncond_latent = torch.zeros_like(latent)  # CFG 无条件输入
             
             dt = 1.0 / steps
             with torch.no_grad():
                 for i in range(steps):
                     t_current = torch.tensor([i * dt], device=device)
-                    # 调用 SA-Flow 模型
-                    velocity = model(x_t, cond_latent, t_current, style_tensor)
-                    # 欧拉积分
-                    x_t = x_t + dt * velocity
+                    
+                    # 🔴 CFG: 有条件 + 无条件预测
+                    v_cond = model(x_t, cond_latent, t_current, style_tensor)
+                    v_uncond = model(x_t, uncond_latent, t_current, style_tensor)
+                    
+                    # CFG 外推: 放大条件带来的特征
+                    v_final = v_uncond + cfg_scale * (v_cond - v_uncond)
+                    
+                    x_t = x_t + dt * v_final
                 
-                # 解码
                 decoded = vae.decode(x_t / 0.18215).sample
                 
             output = (decoded[0].permute(1, 2, 0).cpu().numpy() * 0.5 + 0.5).clip(0, 1)
             output = (output * 255).astype(np.uint8)
             out_img = Image.fromarray(output)
             out_img.save(style_subdir / "output.jpg")
-        print(f"✅ Saved eval {eval_idx} samples for epoch {epoch} to {eval_subdir}")
+        print(f"✅ Saved eval {eval_idx} (CFG={cfg_scale}) for epoch {epoch}")
 
     model.train()
 
@@ -382,7 +381,6 @@ def main():
         print(f"  Loss: {avg_metrics['loss']:.4f}")
         print(f"  Direction (CosSim): {avg_metrics['cos_sim']:.3f} {'✅' if avg_metrics['cos_sim'] > 0.7 else '⚠️'}")
         print(f"  Strength (MagRatio): {avg_metrics['mag_ratio']:.3f} {'✅ Clear' if avg_metrics['mag_ratio'] > 0.7 else '⚠️ Blurry'}")
-        print(f"  Structure (Corr): {avg_metrics['struct_corr']:.3f}")
         print(f"  LR: {scheduler.get_last_lr()[0]:.6f}")
 
         # 每N个epoch运行推理

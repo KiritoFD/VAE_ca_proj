@@ -28,8 +28,9 @@
     "save_every_n_epochs": 10
   },
   "inference": {
-    "steps": 20,
-    "noise_strength": 0.8
+    "steps": 25,
+    "cfg_scale": 4.0,
+    "noise_strength": 1.0
   },
   "eval_samples": [
     {

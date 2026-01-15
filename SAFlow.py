@@ -2,58 +2,87 @@ import torch
 import torch.nn as nn
 import math
 
+
+class GlobalContextBlock(nn.Module):
+    """
+    SA-Flow v2 新增组件: 全局上下文块 (Global Context Block)
+    解决卷积网络"只见树木不见森林"的问题，确保整体色调和笔触风格的一致性。
+    """
+    def __init__(self, dim):
+        super().__init__()
+        # 1. 上下文建模: 1x1 Conv -> Softmax -> Attention
+        self.conv_mask = nn.Conv2d(dim, 1, kernel_size=1)
+        self.softmax = nn.Softmax(dim=2)  # 对空间维度(HW)做Softmax
+
+        # 2. 特征转换
+        self.channel_add_conv = nn.Sequential(
+            nn.Conv2d(dim, dim, kernel_size=1),
+            nn.LayerNorm([dim, 1, 1]),
+            nn.LeakyReLU(0.1),
+            nn.Conv2d(dim, dim, kernel_size=1)
+        )
+
+    def forward(self, x):
+        batch, channel, height, width = x.size()
+        
+        # [B, C, H, W] -> [B, C, H*W]
+        input_x = x.view(batch, channel, height * width)
+        
+        # 计算全局注意力掩码
+        context_mask = self.conv_mask(x)  # [B, 1, H, W]
+        context_mask = context_mask.view(batch, 1, height * width)
+        context_mask = self.softmax(context_mask)  # [B, 1, H*W]
+        
+        # 获取全局上下文 [B, C, H*W] @ [B, H*W, 1] -> [B, C, 1]
+        context = torch.bmm(input_x, context_mask.permute(0, 2, 1))
+        context = context.unsqueeze(-1)  # [B, C, 1, 1]
+        
+        # 融合: 原特征 + 全局特征
+        return x + self.channel_add_conv(context)
+
+
 class GatedDifferentialBlock(nn.Module):
     """
-    SA-Flow 核心组件：门控微分块
-    利用大核卷积近似局部微分流，完全保留空间拓扑结构。
+    SA-Flow v2 核心 Block
+    集成: 大核微分流 + 全局上下文 + 门控混合
     """
     def __init__(self, dim, kernel_size=7):
         super().__init__()
-        # 1. 局部微分流 (Local Differential Term)
-        # Depthwise Conv: 极低参数量，捕捉局部纹理流向，保持拓扑
+        # 1. 局部微分流 (Local Flow) - 保持 7x7 大核
         self.local_flow = nn.Conv2d(dim, dim, kernel_size=kernel_size, 
                                     padding=kernel_size//2, groups=dim)
         
-        # 2. 全局风格势能 (Global Potential Term)
-        # GroupNorm 保持空间结构，不像 LayerNorm 那样Flatten
+        # 2. 全局上下文 (Global Context) - v2 新增
+        self.gc_block = GlobalContextBlock(dim)
+        
+        # 3. 风格注入 (AdaGN)
         self.norm = nn.GroupNorm(32, dim) 
         self.style_proj = nn.Linear(dim, dim * 2) 
         
-        # 3. 混合与非线性 (Flow Mixing)
-        # 1x1 Conv 替代 Linear，实现通道间的信息交互
+        # 4. 门控混合 (Gated Mixing)
         self.proj_1 = nn.Conv2d(dim, dim * 2, 1) 
         self.proj_2 = nn.Conv2d(dim, dim, 1)
         self.act = nn.SiLU()
-        
-        # 🔴 移除 self.scale - 让 GroupNorm 和 Residual 自己平衡
 
     def forward(self, x, style_emb):
-        # x: [B, C, H, W]
         shortcut = x
         
-        # A. 注入全局风格 (AdaGN)
-        # style_emb: [B, dim] -> [B, 2*dim]
+        # A. 风格注入 (AdaGN)
         style_params = self.style_proj(style_emb)
         mu, sigma = style_params.chunk(2, dim=-1)
-        
-        # 广播到空间维度 [B, dim, 1, 1]
         mu = mu.unsqueeze(-1).unsqueeze(-1)
         sigma = sigma.unsqueeze(-1).unsqueeze(-1)
-        
-        # 调制：Norm后进行缩放和平移
         x = self.norm(x) * (1 + sigma) + mu
         
-        # B. 局部空间建模 (No Attention, just Large Kernel Conv)
+        # B. 局部与全局特征提取
         x = self.local_flow(x)
+        x = self.gc_block(x)  # v2: 注入全局信息
         
-        # C. 门控流体混合 (GLU)
-        # 模拟流体力学中的非线性粘滞
+        # C. 门控混合 (GLU)
         x_gate, x_val = self.proj_1(x).chunk(2, dim=1)
         x = self.act(x_gate) * x_val
         x = self.proj_2(x)
         
-        # D. 欧拉积分步 (Residual Connection)
-        # 🔴 直接相加,不乘极小的 scale
         return shortcut + x
 
 
@@ -74,29 +103,28 @@ class SinusoidalTimeEmbedding(nn.Module):
 
 class SAFModel(nn.Module):
     """
-    SA-Flow Architecture (Structure-Aware Flow)
-    替代原有的 Transformer 架构，专门针对 Image-to-Image Mapping 优化。
-    保持了与原 DiTModel 相同的输入输出接口。
+    SA-Flow v2 Model (Structure-Aware Flow)
+    专为流形映射设计，支持 CFG (Classifier-Free Guidance)
+    
+    训练模式: Noise -> Style (条件为 Content)
+    推理模式: 支持 CFG 锐化
     """
     def __init__(
         self,
         latent_channels=4,
-        latent_size=64, # 仅占位，SA-Flow 不依赖固定尺寸
+        latent_size=64,  # 占位，不依赖固定尺寸
         hidden_dim=384,
         num_layers=12,
         num_styles=2,
         kernel_size=7,
-        **kwargs # 吞掉 config 中不再需要的 transformer 参数
+        **kwargs
     ):
         super().__init__()
-        self.in_channels = latent_channels * 2 # xt + x_content
+        self.in_channels = latent_channels * 2  # x_t(4) + x_cond(4)
         self.hidden_dim = hidden_dim
         
-        # 1. 风格嵌入 (Style Embedding)
-        # 这就是方案一里提到的“风格身份证”
+        # 1. 嵌入层
         self.style_embed = nn.Embedding(num_styles, hidden_dim)
-        
-        # 2. 时间嵌入
         self.time_mlp = nn.Sequential(
             SinusoidalTimeEmbedding(hidden_dim),
             nn.Linear(hidden_dim, hidden_dim),
@@ -104,29 +132,27 @@ class SAFModel(nn.Module):
             nn.Linear(hidden_dim, hidden_dim)
         )
         
-        # 3. 入口层 (Stem)
-        # 直接在 Latent 空间卷积，保持 2D 结构
+        # 2. Stem (处理 8 通道输入)
         self.stem = nn.Conv2d(self.in_channels, hidden_dim, kernel_size=3, padding=1)
         
-        # 4. 核心微分流块 (Differential Blocks)
+        # 3. Backbone (v2 Blocks with GC)
         self.blocks = nn.ModuleList([
             GatedDifferentialBlock(hidden_dim, kernel_size=kernel_size)
             for _ in range(num_layers)
         ])
         
-        # 5. 出口层 (Final Velocity Prediction)
+        # 4. Final Head
         self.final_norm = nn.GroupNorm(32, hidden_dim)
         self.final_conv = nn.Conv2d(hidden_dim, latent_channels, kernel_size=3, padding=1)
         
-        # 初始化
         self.initialize_weights()
 
     def initialize_weights(self):
-        # 最后一层初始化为零，保证初始状态下模型输出接近零速度（恒等映射）
+        # Zero-out final layer for identity initialization
         nn.init.zeros_(self.final_conv.weight)
         nn.init.zeros_(self.final_conv.bias)
         
-        # 🔴 添加: 显式初始化中间层,确保梯度流动
+        # Kaiming init for other convs
         for m in self.modules():
             if isinstance(m, nn.Conv2d) and m != self.final_conv:
                 nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
@@ -137,32 +163,30 @@ class SAFModel(nn.Module):
                 if m.bias is not None:
                     nn.init.zeros_(m.bias)
 
-    def forward(self, xt, x0, t, style_id):
+    def forward(self, x_t, x_cond, t, style_id):
         """
         Args:
-            xt: [B, 4, H, W] - 当前流形状态
-            x0: [B, 4, H, W] - 原始内容锚点 (结构条件)
+            x_t: [B, 4, H, W] - 当前流形状态 (噪声 -> 风格图)
+            x_cond: [B, 4, H, W] - 结构条件 (内容图 或 全零用于CFG)
             t: [B] - 时间步
-            style_id: [B] - 风格 ID
+            style_id: [B] - 风格ID
         Returns:
-            v: [B, 4, H, W] - 预测流速
+            v: [B, 4, H, W] - 预测速度场
         """
-        # 1. 准备条件
-        t_emb = self.time_mlp(t)                 # [B, dim]
-        style_emb = self.style_embed(style_id)   # [B, dim]
-        
-        # 融合时间与风格 (简单的相加或拼接均可，这里选择相加作为全局 Condition)
+        # 1. 准备全局条件
+        t_emb = self.time_mlp(t)
+        style_emb = self.style_embed(style_id)
         global_cond = t_emb + style_emb
         
-        # 2. 拼接输入并进入特征空间
-        x = torch.cat([xt, x0], dim=1)
+        # 2. 拼接条件 (Early Fusion)
+        x = torch.cat([x_t, x_cond], dim=1)
         x = self.stem(x)
         
-        # 3. 通过微分流块
+        # 3. Backbone Flow
         for block in self.blocks:
             x = block(x, global_cond)
             
-        # 4. 预测速度场
+        # 4. 预测速度
         x = self.final_norm(x)
         v = self.final_conv(x)
         
