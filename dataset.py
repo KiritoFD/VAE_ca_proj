@@ -1,86 +1,106 @@
 import torch
 from torch.utils.data import Dataset
-import os
-import random
 from pathlib import Path
+import random
 
-
-class RandomPairDataset(Dataset):
+class Stage1Dataset(Dataset):
     """
-    随机配对数据集：内容图和目标图来自不同类别
+    Stage 1 数据集：随机配对 (Independent Coupling)
+    用于学习内容流形到风格流形的初始映射
     """
-    def __init__(self, content_dir, style_root, num_classes=None):
-        """
-        Args:
-            content_dir: 内容latent的文件夹（每个子文件夹为一个类别）
-            style_root: 风格latent的文件夹（每个子文件夹为一个类别）
-            num_classes: 只使用图片最多的N个类别，None表示使用全部
-        """
-        self.content_root = Path(content_dir)
-        self.style_root = Path(style_root)
-
-        # 收集所有类别
-        all_content_classes = sorted([d for d in self.content_root.iterdir() if d.is_dir()])
-        all_style_classes = sorted([d for d in self.style_root.iterdir() if d.is_dir()])
-
-        # 统计每个类别的图片数量
-        class_counts = []
-        for style_dir in all_style_classes:
-            style_files = list(style_dir.glob("*.pt"))
-            class_counts.append((style_dir, len(style_files)))
-
-        # 只用图片最多的N个类别
+    def __init__(self, data_root, num_classes=None):
+        self.data_root = Path(data_root)
+        
+        # 列出所有包含 .pt 文件的子目录作为类别
+        self.classes = sorted([d for d in self.data_root.iterdir() if d.is_dir() and list(d.glob("*.pt"))])
         if num_classes is not None:
-            class_counts.sort(key=lambda x: x[1], reverse=True)
-            class_counts = class_counts[:num_classes]
-            print(f"\n[Dataset] Using top {num_classes} classes with most images:")
-            for i, (style_dir, count) in enumerate(class_counts):
-                print(f"  Rank {i+1}: {style_dir.name} ({count} images)")
-
-        # 重新组织类别
-        self.style_classes = [x[0] for x in class_counts]
-        self.content_classes = [c for c in all_content_classes if c in self.style_classes]
-        # 保证类别顺序一致
-        self.class_name_to_idx = {cls.name: idx for idx, cls in enumerate(self.style_classes)}
-
-        # 构建目标样本列表：(文件路径, 类别ID)
-        self.samples = []
-        for class_id, style_dir in enumerate(self.style_classes):
-            style_files = list(style_dir.glob("*.pt"))
-            for fpath in style_files:
-                self.samples.append((fpath, class_id))
-
-        print(f"\n[Dataset Summary - Random Pair Mode]")
-        print(f"Total samples: {len(self.samples)}")
-        print(f"Using {len(self.style_classes)} classes:")
-        for i, style_dir in enumerate(self.style_classes):
-            count = sum(1 for s in self.samples if s[1] == i)
-            print(f"  Class {i} ({style_dir.name}): {count} images")
+            self.classes = self.classes[:num_classes]
+        
+        # 建立类别名到索引的映射
+        self.class_to_id = {cls.name: i for i, cls in enumerate(self.classes)}
+        
+        # 收集每个类别的文件列表
+        self.class_files = {}
+        self.all_files = []
+        for cls_dir in self.classes:
+            files = sorted(list(cls_dir.glob("*.pt")))
+            if files:
+                self.class_files[cls_dir.name] = files
+                self.all_files.extend(files)
+        
+        if not self.all_files:
+            raise ValueError(f"在 {data_root} 中未找到任何 .pt 文件，请检查路径。")
+            
+        print(f"[Stage1Dataset] 成功加载 {len(self.all_files)} 个样本，共 {len(self.class_files)} 个类别")
 
     def __len__(self):
-        return len(self.samples)
+        return len(self.all_files)
 
     def __getitem__(self, idx):
-        # 目标风格图
-        target_path, target_label = self.samples[idx]
-        x_style = torch.load(target_path, map_location='cpu')
-
-        # 随机选择一个不同类别
-        other_class_ids = [i for i in range(len(self.style_classes)) if i != target_label]
-        content_class_id = random.choice(other_class_ids)
-        content_class_dir = self.style_classes[content_class_id]
-        content_files = list(content_class_dir.glob("*.pt"))
-        content_path = random.choice(content_files)
-        x_content = torch.load(content_path, map_location='cpu')
-
-        # 确保形状正确 [4, 64, 64]
-        if x_content.dim() == 4:
-            x_content = x_content.squeeze(0)
-        if x_style.dim() == 4:
-            x_style = x_style.squeeze(0)
+        # 1. 加载内容图 (Content)
+        content_file = self.all_files[idx]
+        x_content = torch.load(content_file, map_location='cpu')
         
-        # SD latent scaling (保持与VAE编码一致)
-        x_content = x_content * 0.18215
-        x_style = x_style * 0.18215
+        # 2. 随机选择风格图 (Style)
+        content_class_name = content_file.parent.name
+        other_class_names = [c for c in self.class_files.keys() if c != content_class_name]
+        
+        if other_class_names:
+            style_class_name = random.choice(other_class_names)
+            style_file = random.choice(self.class_files[style_class_name])
+        else:
+            # 如果只有一个类别，则从同类中随机选一张不同的
+            style_file = random.choice(self.class_files[content_class_name])
+        
+        x_style = torch.load(style_file, map_location='cpu')
+        
+        # 🔴 关键修复 1：维度挤压
+        # 将 [1, 4, 64, 64] 转换为 [4, 64, 64]，防止 DataLoader 产生 5D 张量
+        if x_content.dim() > 3:
+            x_content = x_content.squeeze()
+        if x_style.dim() > 3:
+            x_style = x_style.squeeze()
+            
+        # 🔴 关键修复 2：移除二次缩放
+        # 因为 encode_sd1.5.py 已乘过 0.18215，这里直接返回原始读取值
+        # 若再次乘以 0.18215，会导致数值分布过小，Loss 异常
+        
+        # 获取风格对应的标签 ID
+        style_label = self.class_to_id[style_file.parent.name]
+        
+        return x_content, x_style, torch.tensor(style_label, dtype=torch.long)
 
-        return x_content, x_style, target_label
+
+class Stage2Dataset(Dataset):
+    """
+    Stage 2 数据集：Reflow 生成的伪数据对
+    (Content, Z) 其中 Z 是 Stage 1 模型生成的确定性映射结果
+    """
+    def __init__(self, reflow_dir):
+        self.reflow_dir = Path(reflow_dir)
+        self.pairs = sorted(list(self.reflow_dir.glob("pair_*.pt")))
+        
+        if not self.pairs:
+            print(f"⚠️ 警告：在 {reflow_dir} 中未找到配对数据，请确认 Stage 1 生成步骤已完成。")
+
+        print(f"[Stage2Dataset] 成功加载 {len(self.pairs)} 组 Reflow 配对数据")
+
+    def __len__(self):
+        return len(self.pairs)
+
+    def __getitem__(self, idx):
+        data = torch.load(self.pairs[idx], map_location='cpu')
+        
+        x_content = data['content']
+        z_target = data['z']
+        style_label = data['style_label']
+
+        # 同样进行维度检查，确保万无一失
+        if x_content.dim() > 3:
+            x_content = x_content.squeeze()
+        if z_target.dim() > 3:
+            z_target = z_target.squeeze()
+
+        # 🔴 移除二次缩放
+        # Stage 1 生成的 Z 本身就是基于已缩放数据产生的，无需再次处理
+        return x_content, z_target, style_label

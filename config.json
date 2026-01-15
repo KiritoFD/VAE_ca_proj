@@ -1,45 +1,25 @@
 {
   "model": {
     "latent_channels": 4,
-    "latent_size": 64,
-    "hidden_dim": 384,
-    "num_layers": 12,
+    "hidden_dim": 256,
+    "num_layers": 8,
     "num_styles": 2,
     "kernel_size": 7
   },
   "training": {
     "batch_size": 12,
-    "num_epochs": 500,
-    "learning_rate": 0.0001,
-    "weight_decay": 0.01,
-    "gradient_clip_norm": 1.0,
+    "learning_rate": 2e-4,
     "use_amp": true,
-    "num_workers": 4,
-    "inference_every_n_epochs": 5
+    "num_workers": 0,
+    "stage1_epochs": 50,
+    "stage2_epochs": 100,
+    "reflow_data_dir": "data_reflow_cache"
   },
   "data": {
-    "content_dir": "F:\\monet2photo\\latents\\monet2photo",
-    "style_root": "F:\\monet2photo\\latents\\monet2photo",
+    "data_root": "F:\\monet2photo\\latents\\monet2photo",
     "num_classes": 2
   },
   "checkpoint": {
-    "resume_from": "auto",
-    "save_dir": "checkpoints",
-    "save_every_n_epochs": 10
-  },
-  "inference": {
-    "steps": 25,
-    "cfg_scale": 4.0,
-    "noise_strength": 1.0
-  },
-  "eval_samples": [
-    {
-      "img_dir": "F:\\monet2photo\\monet2photo\\testA",
-      "target_styles": [0, 1]
-    },
-    {
-      "img_dir": "F:\\monet2photo\\monet2photo\\testB",
-      "target_styles": [0, 1]
-    }
-  ]
+    "save_dir": "checkpoints"
+  }
 }
