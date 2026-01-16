@@ -7,13 +7,14 @@
     "kernel_size": 7
   },
   "training": {
-    "batch_size": 12,
+    "batch_size": 11,
     "learning_rate": 2e-4,
     "use_amp": true,
     "num_workers": 0,
     "stage1_epochs": 50,
     "stage2_epochs": 100,
-    "reflow_data_dir": "data_reflow_cache"
+    "reflow_data_dir": "data_reflow_cache",
+    "identity_weights": [0.8,1.5]
   },
   "data": {
     "data_root": "F:\\monet2photo\\latents\\monet2photo",
@@ -21,5 +22,9 @@
   },
   "checkpoint": {
     "save_dir": "checkpoints"
+  },
+  "inference":{
+    "image_path": "F:\\monet2photo\\monet2photo\\inf",
+    "save_dir": "inference_results"
   }
 }

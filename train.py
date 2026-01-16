@@ -3,313 +3,221 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, WeightedRandomSampler
 from tqdm import tqdm
 from pathlib import Path
-import json
-import os
-import random
+import json, random, re, shutil, os
 import numpy as np
 from PIL import Image
 from diffusers import AutoencoderKL
-import re
-EVAL_INTERVAL = 1
-# 引用你的模型和数据集
+
 from SAFlow import SAFModel
 from dataset import Stage1Dataset, Stage2Dataset
 
-def load_config():
-    with open("config.json", 'r', encoding='utf-8') as f:
-        return json.load(f)
+# ================= 核心参数 =================
+NUM_SAMPLES_PER_CLASS = 1  # 推理时每个类别选几张图
+IDENTITY_RATE = 0.2        # 20% 概率学 Identity
+EVAL_STEP = 1              # 每个 Epoch 结束后保存并推理
+# ===========================================
 
 class ReflowTrainer:
     def __init__(self):
-        self.cfg = load_config()
+        print("\n🔧 [Init] 初始化训练器...")
+        with open("config.json", 'r', encoding='utf-8') as f:
+            self.cfg = json.load(f)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         
-        # 路径设置
         self.ckpt_dir = Path(self.cfg['checkpoint']['save_dir'])
-        self.ckpt_dir.mkdir(exist_ok=True)
+        self.ckpt_dir.mkdir(parents=True, exist_ok=True)
         self.reflow_dir = Path(self.cfg['training']['reflow_data_dir'])
         self.vis_root = self.ckpt_dir / "visualizations"
-        self.vis_root.mkdir(exist_ok=True)
         
-        # 加载 VAE
-        print("⏳ Loading VAE for visualization...")
-        self.vae = AutoencoderKL.from_pretrained(
-            "runwayml/stable-diffusion-v1-5", 
-            subfolder="vae"
-        ).to(self.device)
+        # 加载 VAE (冻结)
+        print("⏳ [Init] 加载 VAE...")
+        self.vae = AutoencoderKL.from_pretrained("runwayml/stable-diffusion-v1-5", subfolder="vae").to(self.device)
         self.vae.eval()
         self.vae.requires_grad_(False)
-        
-        print(f"🚀 Initialized Trainer on {self.device}")
-        
+
+        # 准备类别权重张量
+        self.id_loss_weights = torch.tensor(
+            self.cfg['training'].get('identity_weights', [1.0] * self.cfg['data']['num_classes']),
+            device=self.device
+        )
+
     def get_model(self):
         return SAFModel(**self.cfg['model']).to(self.device)
 
     def resume_checkpoint(self, model, stage_prefix):
-        """自动断点续传"""
         ckpts = list(self.ckpt_dir.glob(f"{stage_prefix}_epoch*.pt"))
-        if not ckpts:
-            print(f"⚪ No resume checkpoint for {stage_prefix}, starting from Epoch 1.")
-            return 1
-
-        def extract_epoch(p):
-            match = re.search(r'epoch(\d+)', p.name)
-            return int(match.group(1)) if match else 0
-        
-        latest_ckpt = max(ckpts, key=extract_epoch)
-        latest_epoch = extract_epoch(latest_ckpt)
-        print(f"🟢 Resuming {stage_prefix} from Epoch {latest_epoch} (File: {latest_ckpt.name})")
-        model.load_state_dict(torch.load(latest_ckpt, map_location=self.device))
-        return latest_epoch + 1
-
-    def compute_loss(self, model, x_start, x_end, s_label, use_dropout=False):
-        B = x_start.size(0)
-        t = torch.rand(B, device=self.device)
-        t_view = t.view(-1, 1, 1, 1)
-        
-        x_t = (1 - t_view) * x_start + t_view * x_end
-        
-        if use_dropout and random.random() < 0.1:
-            x_cond = torch.zeros_like(x_start)
-        else:
-            x_cond = x_start
-
-        v_pred = model(x_t, x_cond, t, s_label)
-        v_target = x_end - x_start
-        
-        return nn.functional.mse_loss(v_pred, v_target)
-
-    @torch.no_grad()
-    def decode_latent_to_image(self, latents):
-        latents = latents / 0.18215 
-        imgs = self.vae.decode(latents).sample
-        imgs = (imgs / 2 + 0.5).clamp(0, 1)
-        imgs = imgs.cpu().permute(0, 2, 3, 1).numpy()
-        return (imgs * 255).astype('uint8')
-
-    @torch.no_grad()
-    def do_inference(self, model, x_content, epoch, stage_name):
-        model.eval()
-        save_dir = self.vis_root / stage_name / f"epoch_{epoch}"
-        save_dir.mkdir(parents=True, exist_ok=True)
-
-        x_c = x_content[0:1].to(self.device) 
-        num_styles = self.cfg['model']['num_styles']
-        
-        img_c = self.decode_latent_to_image(x_c)[0]
-        Image.fromarray(img_c).save(save_dir / "content_source.jpg")
-        
-        for s_idx in range(num_styles):
-            s_id = torch.tensor([s_idx], dtype=torch.long, device=self.device)
-            x_t = x_c.clone()
-            dt = 1.0 / 20 
-            
-            for step in range(20):
-                t = torch.ones(1, device=self.device) * (step * dt)
-                v = model(x_t, x_c, t, s_id)
-                x_t = x_t + v * dt
-            
-            img_g = self.decode_latent_to_image(x_t)[0]
-            Image.fromarray(img_g).save(save_dir / f"style_{s_idx}_result.jpg")
-
-        print(f"🖼️ Inference done. Saved to {save_dir}")
-        model.train()
+        if not ckpts: return 1
+        latest = max(ckpts, key=lambda p: int(re.search(r'epoch(\d+)', p.name).group(1)))
+        model.load_state_dict(torch.load(latest, map_location=self.device))
+        epoch = int(re.search(r'epoch(\d+)', latest.name).group(1))
+        print(f"🟢 [Resume] 已从 Epoch {epoch} 恢复权重")
+        return epoch + 1
 
     def make_balanced_sampler(self, dataset):
-        print("⚖️ 计算类别权重，启用平衡采样...")
-        targets = []
-        for f in dataset.all_files:
-            class_name = f.parent.name
-            class_id = dataset.class_to_id[class_name]
-            targets.append(class_id)
-        targets = np.array(targets)
-        
+        print("⚖️ [Sampler] 正在计算类别均衡权重...")
+        targets = [cls_id for _, cls_id in dataset.all_files]
         class_counts = np.bincount(targets)
-        print(f"   类别样本分布: {class_counts} (索引对应: {list(dataset.class_to_id.keys())})")
-        
         class_weights = 1. / class_counts
-        sample_weights = class_weights[targets]
+        sample_weights = np.array([class_weights[t] for t in targets])
         
-        sampler = WeightedRandomSampler(
-            weights=sample_weights,
-            num_samples=len(sample_weights),
+        return WeightedRandomSampler(
+            weights=torch.from_numpy(sample_weights), 
+            num_samples=len(sample_weights), 
             replacement=True
         )
-        return sampler
+
+    @torch.no_grad()
+    def do_inference(self, model, dataset, epoch, stage):
+        model.eval()
+        save_dir = self.vis_root / stage / f"epoch_{epoch}"
+        save_dir.mkdir(parents=True, exist_ok=True)
+        
+        num_classes = len(dataset.classes)
+        print(f"🖼️ [Inference] 采样推理中...")
+        
+        for src_id in range(num_classes):
+            available_files = dataset.files_by_class[src_id]
+            selected_files = random.sample(available_files, min(NUM_SAMPLES_PER_CLASS, len(available_files)))
+            
+            for f_idx, sample_path in enumerate(selected_files):
+                x_c = dataset.load_latent(sample_path).unsqueeze(0).to(self.device)
+                
+                # 原图参考
+                orig = self.vae.decode(x_c / 0.18215).sample
+                orig = (orig / 2 + 0.5).clamp(0, 1).cpu().permute(0,2,3,1).numpy()[0]
+                Image.fromarray((orig * 255).astype('uint8')).save(save_dir / f"src_cls{src_id}_samp{f_idx}_orig.jpg")
+                
+                for target_id in range(num_classes):
+                    x_t = x_c.clone()
+                    tid_tensor = torch.tensor([target_id], device=self.device)
+                    for i in range(20):
+                        t = torch.ones(1, device=self.device) * (i / 20)
+                        x_t = x_t + model(x_t, x_c, t, tid_tensor) * (1/20)
+                    
+                    res = self.vae.decode(x_t / 0.18215).sample
+                    res = (res / 2 + 0.5).clamp(0, 1).cpu().permute(0,2,3,1).numpy()[0]
+                    
+                    suffix = "_ID" if src_id == target_id else ""
+                    Image.fromarray((res * 255).astype('uint8')).save(
+                        save_dir / f"src{src_id}_to{target_id}{suffix}.jpg"
+                    )
+        model.train()
 
     def run_stage1(self):
-        print("\n🚀 [Stage 1] Independent Coupling Training...")
+        print("\n🚀 [Stage 1] 开始均衡化训练...")
         model = self.get_model()
         opt = torch.optim.AdamW(model.parameters(), lr=self.cfg['training']['learning_rate'])
         
-        start_epoch = self.resume_checkpoint(model, "stage1")
-        total_epochs = self.cfg['training']['stage1_epochs']
-        
-        if start_epoch > total_epochs:
-            print("✅ Stage 1 already completed.")
-            return
-
         ds = Stage1Dataset(self.cfg['data']['data_root'], self.cfg['data']['num_classes'])
         sampler = self.make_balanced_sampler(ds)
+        
         dl = DataLoader(ds, batch_size=self.cfg['training']['batch_size'], 
-                        sampler=sampler, shuffle=False, 
-                        num_workers=self.cfg['training']['num_workers'], drop_last=True)
+                        sampler=sampler, shuffle=False, drop_last=True)
         
-        vis_batch = next(iter(dl))
+        start_epoch = self.resume_checkpoint(model, "stage1")
         
-        # 🔴 定义探针检查频率：每个Epoch检查4次
-        check_interval = max(1, len(dl) // 4)
-        
-        for epoch in range(start_epoch, total_epochs + 1):
+        for epoch in range(start_epoch, self.cfg['training']['stage1_epochs'] + 1):
             model.train()
-            pbar = tqdm(dl, desc=f"S1 Epoch {epoch}/{total_epochs}")
-            total_loss = 0
-            smooth_loss = 0
+            pbar = tqdm(dl, desc=f"S1 Ep {epoch}")
+            history = {'Lc': [], 'Ls': []}
             
-            for step, (x_c, x_s, s_id) in enumerate(pbar):
-                x_c, x_s, s_id = x_c.to(self.device), x_s.to(self.device), s_id.to(self.device)
-
-                # ================= 🔍 增强版数据探针 (Periodic Probe) =================
-                if step % check_interval == 0:
-                    with torch.no_grad():
-                        # 1. 基础数值统计
-                        c_std = x_c.std().item()
-                        s_std = x_s.std().item()
-                        
-                        # 2. 真实差异计算 (Target MSE)
-                        diffs = (x_s - x_c).pow(2).view(x_c.size(0), -1).mean(dim=1)
-                        avg_mse = diffs.mean().item()
-                        
-                        # 3. 统计“疑似同图”的数量 (MSE < 0.1)
-                        suspicious_count = (diffs < 0.1).sum().item()
-                        
-                        tqdm.write(f"\n🔍 [探针 Step {step}] Avg Target MSE: {avg_mse:.4f} | Content Std: {c_std:.3f}")
-                        
-                        # 4. 实时报警逻辑
-                        if c_std < 0.2:
-                            tqdm.write(f"❌ [数值报警] Std过小 ({c_std:.4f})! 仍在进行二次缩放！")
-                        elif suspicious_count > 0:
-                            tqdm.write(f"⚠️ [逻辑报警] 本Batch有 {suspicious_count}/{x_c.size(0)} 张图差异过小! (疑似同类配对)")
-                        elif avg_mse < 0.2:
-                            tqdm.write(f"⚠️ [Loss报警] 理论 Loss 下限过低 ({avg_mse:.4f})! 请检查是否在训练恒等映射。")
-                        else:
-                            # 正常情况不刷屏，只显示简报
-                            pass
-                # ====================================================================
+            for x_c, x_s, t_id, s_id in pbar:
+                x_c, x_s, t_id, s_id = x_c.to(self.device), x_s.to(self.device), t_id.to(self.device), s_id.to(self.device)
+                B = x_c.size(0)
+                
+                is_self = torch.rand(B, device=self.device) < IDENTITY_RATE
+                x_target = torch.where(is_self.view(-1,1,1,1), x_c, x_s)
+                style_id = torch.where(is_self, s_id, t_id)
                 
                 opt.zero_grad()
-                loss = self.compute_loss(model, x_c, x_s, s_id, use_dropout=True)
+                t = torch.rand(B, device=self.device)
+                x_t = (1 - t.view(-1,1,1,1)) * x_c + t.view(-1,1,1,1) * x_target
+                
+                v_pred = model(x_t, x_c, t, style_id)
+                v_target = x_target - x_c
+                
+                # 计算逐样本 MSE
+                loss_elementwise = torch.mean((v_pred - v_target)**2, dim=[1,2,3])
+                
+                # 🔴 应用类别特定的 Identity 权重
+                weights = torch.ones(B, device=self.device)
+                if is_self.any():
+                    # 仅在 identity 样本上应用 config 中的权重
+                    weights[is_self] = self.id_loss_weights[s_id[is_self]]
+                
+                loss_weighted = loss_elementwise * weights
+                loss = loss_weighted.mean()
+                
                 loss.backward()
                 opt.step()
                 
-                loss_val = loss.item()
-                total_loss += loss_val
-                
-                if step == 0: smooth_loss = loss_val
-                else: smooth_loss = 0.9 * smooth_loss + 0.1 * loss_val
-                pbar.set_postfix({"loss": f"{smooth_loss:.4f}"})
-            
-            print(f"📊 Stage 1 Epoch {epoch} Avg Loss: {total_loss / len(dl):.6f}")
-            
-            if epoch % EVAL_INTERVAL == 0:
-                self.do_inference(model, vis_batch[0], epoch, "stage1")
+                # 监控
+                ls_val = loss_elementwise[is_self].mean().item() if is_self.any() else 0
+                lc_val = loss_elementwise[~is_self].mean().item() if (~is_self).any() else 0
+                history['Ls'].append(ls_val); history['Lc'].append(lc_val)
+                pbar.set_postfix({"Lc": f"{np.mean(history['Lc'][-50:]):.4f}", "Ls": f"{np.mean(history['Ls'][-50:]):.4f}"})
+
+            if epoch % EVAL_STEP == 0:
                 torch.save(model.state_dict(), self.ckpt_dir / f"stage1_epoch{epoch}.pt")
+                self.do_inference(model, ds, epoch, "stage1")
                 
         torch.save(model.state_dict(), self.ckpt_dir / "stage1_final.pt")
 
-    # ... (run_generation, run_stage2, run_all 保持不变，可直接使用上一版的内容，或需要我再次完整贴出吗？) ...
-    # 为了节省篇幅，这里假设你保留了之前版本的 run_generation 和 run_stage2
-    # 如果你需要我再贴一遍完整的这部分，请告诉我。
-    
     @torch.no_grad()
     def run_generation(self):
-        # ... (同上一版) ...
-        print("\n🌊 [Reflow] Data Synthesis...")
-        self.reflow_dir.mkdir(exist_ok=True)
+        print("\n🌊 [Reflow] 数据合成中...")
+        if self.reflow_dir.exists(): shutil.rmtree(self.reflow_dir)
+        self.reflow_dir.mkdir(parents=True, exist_ok=True)
         model = self.get_model()
-        
-        s1_path = self.ckpt_dir / "stage1_final.pt"
-        if not s1_path.exists(): raise FileNotFoundError("Stage 1 final model not found!")
-            
-        print(f"Loading {s1_path}...")
-        model.load_state_dict(torch.load(s1_path, map_location=self.device))
+        model.load_state_dict(torch.load(self.ckpt_dir / "stage1_final.pt", map_location=self.device))
         model.eval()
-        
-        ds = Stage1Dataset(self.cfg['data']['data_root'], self.cfg['data']['num_classes'])
+        ds = Stage1Dataset(self.cfg['data']['data_root'])
         dl = DataLoader(ds, batch_size=self.cfg['training']['batch_size'], shuffle=False)
-        
         cnt = 0
-        for x_c, _, s_id in tqdm(dl, desc="Synthesizing"):
+        for x_c, _, _, s_id in tqdm(dl, desc="Synthesizing"):
             x_c, s_id = x_c.to(self.device), s_id.to(self.device)
-            x_t = x_c.clone()
-            dt = 1.0 / 20
-            for i in range(20):
-                t = torch.ones(x_c.size(0), device=self.device) * (i * dt)
-                v = model(x_t, x_c, t, s_id)
-                x_t = x_t + v * dt
-            
-            for i in range(x_c.size(0)):
-                torch.save({
-                    'content': x_c[i].cpu(), 
-                    'z': x_t[i].cpu(), 
-                    'style_label': s_id[i].cpu()
-                }, self.reflow_dir / f"pair_{cnt}.pt")
-                cnt += 1
-        print(f"✅ Generated {cnt} pairs.")
+            for target_id in range(len(ds.classes)):
+                t_ids = torch.full((x_c.size(0),), target_id, dtype=torch.long, device=self.device)
+                mask = (s_id != t_ids)
+                if mask.sum() == 0: continue
+                curr_xc, curr_tid = x_c[mask], t_ids[mask]
+                xt = curr_xc.clone()
+                for i in range(20):
+                    t = torch.ones(curr_xc.size(0), device=self.device) * (i / 20)
+                    xt = xt + model(xt, curr_xc, t, curr_tid) * (1/20)
+                for i in range(curr_xc.size(0)):
+                    torch.save({'content': curr_xc[i].cpu(), 'z': xt[i].cpu(), 'style_label': curr_tid[i].cpu()}, 
+                               self.reflow_dir / f"pair_{cnt}.pt")
+                    cnt += 1
 
     def run_stage2(self):
-        # ... (同上一版) ...
-        print("\n✨ [Stage 2] Straightening Training...")
+        print("\n✨ [Stage 2] 直线拉直训练...")
         model = self.get_model()
         opt = torch.optim.AdamW(model.parameters(), lr=self.cfg['training']['learning_rate'])
-        
         start_epoch = self.resume_checkpoint(model, "stage2")
-        total_epochs = self.cfg['training']['stage2_epochs']
-
-        if start_epoch > total_epochs:
-            print("✅ Stage 2 already completed.")
-            return
-            
         ds = Stage2Dataset(self.reflow_dir)
-        dl = DataLoader(ds, batch_size=self.cfg['training']['batch_size'], shuffle=True, 
-                        num_workers=self.cfg['training']['num_workers'], drop_last=True)
-        
-        vis_batch = next(iter(dl))
-        
-        for epoch in range(start_epoch, total_epochs + 1):
+        ds_infer = Stage1Dataset(self.cfg['data']['data_root'])
+        dl = DataLoader(ds, batch_size=self.cfg['training']['batch_size'], shuffle=True, drop_last=True)
+        for epoch in range(start_epoch, self.cfg['training']['stage2_epochs'] + 1):
             model.train()
-            pbar = tqdm(dl, desc=f"S2 Epoch {epoch}/{total_epochs}")
-            total_loss = 0
-            smooth_loss = 0
-            
-            for step, (x_c, z, s_id) in enumerate(pbar):
+            pbar = tqdm(dl, desc=f"S2 Ep {epoch}")
+            for x_c, z, s_id in pbar:
                 x_c, z, s_id = x_c.to(self.device), z.to(self.device), s_id.to(self.device)
-                
                 opt.zero_grad()
-                loss = self.compute_loss(model, x_c, z, s_id, use_dropout=False)
-                loss.backward()
-                opt.step()
-                
-                loss_val = loss.item()
-                total_loss += loss_val
-                
-                if step == 0: smooth_loss = loss_val
-                else: smooth_loss = 0.9 * smooth_loss + 0.1 * loss_val
-                pbar.set_postfix({"loss": f"{smooth_loss:.6f}"})
-            
-            print(f"📊 Stage 2 Epoch {epoch} Avg Loss: {total_loss / len(dl):.8f}")
-            
-            if epoch % EVAL_INTERVAL == 0:
-                self.do_inference(model, vis_batch[0], epoch, "stage2")
+                t = torch.rand(x_c.size(0), device=self.device).view(-1,1,1,1)
+                x_t = (1 - t) * x_c + t * z
+                v_pred = model(x_t, x_c, t.squeeze(), s_id)
+                loss = torch.mean((v_pred - (z - x_c))**2)
+                loss.backward(); opt.step()
+                pbar.set_postfix({"loss": f"{loss.item():.6f}"})
+            if epoch % EVAL_STEP == 0:
                 torch.save(model.state_dict(), self.ckpt_dir / f"stage2_epoch{epoch}.pt")
-                
+                self.do_inference(model, ds_infer, epoch, "stage2")
         torch.save(model.state_dict(), self.ckpt_dir / "saf_final_reflowed.pt")
 
     def run_all(self):
-        if not (self.ckpt_dir / "stage1_final.pt").exists():
-            self.run_stage1()
-        if not self.reflow_dir.exists() or len(list(self.reflow_dir.glob("*.pt"))) == 0:
-            self.run_generation()
+        if not (self.ckpt_dir / "stage1_final.pt").exists(): self.run_stage1()
+        if not self.reflow_dir.exists() or not any(self.reflow_dir.iterdir()): self.run_generation()
         self.run_stage2()
 
 if __name__ == "__main__":

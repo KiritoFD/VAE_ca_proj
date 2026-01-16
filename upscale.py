@@ -10,7 +10,7 @@ from basicsr.archs.rrdbnet_arch import RRDBNet
 
 # ================= 配置 =================
 # 输入文件夹 (你的256图片目录)
-INPUT_DIR = r"F:\monet2photo\monet2photo\testB"
+INPUT_DIR = r"F:\monet2photo\monet2photo\testA"
 
 # 输出文件夹 (脚本会自动创建)
 OUTPUT_DIR = f"{INPUT_DIR}_512"
