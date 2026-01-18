@@ -1,0 +1,94 @@
+body {
+    background-color: #f2f2f7;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 16px;
+    color: #1c1c1e;
+}
+
+.app-container {
+    max-width: 600px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+header { text-align: center; margin-bottom: 20px; }
+h1 { margin: 0; font-size: 20px; font-weight: 800; }
+.status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    background: #ffebee;
+    color: #c62828;
+    font-size: 12px;
+    font-weight: bold;
+    margin-top: 8px;
+}
+
+.card {
+    background: #fff;
+    border: 1px solid #e5e5ea;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.section-title {
+    display: block;
+    font-size: 13px;
+    color: #8e8e93;
+    font-weight: 600;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.upload-box {
+    background: #f2f2f7;
+    height: 180px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    border: 2px dashed #d1d1d6;
+}
+.upload-box img { width: 100%; height: 100%; object-fit: contain; }
+.placeholder { color: #007aff; font-weight: 600; }
+
+.row { display: flex; gap: 12px; }
+.col { flex: 1; display: flex; flex-direction: column; }
+select, input { padding: 10px; border-radius: 8px; border: 1px solid #d1d1d6; background: #fff; }
+
+.primary-btn {
+    width: 100%;
+    padding: 16px;
+    background: #007aff;
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-size: 17px;
+    font-weight: 600;
+}
+.primary-btn:disabled { background: #d1d1d6; color: #8e8e93; }
+
+.log-box {
+    margin-top: 10px;
+    font-size: 10px;
+    color: #666;
+    max-height: 80px;
+    overflow-y: auto;
+    font-family: monospace;
+    background: #fafafa;
+    padding: 8px;
+    border-radius: 8px;
+}
+.log-box p { margin: 2px 0; }
+
+.result-area { margin-top: 20px; }
+canvas { width: 100%; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.progress-bg { height: 6px; background: #e5e5ea; border-radius: 3px; margin-top: 12px; overflow: hidden; }
+.progress-fill { width: 0%; height: 100%; background: #34c759; transition: width 0.2s; }

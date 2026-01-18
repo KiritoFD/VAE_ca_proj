@@ -1,3 +1,7 @@
 *.arrow
 *.pt
 *.rar
+*.jpg
+*.mnn
+*.data
+*.onnx
