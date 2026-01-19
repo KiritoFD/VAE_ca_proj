@@ -1,0 +1,17 @@
+Loading CLIP model...
+Total images found: 862
+Calculating CLIP Content Consistency Matrix...
+
+======================================================================
+CLIP Content Score Matrix (Higher is better, Max 1.0)
+Metric: Semantic Similarity between Source and Output
+----------------------------------------------------------------------
+Sub-Directory        | Target Style | Avg CLIP Score 
+----------------------------------------------------------------------
+trainA               | Style 0        | 0.83557
+trainA               | Style 1        | 0.81760
+----------------------------------------------------------------------
+trainB               | Style 0        | 0.77173
+trainB               | Style 1        | 0.84181
+----------------------------------------------------------------------
+======================================================================
