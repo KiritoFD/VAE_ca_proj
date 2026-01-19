@@ -31,11 +31,11 @@ SA-Flow（Style-Aware Flow）是一个面向 **非配对数据（Unpaired Data�
 用MNN完成了简单的端侧部署
 
 <div align="center">
-  <img src="./android_infra.jpg" alt="photo->monet" width="60%" />
-  <img src="image/readme/1768810230461.jpg" alt="1768810230461" width="39%" />
+  <img src="image/readme/android_infra.png" alt="photo->monet" width="60%" />
+  <img src="image/readme/mnn-sfa.png" alt="1768810230461" width="39%" />
 </div>
 
-与基模对比，效果和速度有显著优势（下为Mnn-chat上用官方模型市场的SD1.5推理结果）![](image/readme/1768810285282.jpg)
+与基模对比，效果和速度有显著优势（下为Mnn-chat上用官方模型市场的SD1.5推理结果）![](image/readme/mnn-chat-sd1.5.png)
 
 ## 1. 任务定义：VAE 潜空间中的分布映射
 
