@@ -21,7 +21,7 @@
     "num_classes": 2
   },
   "checkpoint": {
-    "save_dir": "checkpoints"
+    "save_dir": "checkpoints-lsfm"
   },
   "inference":{
     "image_path": "F:\\monet2photo\\monet2photo\\inf",

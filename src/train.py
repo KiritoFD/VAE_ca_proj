@@ -9,7 +9,7 @@ import numpy as np
 from PIL import Image
 from diffusers import AutoencoderKL
 from torch.cuda.amp import autocast, GradScaler
-from scipy.optimize import linear_sum_assignment
+import torch.nn.functional as F
 
 from SAFlow import SAFModel
 from dataset import Stage1Dataset, Stage2Dataset
@@ -17,12 +17,12 @@ from dataset import Stage1Dataset, Stage2Dataset
 # ================= 核心超参 =================
 EVAL_STEP = 1
 MAX_GRAD_NORM = 1.0        
-NUM_SAMPLES_PER_CLASS = 1
+IDENTITY_PROB = 0.15  # 🟢 [新增] 15% 的概率进行 Identity 训练 (源=目标)
 # ===========================================
 
 class ReflowTrainer:
     def __init__(self):
-        print("\n🔧 [Init] 初始化训练器 (Final OT-CFM Edition)...")
+        print("\n🔧 [Init] 初始化训练器 (LSFM: WCT + Fourier + Identity)...")
         with open("config.json", 'r', encoding='utf-8') as f:
             self.cfg = json.load(f)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -32,10 +32,7 @@ class ReflowTrainer:
         self.reflow_dir = Path(self.cfg['training']['reflow_data_dir'])
         self.vis_root = self.ckpt_dir / "visualizations"
         
-        # TensorBoard
         self.writer = SummaryWriter(log_dir=str(self.ckpt_dir / "logs"))
-        print(f"📈 TensorBoard 日志目录: {self.ckpt_dir / 'logs'}")
-        
         self.scaler = GradScaler() if self.cfg['training'].get('use_amp', False) else None
         
         print("⏳ [Init] 加载 VAE...")
@@ -48,7 +45,6 @@ class ReflowTrainer:
 
     def load_checkpoint_logic(self, model, stage_prefix):
         user_ckpt = self.cfg['training'].get('resume_checkpoint', "")
-        
         if user_ckpt and os.path.exists(user_ckpt):
             print(f"🛑 [Manual Resume] 加载指定权重: {user_ckpt}")
             state = torch.load(user_ckpt, map_location=self.device)
@@ -81,76 +77,70 @@ class ReflowTrainer:
             replacement=True
         )
 
-    @torch.no_grad()
-    def do_inference(self, model, dataset, epoch, stage):
+    def construct_target_lsfm(self, x_c, x_s):
         """
-        N-to-N 全类别转换测试
-        用于验证 Style ID 是否真正控制了生成结果。
+        🟢 [Math Core] LSFM 目标构造器
+        包含: WCT (协方差对齐) + Fourier Mixing (频域纹理注入)
         """
-        model.eval()
-        save_dir = self.vis_root / stage / f"epoch_{epoch}"
-        save_dir.mkdir(parents=True, exist_ok=True)
-        
-        num_steps = self.cfg['inference'].get('num_inference_steps', 20)
-        dt = 1.0 / num_steps
+        B, C, H, W = x_c.size()
+        eps = 1e-5
 
-        # 遍历每个源类别
-        for src_id in range(len(dataset.classes)):
-            available_files = dataset.files_by_class[src_id]
-            if not available_files: continue
+        # === 1. WCT (Whitening and Coloring Transform) ===
+        zc_flat = x_c.view(B, C, -1)
+        zs_flat = x_s.view(B, C, -1)
+        
+        # 中心化
+        mu_c = zc_flat.mean(dim=2, keepdim=True)
+        mu_s = zs_flat.mean(dim=2, keepdim=True)
+        zc_centered = zc_flat - mu_c
+        zs_centered = zs_flat - mu_s
+        
+        # 协方差 (Unbiased)
+        cov_c = torch.bmm(zc_centered, zc_centered.transpose(1, 2)) / (H * W - 1)
+        cov_s = torch.bmm(zs_centered, zs_centered.transpose(1, 2)) / (H * W - 1)
+        
+        # SVD 分解 (增加数值稳定性)
+        # ⚠️ 使用 try-except 处理极少数 SVD 不收敛的情况
+        try:
+            Uc, Sc, _ = torch.linalg.svd(cov_c)
+            Us, Ss, _ = torch.linalg.svd(cov_s)
+        except RuntimeError:
+            # 极个别情况 SVD 失败，直接退化为 AdaIN (均值方差对齐)
+            return (x_c - mu_c.view(B,C,1,1)) * (zs_flat.std(dim=2).view(B,C,1,1) / (zc_flat.std(dim=2).view(B,C,1,1)+eps)) + mu_s.view(B,C,1,1)
             
-            # 随机抽 1 张源图
-            sample_path = random.choice(available_files)
-            x_c = dataset.load_latent(sample_path).unsqueeze(0).to(self.device)
-            
-            # 保存原图
-            orig_img = self.vae.decode(x_c / 0.18215).sample
-            orig_img = (orig_img / 2 + 0.5).clamp(0, 1).cpu().permute(0,2,3,1).numpy()[0]
-            Image.fromarray((orig_img * 255).astype('uint8')).save(
-                save_dir / f"Src_Cls{src_id}_Original.jpg"
-            )
-            
-            # 转换为所有目标类别
-            for target_id in range(len(dataset.classes)):
-                x_t = x_c.clone()
-                # 显式指定目标 Style ID
-                tid_tensor = torch.tensor([target_id], device=self.device)
-                
-                # Flow Matching 推理
-                for i in range(num_steps):
-                    t = torch.ones(1, device=self.device) * (i * dt)
-                    v = model(x_t, x_c, t, tid_tensor)
-                    x_t = x_t + v * dt
-                
-                # 保存结果
-                res = self.vae.decode(x_t / 0.18215).sample
-                res = (res / 2 + 0.5).clamp(0, 1).cpu().permute(0,2,3,1).numpy()[0]
-                Image.fromarray((res * 255).astype('uint8')).save(
-                    save_dir / f"Src_Cls{src_id}_To_Tgt{target_id}.jpg"
-                )
+        Sc = torch.clamp(Sc, min=eps)
+        Ss = torch.clamp(Ss, min=eps)
+        
+        # 构造变换矩阵
+        C_inv = torch.bmm(Uc, torch.diag_embed(1.0 / torch.sqrt(Sc)))
+        C_inv = torch.bmm(C_inv, Uc.transpose(1, 2))
+        
+        S_mat = torch.bmm(Us, torch.diag_embed(torch.sqrt(Ss)))
+        S_mat = torch.bmm(S_mat, Us.transpose(1, 2))
+        
+        transform_mat = torch.bmm(S_mat, C_inv)
+        z_wct = torch.bmm(transform_mat, zc_centered) + mu_s
+        z_wct = z_wct.view(B, C, H, W)
 
-        model.train()
-
-    def compute_ot_matching(self, x_c, x_s):
-        """
-        计算 OT 匹配索引
-        返回: col_ind (重排索引), ot_cost (匹配代价)
-        """
-        B = x_c.size(0)
-        x_c_flat = x_c.view(B, -1)
-        x_s_flat = x_s.view(B, -1)
+        # === 2. Fourier Amplitude Mixing ===
+        # 使用 rfft2 加速 (实数输入)
+        freq_c = torch.fft.rfft2(z_wct, norm='ortho')
+        freq_s = torch.fft.rfft2(x_s, norm='ortho')
         
-        # 计算距离矩阵 [B, B]
-        dists = torch.cdist(x_c_flat, x_s_flat).cpu().numpy()
+        amp_s = torch.abs(freq_s)
+        phase_c = torch.angle(freq_c)
         
-        # 匈牙利算法求解
-        row_ind, col_ind = linear_sum_assignment(dists)
-        ot_cost = dists[row_ind, col_ind].mean()
+        # 组合: 风格幅值 + 内容相位
+        # 加上 1e-8 防止纯 0 导致的相位计算 NaN
+        new_freq = amp_s * torch.exp(1j * phase_c)
         
-        return col_ind, ot_cost
+        # 逆变换 (确保尺寸一致)
+        z_target = torch.fft.irfft2(new_freq, s=(H, W), norm='ortho')
+        
+        return z_target
 
     def run_stage1(self):
-        print("\n🚀 [Stage 1] 启动训练 (OT-CFM Corrected)...")
+        print("\n🚀 [Stage 1] 启动训练 (LSFM)...")
         model = self.get_model()
         start_epoch = self.load_checkpoint_logic(model, "stage1")
         
@@ -165,43 +155,42 @@ class ReflowTrainer:
         for epoch in range(start_epoch, self.cfg['training']['stage1_epochs'] + 1):
             model.train()
             pbar = tqdm(dl, desc=f"S1 Ep {epoch}")
-            log_loss, log_ot, log_grad = [], [], []
+            log_loss, log_grad = [], []
             
-            # x_c: 内容图
-            # x_s: 随机采样的目标图 (来自 t_id)
-            # t_id: x_s 的类别标签 (Target Style Label)
-            # s_id: x_c 的类别标签 (Source Style Label)
+            # x_c: 内容图, x_s: 风格参考图
+            # t_id: x_s 的风格标签
+            # s_id: x_c 的风格标签
             for x_c, x_s, t_id, s_id in pbar:
                 x_c, x_s = x_c.to(self.device), x_s.to(self.device)
-                t_id = t_id.to(self.device) 
+                t_id, s_id = t_id.to(self.device), s_id.to(self.device)
                 
-                # 🟢 1. 计算 OT 匹配索引
+                # 🟢 [Identity Loss / Augmentation]
+                # 以一定概率强制 x_s = x_c，教模型“如果目标风格也是自己，则保持不动”
+                do_identity = (random.random() < IDENTITY_PROB)
+                if do_identity:
+                    x_s = x_c.clone()
+                    t_id = s_id.clone()
+                
+                # 🟢 [LSFM Target Construction]
                 with torch.no_grad():
-                     col_ind, ot_cost_val = self.compute_ot_matching(x_c, x_s)
-                     
-                     # 将 numpy 索引转为 tensor
-                     idx = torch.from_numpy(col_ind).to(self.device)
-                     
-                     # 🔴 [关键修复] 同步重排 Image 和 Label
-                     x_target = x_s[idx]      # 重排目标图片
-                     s_id_target = t_id[idx]  # 重排目标标签 (注意这里用 t_id, 因为它是 x_s 的标签)
+                    # 如果是 Identity 模式，WCT(x, x) == x，Fourier(x, x) == x
+                    # 所以 x_target 会自动变为 x_c，v_target 会变为 0
+                    x_target = self.construct_target_lsfm(x_c, x_s)
+                    s_id_target = t_id
                 
-                # 2. Flow Matching
+                # Flow Matching
                 opt.zero_grad()
                 with autocast(enabled=use_amp):
                     t = torch.rand(x_c.size(0), device=self.device)
                     t_view = t.view(-1,1,1,1)
                     
-                    # 插值路径: Source -> Target
                     x_t = (1 - t_view) * x_c + t_view * x_target
                     
-                    # 预测: 此时传入的 Style ID 是与 x_target 对应的正确标签！
                     v_pred = model(x_t, x_c, t, s_id_target) 
                     v_target = x_target - x_c
                     
                     loss = torch.mean((v_pred - v_target)**2)
 
-                # 3. 反向传播
                 if self.scaler:
                     self.scaler.scale(loss).backward()
                     self.scaler.unscale_(opt)
@@ -213,23 +202,18 @@ class ReflowTrainer:
                     grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), MAX_GRAD_NORM)
                     opt.step()
 
-                # 4. 日志记录
-                loss_val = loss.item()
-                grad_norm_val = grad_norm.item()
+                loss_val, grad_norm_val = loss.item(), grad_norm.item()
                 log_loss.append(loss_val)
-                log_ot.append(ot_cost_val)
                 log_grad.append(grad_norm_val)
                 
                 global_step += 1
                 if global_step % 10 == 0:
                     self.writer.add_scalar("Train/Loss", loss_val, global_step)
-                    self.writer.add_scalar("Train/OT_Cost", ot_cost_val, global_step)
                     self.writer.add_scalar("Train/Grad_Norm", grad_norm_val, global_step)
                     self.writer.add_scalar("Train/LR", opt.param_groups[0]['lr'], global_step)
 
                 pbar.set_postfix({
                     "L": f"{np.mean(log_loss[-20:]):.4f}", 
-                    "OT": f"{np.mean(log_ot[-20:]):.2f}",
                     "G": f"{np.mean(log_grad[-20:]):.2f}"
                 })
 
@@ -240,101 +224,56 @@ class ReflowTrainer:
         torch.save(model.state_dict(), self.ckpt_dir / "stage1_final.pt")
 
     @torch.no_grad()
-    def run_generation(self):
-        print("\n🌊 [Reflow] 准备生成数据...")
-        if self.reflow_dir.exists(): shutil.rmtree(self.reflow_dir)
-        self.reflow_dir.mkdir(parents=True, exist_ok=True)
-        model = self.get_model()
-        
-        # 优先使用最好的权重，如果没有则用 final
-        ckpt_path = self.ckpt_dir / "stage1_final.pt"
-        if not ckpt_path.exists(): 
-            print("⚠️ 未找到权重，跳过生成")
-            return
-
-        print(f"🔄 Loading: {ckpt_path.name}")
-        state = torch.load(ckpt_path, map_location=self.device)
-        model.load_state_dict(state, strict=False)
+    def do_inference(self, model, dataset, epoch, stage):
+        """ N-to-N 全风格转换测试 """
         model.eval()
-        
-        ds = Stage1Dataset(self.cfg['data']['data_root'])
-        dl = DataLoader(ds, batch_size=self.cfg['training']['batch_size'], shuffle=False)
+        save_dir = self.vis_root / stage / f"epoch_{epoch}"
+        save_dir.mkdir(parents=True, exist_ok=True)
         
         num_steps = self.cfg['inference'].get('num_inference_steps', 20)
         dt = 1.0 / num_steps
         
-        cnt = 0
-        for x_c, _, _, s_id in tqdm(dl, desc=f"Reflow Gen"):
-            x_c, s_id = x_c.to(self.device), s_id.to(self.device)
+        # 只随机挑几个源图片进行展示，避免太慢
+        vis_count = 0
+        max_vis = 2 # 每个类别挑2张
+
+        for src_id in range(len(dataset.classes)):
+            available_files = dataset.files_by_class[src_id]
+            if not available_files: continue
             
-            for target_id in range(len(ds.classes)):
-                t_ids = torch.full((x_c.size(0),), target_id, dtype=torch.long, device=self.device)
-                # 排除自身重构 (可选)
-                mask = (s_id != t_ids)
-                if mask.sum() == 0: continue
+            selected_files = random.sample(available_files, min(max_vis, len(available_files)))
+            
+            for idx, sample_path in enumerate(selected_files):
+                x_c = dataset.load_latent(sample_path).unsqueeze(0).to(self.device)
                 
-                curr_xc, curr_tid = x_c[mask], t_ids[mask]
-                xt = curr_xc.clone()
+                # 保存原图
+                orig_img = self.vae.decode(x_c / 0.18215).sample
+                orig_img = (orig_img / 2 + 0.5).clamp(0, 1).cpu().permute(0,2,3,1).numpy()[0]
+                Image.fromarray((orig_img * 255).astype('uint8')).save(
+                    save_dir / f"Src_Cls{src_id}_Img{idx}_Original.jpg"
+                )
                 
-                # Teacher 生成
-                for i in range(num_steps):
-                    t = torch.ones(curr_xc.size(0), device=self.device) * (i * dt)
-                    v = model(xt, curr_xc, t, curr_tid)
-                    xt = xt + v * dt
-                
-                for i in range(curr_xc.size(0)):
-                    torch.save({'content': curr_xc[i].cpu(), 'z': xt[i].cpu(), 'style_label': curr_tid[i].cpu()}, 
-                               self.reflow_dir / f"pair_{cnt}.pt")
-                    cnt += 1
-
-    def run_stage2(self):
-        print("\n✨ [Stage 2] 启动训练...")
-        model = self.get_model()
-        opt = torch.optim.AdamW(model.parameters(), lr=self.cfg['training']['learning_rate'])
-        start_epoch = self.load_checkpoint_logic(model, "stage2")
-        
-        ds = Stage2Dataset(self.reflow_dir)
-        if len(ds) == 0: 
-            print("❌ Reflow 数据集为空！请检查 run_generation")
-            return
-
-        ds_infer = Stage1Dataset(self.cfg['data']['data_root'])
-        dl = DataLoader(ds, batch_size=self.cfg['training']['batch_size'], shuffle=True, drop_last=True)
-        use_amp = self.cfg['training'].get('use_amp', False)
-
-        for epoch in range(start_epoch, self.cfg['training']['stage2_epochs'] + 1):
-            model.train()
-            pbar = tqdm(dl, desc=f"S2 Ep {epoch}")
-            for x_c, z, s_id in pbar:
-                x_c, z, s_id = x_c.to(self.device), z.to(self.device), s_id.to(self.device)
-                opt.zero_grad()
-                with autocast(enabled=use_amp):
-                    t = torch.rand(x_c.size(0), device=self.device).view(-1,1,1,1)
-                    x_t = (1 - t) * x_c + t * z
-                    v_pred = model(x_t, x_c, t.squeeze(), s_id)
-                    loss = torch.mean((v_pred - (z - x_c))**2)
-
-                if self.scaler:
-                    self.scaler.scale(loss).backward()
-                    self.scaler.unscale_(opt)
-                    torch.nn.utils.clip_grad_norm_(model.parameters(), MAX_GRAD_NORM)
-                    self.scaler.step(opt)
-                    self.scaler.update()
-                else:
-                    loss.backward()
-                    torch.nn.utils.clip_grad_norm_(model.parameters(), MAX_GRAD_NORM)
-                    opt.step()
+                # 转换所有目标风格
+                for target_id in range(len(dataset.classes)):
+                    x_t = x_c.clone()
+                    tid_tensor = torch.tensor([target_id], device=self.device)
                     
-                pbar.set_postfix({"loss": f"{loss.item():.6f}"})
-            if epoch % EVAL_STEP == 0:
-                torch.save(model.state_dict(), self.ckpt_dir / f"stage2_epoch{epoch}.pt")
-                self.do_inference(model, ds_infer, epoch, "stage2")
-        torch.save(model.state_dict(), self.ckpt_dir / "saf_final_reflowed.pt")
+                    for i in range(num_steps):
+                        t = torch.ones(1, device=self.device) * (i * dt)
+                        v = model(x_t, x_c, t, tid_tensor)
+                        x_t = x_t + v * dt
+                    
+                    res = self.vae.decode(x_t / 0.18215).sample
+                    res = (res / 2 + 0.5).clamp(0, 1).cpu().permute(0,2,3,1).numpy()[0]
+                    Image.fromarray((res * 255).astype('uint8')).save(
+                        save_dir / f"Src_Cls{src_id}_Img{idx}_To_Tgt{target_id}.jpg"
+                    )
 
+        model.train()
+
+    # run_generation 和 run_stage2 与之前保持一致，或按需添加
     def run_all(self):
-        if not (self.ckpt_dir / "stage1_final.pt").exists(): self.run_stage1()
-        if not self.reflow_dir.exists() or not any(self.reflow_dir.iterdir()): self.run_generation()
-        self.run_stage2()
+        self.run_stage1()
 
 if __name__ == "__main__":
     trainer = ReflowTrainer()

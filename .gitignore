@@ -5,3 +5,5 @@
 *.mnn
 *.data
 *.onnx
+!/src/checkpoints-lsfm/
+!/src/checkpoints-lsfm/**
