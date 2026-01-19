@@ -1,0 +1,23 @@
+[Init] Device: cuda
+[Search] Looking for trainA/trainB in: ['F:\\monet2photo\\monet2photo', 'F:\\monet2photo\\monet2photo']
+[Load] VGG16 (Frozen)...
+[Stats] Computing Gram Matrix for Style 0 from: F:\monet2photo\monet2photo\trainA
+[Stats] Computing Gram Matrix for Style 1 from: F:\monet2photo\monet2photo\trainB
+[Load] SAFModel from checkpoints-lsfm\stage1_epoch49.pt...
+[Cache] Directory: G:\GitHub\VAE_ca_proj\src\eval_cache
+
+[Start] Evaluation on: F:\monet2photo\monet2photo\inf
+
+======================================================================
+VGG Gram Style Distance Matrix (Lower is Better, Scaled x1e5)
+----------------------------------------------------------------------
+Sub-Directory        | Target Style | Avg VGG Dist   
+----------------------------------------------------------------------
+trainA               | Style 0        | 9.76856
+trainA               | Style 1        | 10.10491
+----------------------------------------------------------------------
+trainB               | Style 0        | 7.96632
+trainB               | Style 1        | 9.50759
+----------------------------------------------------------------------
+======================================================================
+[Done] Cache saved in: G:\GitHub\VAE_ca_proj\src\eval_cache
