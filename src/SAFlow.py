@@ -70,11 +70,11 @@ class SAFBlock(nn.Module):
         return shortcut + x
 
 class SAFModel(nn.Module):
-    """SA-Flow v5 (Reflow Edition)"""
+    """SA-Flow v6 (OT-CFM Standard)"""
     def __init__(self, latent_channels=4, hidden_dim=256, num_layers=8, num_styles=2, kernel_size=7):
         super().__init__()
         
-        # 全局嵌入
+        # 全局嵌入 (Time + Style)
         self.time_mlp = nn.Sequential(
             nn.Linear(1, hidden_dim), nn.SiLU(), nn.Linear(hidden_dim, hidden_dim)
         )
@@ -83,7 +83,7 @@ class SAFModel(nn.Module):
         # 输入 Stem
         self.stem = nn.Conv2d(latent_channels, hidden_dim, 3, padding=1)
         
-        # 条件编码器
+        # 条件编码器 (处理 x_content)
         self.cond_encoder = nn.Sequential(
             nn.Conv2d(latent_channels, hidden_dim, 3, padding=1),
             nn.SiLU(),
@@ -99,7 +99,7 @@ class SAFModel(nn.Module):
         self.final_norm = nn.GroupNorm(32, hidden_dim)
         self.final = nn.Conv2d(hidden_dim, latent_channels, 3, padding=1)
         
-        # 零初始化
+        # 零初始化 (Flow Matching 最佳实践)
         nn.init.zeros_(self.final.weight)
         nn.init.zeros_(self.final.bias)
 

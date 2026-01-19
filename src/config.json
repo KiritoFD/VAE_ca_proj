@@ -7,14 +7,14 @@
     "kernel_size": 7
   },
   "training": {
-    "batch_size": 11,
+    "batch_size": 22,
     "learning_rate": 2e-4,
     "use_amp": true,
-    "num_workers": 0,
+    "num_workers": 4,
     "stage1_epochs": 50,
     "stage2_epochs": 100,
     "reflow_data_dir": "data_reflow_cache",
-    "identity_weights": [2.0,4.0]
+    "resume_checkpoint": "G:\\GitHub\\VAE_ca_proj\\src\\stage1_epoch10.pt"
   },
   "data": {
     "data_root": "F:\\monet2photo\\latents\\monet2photo",
@@ -25,6 +25,7 @@
   },
   "inference":{
     "image_path": "F:\\monet2photo\\monet2photo\\inf",
-    "save_dir": "inference_results"
+    "save_dir": "inference_results",
+    "num_inference_steps": 5
   }
 }
