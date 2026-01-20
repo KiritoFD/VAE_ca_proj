@@ -9,10 +9,11 @@
   "training": {
     "batch_size": 64,
     "gen_batch_size": 64,
-    "learning_rate": 1e-5,
+    "learning_rate": 1e-4,
+    "transfer_loss_weight": 10.0,
     "use_amp": true,
     "num_workers":0,
-    "stage1_epochs": 200,
+    "stage1_epochs": 300,
     "stage2_epochs": 100,
     "reflow_data_dir": "data_reflow_cache_256_SpectralLoss",
     "resume_checkpoint": ""

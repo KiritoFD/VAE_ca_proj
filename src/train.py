@@ -14,6 +14,7 @@ import numpy as np
 from PIL import Image
 from diffusers import AutoencoderKL
 import torch.nn.functional as F
+import gc  # 🟢 新增：垃圾回收
 
 from SAFlow import SAFModel
 from dataset import Stage1Dataset, Stage2Dataset
@@ -29,6 +30,19 @@ EVAL_STEP = 1           # 每多少个 Epoch 进行一次推理验证
 MAX_GRAD_NORM = 1.0     # 梯度裁剪阈值
 IDENTITY_PROB = 0.15    # Stage 1 训练恒等映射的概率
 # =========================================
+
+# 🟢 新增：递归更新字典
+def deep_update(source, overrides):
+    """
+    递归更新字典，确保子层级的配置不会被暴力覆盖，而是按键更新。
+    """
+    for key, value in overrides.items():
+        if isinstance(value, dict) and value:
+            returned = deep_update(source.get(key, {}), value)
+            source[key] = returned
+        else:
+            source[key] = overrides[key]
+    return source
 
 # 🟢 [命名] 频谱幅度损失 (Spectral Amplitude Distance)
 def compute_spectral_loss(v_pred, v_gt):
@@ -56,8 +70,10 @@ class TrainingLogger:
     def __init__(self, log_dir):
         self.log_dir = Path(log_dir)
         self.log_dir.mkdir(parents=True, exist_ok=True)
-        self.logger = logging.getLogger("LSFM")
+        # 🟢 修改：使用唯一的 logger 名称避免重名冲突
+        self.logger = logging.getLogger(f"LSFM_{id(self)}")
         self.logger.setLevel(logging.INFO)
+        self.logger.propagate = False  # 🟢 新增：防止重复打印
         if not self.logger.handlers:
             fh = logging.FileHandler(self.log_dir / "train.log", encoding='utf-8')
             ch = logging.StreamHandler(sys.stdout)
@@ -71,13 +87,18 @@ class TrainingLogger:
         self.logger.info(msg)
 
 class LSFMTrainer:
-    def __init__(self):
-        # 1. 加载配置
+    # 🟢 核心修改：接收 config_override 参数
+    def __init__(self, config_override=None):
+        # 1. 加载基础配置
         config_path = Path("config.json")
         if not config_path.exists(): config_path = Path("../config.json")
         
         with open(config_path, 'r', encoding='utf-8') as f:
             self.cfg = json.load(f)
+        
+        # 2. 🟢 深度应用配置覆盖 (支持任意参数修改)
+        if config_override:
+            self.cfg = deep_update(self.cfg, config_override)
         
         self.device = torch.device("cuda")
         self.ckpt_dir = Path(self.cfg['checkpoint']['save_dir'])
@@ -85,17 +106,23 @@ class LSFMTrainer:
         
         # 初始化日志
         self.logger = TrainingLogger(self.ckpt_dir / "logs")
+        
+        # 🟢 新增：保存本次实验的完整配置，方便回溯
+        with open(self.ckpt_dir / "experiment_config.json", "w", encoding='utf-8') as f:
+            json.dump(self.cfg, f, indent=4, ensure_ascii=False)
+        
         self.reflow_dir = Path(self.cfg['training'].get('reflow_data_dir', 'data/reflow_pairs'))
         
         # 🟢 读取可配置的损失权重
         self.transfer_weight = self.cfg['training'].get('transfer_loss_weight', 1.0)
 
         self.logger.info("="*50)
-        self.logger.info(f"Initializing Trainer")
+        self.logger.info(f"🚀 Initializing Experiment")
+        self.logger.info(f"📂 Save Dir  : {self.ckpt_dir}")
         self.logger.info(f"Device      : {self.device}")
         self.logger.info(f"Batch Size  : {self.cfg['training']['batch_size']}")
         self.logger.info(f"Resolution  : 256x256")
-        self.logger.info(f"Transfer Loss Weight: {self.transfer_weight}")  # 🟢 记录到日志
+        self.logger.info(f"⚡ LR: {self.cfg['training']['learning_rate']} | Weight: {self.transfer_weight}")
         self.logger.info("="*50)
 
         # 2. 加载 VAE (FT-MSE)
@@ -183,7 +210,13 @@ class LSFMTrainer:
                         shuffle=True, num_workers=8, pin_memory=True, drop_last=True)
         
         opt = torch.optim.AdamW(model.parameters(), lr=self.cfg['training']['learning_rate'])
+        
         total_epochs = self.cfg['training']['stage1_epochs']
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+            opt, 
+            T_max=total_epochs, 
+            eta_min=1e-6
+        )
 
         for epoch in range(1, total_epochs + 1):
             model.train()
@@ -206,41 +239,27 @@ class LSFMTrainer:
 
                 opt.zero_grad(set_to_none=True)
                 with torch.amp.autocast(device_type="cuda", dtype=torch.bfloat16):
-                    # 1. 🟢 物理真实的目标速度 (不放大，不篡改)
                     v_gt = target - x_c
                     
-                    # 2. 模型预测
                     t = torch.rand(x_c.size(0), device=self.device)
                     x_t = (1 - t.view(-1,1,1,1)) * x_c + t.view(-1,1,1,1) * target
                     v_pred = model(x_t, x_c, t, t_id)
                     
-                    # 3. 计算组件 Loss
-                    # A. 🟢 基础 MSE (reduction='none' 以便逐样本加权)
                     loss_mse_raw = F.mse_loss(v_pred, v_gt, reduction='none')
-                    loss_mse_per_sample = loss_mse_raw.mean(dim=[1, 2, 3])  # [B, C, H, W] -> [B]
+                    loss_mse_per_sample = loss_mse_raw.mean(dim=[1, 2, 3])
                     
-                    # B. 频谱 Loss (Spectral Amplitude Loss)
                     loss_spec = compute_spectral_loss(v_pred, v_gt)
                     
-                    # C. 方向一致性 (Cosine Loss)
                     v_pred_flat = v_pred.flatten(1)
                     v_gt_flat = v_gt.flatten(1)
                     cos_sim = F.cosine_similarity(v_pred_flat, v_gt_flat, dim=1, eps=1e-6)
                     loss_dir = (1 - cos_sim).mean()
                     
-                    # 4. 🟢 动态加权逻辑 (Loss Balancing)
-                    # 识别哪些样本是"风格迁移"(困难任务)，哪些是"自保持"(简单任务)
-                    is_transfer = (s_id != t_id).float()  # [B]
-                    
-                    # 构建权重向量:
-                    # Identity: 权重 = 1.0
-                    # Transfer: 权重 = self.transfer_weight (从配置读取)
+                    is_transfer = (s_id != t_id).float()
                     sample_weights = 1.0 + is_transfer * (self.transfer_weight - 1.0)
                     
-                    # 加权平均 MSE
                     weighted_mse = (loss_mse_per_sample * sample_weights).mean()
                     
-                    # 5. 🟢 总 Loss (调整了辅助 Loss 的权重)
                     loss = weighted_mse + 0.1 * loss_spec + 0.1 * loss_dir
 
                 loss.backward()
@@ -252,7 +271,11 @@ class LSFMTrainer:
 
             avg_loss = epoch_loss / len(dl)
             elapsed = time.time() - start_time
-            self.logger.info(f"[S1] Epoch {epoch:03d} | Avg Loss: {avg_loss:.6f} | Time: {elapsed:.1f}s")
+            
+            current_lr = scheduler.get_last_lr()[0]
+            self.logger.info(f"[S1] Epoch {epoch:03d} | Avg Loss: {avg_loss:.6f} | LR: {current_lr:.2e} | Time: {elapsed:.1f}s")
+            
+            scheduler.step()
 
             if epoch % EVAL_STEP == 0:
                 self.save_ckpt(model, epoch, "stage1")
@@ -321,6 +344,13 @@ class LSFMTrainer:
         opt = torch.optim.AdamW(model.parameters(), lr=self.cfg['training']['learning_rate'])
         total_epochs = self.cfg['training']['stage2_epochs']
         
+        # 🟢 Stage 2 也加上调度器 (继续优化路径)
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+            opt, 
+            T_max=total_epochs, 
+            eta_min=1e-6
+        )
+        
         for epoch in range(1, total_epochs + 1):
             model.train()
             epoch_loss = 0.0
@@ -348,7 +378,11 @@ class LSFMTrainer:
             
             avg_loss = epoch_loss / len(dl)
             elapsed = time.time() - start_time
-            self.logger.info(f"[S2] Epoch {epoch:03d} | Avg Loss: {avg_loss:.6f} | Time: {elapsed:.1f}s")
+            
+            current_lr = scheduler.get_last_lr()[0]
+            self.logger.info(f"[S2] Epoch {epoch:03d} | Avg Loss: {avg_loss:.6f} | LR: {current_lr:.2e} | Time: {elapsed:.1f}s")
+            
+            scheduler.step()
             
             if epoch % EVAL_STEP == 0:
                 self.save_ckpt(model, epoch, "stage2")
@@ -365,7 +399,7 @@ class LSFMTrainer:
         with open("config.json", 'r', encoding='utf-8') as f:
             fresh_cfg = json.load(f)
         
-        inf_cfg = fresh_cfg.get('inference', {})
+        inf_cfg = self.cfg.get('inference', {})
         # 🟢 强行清洗字符串：确保 monet2photo 中只有一个 p
         raw_path = inf_cfg.get('image_path', '').replace("monet2pphoto", "monet2photo")
         test_root = Path(raw_path)

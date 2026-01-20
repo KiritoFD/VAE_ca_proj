@@ -1,0 +1,27 @@
+[22:37:02][INFO] ==================================================
+[22:37:02][INFO] 🚀 Initializing Experiment
+[22:37:02][INFO] 📂 Save Dir  : AutoSearch_Results/Exp1_Baseline_LR1e4_W5/checkpoints
+[22:37:02][INFO] Device      : cuda
+[22:37:02][INFO] Batch Size  : 64
+[22:37:02][INFO] Resolution  : 256x256
+[22:37:02][INFO] ⚡ LR: 0.0001 | Weight: 5.0
+[22:37:02][INFO] ==================================================
+[22:37:02][INFO] [Init] Loading VAE (stabilityai/sd-vae-ft-mse)...
+[22:37:04][INFO] [Init] Loading Training Dataset...
+[22:37:04][INFO] [Init] Dataset Ready. Total Latents: 7359
+[22:37:04][INFO] ==================================================
+[22:37:04][INFO] >>> Starting Stage 1: LSFM Training (with Velocity Amplification)
+[22:37:04][INFO] ==================================================
+[22:37:04][INFO] [Model] Compiling network with torch.compile (max-autotune)...
+[22:37:43][INFO] [S1] Epoch 001 | Avg Loss: 0.833277 | LR: 1.00e-04 | Time: 38.1s
+[22:37:43][INFO] [Inference] Starting Epoch 1 | Steps: 4
+[22:37:49][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp1_Baseline_LR1e4_W5/checkpoints/inf/stage1/ep1
+[22:38:16][INFO] [S1] Epoch 002 | Avg Loss: 0.551549 | LR: 1.00e-04 | Time: 26.8s
+[22:38:16][INFO] [Inference] Starting Epoch 2 | Steps: 4
+[22:38:17][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp1_Baseline_LR1e4_W5/checkpoints/inf/stage1/ep2
+[22:38:43][INFO] [S1] Epoch 003 | Avg Loss: 0.466833 | LR: 9.99e-05 | Time: 25.3s
+[22:38:43][INFO] [Inference] Starting Epoch 3 | Steps: 4
+[22:38:44][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp1_Baseline_LR1e4_W5/checkpoints/inf/stage1/ep3
+[22:39:09][INFO] [S1] Epoch 004 | Avg Loss: 0.405872 | LR: 9.98e-05 | Time: 25.2s
+[22:39:09][INFO] [Inference] Starting Epoch 4 | Steps: 4
+[22:39:10][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp1_Baseline_LR1e4_W5/checkpoints/inf/stage1/ep4
