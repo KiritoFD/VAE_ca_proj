@@ -1,0 +1,281 @@
+[2026-01-20 19:19:44] INFO: 🚀 Initializing Trainer on cuda (WSL2 Optimized)
+[2026-01-20 19:19:44] INFO: Precision: Using BFloat16 (BF16) + TF32.
+[2026-01-20 19:19:44] INFO: Loading VAE...
+[19:20:48] 🚀 Trainer Init | Mode: 256x256 Latents | Batch: 22
+[19:20:48] Loading VAE (FT-MSE) for validation decoding...
+[19:21:25] 🚀 Trainer Init | Mode: 256x256 Latents | Batch: 22
+[19:21:25] Loading VAE (FT-MSE) for validation decoding...
+[19:21:28] Starting Stage 1...
+[19:21:28] ⚡ Compiling model (max-autotune)...
+[19:28:23] 🚀 Trainer Init | Mode: 256x256 Latents | Batch: 64
+[19:28:23] Loading VAE (FT-MSE) for validation decoding...
+[19:28:25] Starting Stage 1...
+[19:28:26] ⚡ Compiling model (max-autotune)...
+[19:29:34] 🚀 Trainer Init | Mode: 256x256 Latents | Batch: 64
+[19:29:34] Loading VAE (FT-MSE) for validation decoding...
+[19:29:49] Starting Stage 1...
+[19:29:49] ⚡ Compiling model (max-autotune)...
+[19:56:17] Generating Reflow Data (Latent Mode)...
+[19:56:17] ⚡ Compiling model (max-autotune)...
+[20:01:58] 🚀 Init | Batch: 64 | Res: 256
+[20:01:58] Loading VAE (FT-MSE)...
+[20:02:00] Initializing Training Dataset (Once)...
+[20:02:00] ✅ Training Set: 7359 latents ready.
+[20:02:00] Stage 1 already done.
+[20:02:00] Generating Reflow Data...
+[20:02:00] ⚡ Compiling model (max-autotune)...
+[20:04:07] 🚀 Init | Batch: 64 | Res: 256
+[20:04:07] Loading VAE (FT-MSE)...
+[20:04:09] Initializing Training Dataset (Once)...
+[20:04:09] ✅ Training Set: 7359 latents ready.
+[20:04:09] Stage 1 already done.
+[20:04:09] Generating Reflow Data...
+[20:04:09] ⚡ Compiling model (max-autotune)...
+[20:08:35] Starting Stage 2...
+[20:08:35] ⚡ Compiling model (max-autotune)...
+[20:19:23] 🚀 Init | Batch: 64 | Res: 256
+[20:19:23] Loading VAE (stabilityai/sd-vae-ft-mse)...
+[20:19:25] Initializing Training Dataset (Once)...
+[20:19:25] ✅ Training Set: 7359 latents ready.
+[20:19:25] Stage 1 already done.
+[20:19:25] Starting Stage 2...
+[20:19:25] ⚡ Compiling model (max-autotune)...
+[20:31:30] 🚀 Init | Batch: 64 | Res: 256
+[20:31:30] Loading VAE (stabilityai/sd-vae-ft-mse)...
+[20:31:33] Initializing Training Dataset (Once)...
+[20:31:33] ✅ Training Set: 7359 latents ready.
+[20:31:33] Stage 1 already done.
+[20:31:33] Starting Stage 2...
+[20:31:33] ⚡ Compiling model (max-autotune)...
+[20:38:39][INFO] ==================================================
+[20:38:39][INFO] Initializing Trainer
+[20:38:39][INFO] Device      : cuda
+[20:38:39][INFO] Batch Size  : 64
+[20:38:39][INFO] Resolution  : 256x256
+[20:38:39][INFO] ==================================================
+[20:38:39][INFO] [Init] Loading VAE (stabilityai/sd-vae-ft-mse)...
+[20:38:41][INFO] [Init] Loading Training Dataset...
+[20:38:41][INFO] [Init] Dataset Ready. Total Latents: 7359
+[20:38:41][INFO] [Stage 1] Checkpoint found. Skipping training.
+[20:38:41][INFO] ==================================================
+[20:38:41][INFO] >>> Starting Stage 2: Distillation (Reflow)
+[20:38:41][INFO] ==================================================
+[20:38:41][INFO] [Model] Compiling network with torch.compile (max-autotune)...
+[20:40:07][INFO] [S2] Epoch 001 | Avg Loss: 0.002810 | Time: 85.0s
+[20:41:18][INFO] [S2] Epoch 002 | Avg Loss: 0.000767 | Time: 70.2s
+[20:42:27][INFO] [S2] Epoch 003 | Avg Loss: 0.001185 | Time: 69.2s
+[20:43:38][INFO] [S2] Epoch 004 | Avg Loss: 0.001102 | Time: 70.4s
+[20:44:50][INFO] [S2] Epoch 005 | Avg Loss: 0.001141 | Time: 71.6s
+[20:46:01][INFO] [S2] Epoch 006 | Avg Loss: 0.000945 | Time: 70.6s
+[20:47:10][INFO] [S2] Epoch 007 | Avg Loss: 0.000801 | Time: 69.0s
+[20:48:20][INFO] [S2] Epoch 008 | Avg Loss: 0.000732 | Time: 69.9s
+[20:49:32][INFO] [S2] Epoch 009 | Avg Loss: 0.001249 | Time: 71.9s
+[20:50:44][INFO] [S2] Epoch 010 | Avg Loss: 0.000786 | Time: 71.4s
+[20:51:54][INFO] [S2] Epoch 011 | Avg Loss: 0.000620 | Time: 69.4s
+[20:53:03][INFO] [S2] Epoch 012 | Avg Loss: 0.000685 | Time: 69.6s
+[20:53:54][INFO] ==================================================
+[20:53:54][INFO] Initializing Trainer
+[20:53:54][INFO] Device      : cuda
+[20:53:54][INFO] Batch Size  : 64
+[20:53:54][INFO] Resolution  : 256x256
+[20:53:54][INFO] ==================================================
+[20:53:54][INFO] [Init] Loading VAE (stabilityai/sd-vae-ft-mse)...
+[20:53:56][INFO] [Init] Loading Training Dataset...
+[20:53:55][INFO] [Init] Dataset Ready. Total Latents: 7359
+[20:53:55][INFO] [Stage 1] Checkpoint found. Skipping training.
+[20:53:55][INFO] ==================================================
+[20:53:55][INFO] >>> Starting Stage 2: Distillation (Reflow)
+[20:53:55][INFO] ==================================================
+[20:53:55][INFO] [Model] Compiling network with torch.compile (max-autotune)...
+[20:55:21][INFO] [S2] Epoch 001 | Avg Loss: 0.003214 | Time: 84.8s
+[20:55:21][INFO] [Inference] ⚠️ No images found in /mnt/f/monet2photo/monet2photo/test
+[20:58:04][INFO] ==================================================
+[20:58:04][INFO] Initializing Trainer
+[20:58:04][INFO] Device      : cuda
+[20:58:04][INFO] Batch Size  : 64
+[20:58:04][INFO] Resolution  : 256x256
+[20:58:04][INFO] ==================================================
+[20:58:04][INFO] [Init] Loading VAE (stabilityai/sd-vae-ft-mse)...
+[20:58:06][INFO] [Init] Loading Training Dataset...
+[20:58:07][INFO] [Init] Dataset Ready. Total Latents: 7359
+[20:58:07][INFO] [Stage 1] Checkpoint found. Skipping training.
+[20:58:07][INFO] ==================================================
+[20:58:07][INFO] >>> Starting Stage 2: Distillation (Reflow)
+[20:58:07][INFO] ==================================================
+[20:58:07][INFO] [Model] Compiling network with torch.compile (max-autotune)...
+[20:59:33][INFO] [S2] Epoch 001 | Avg Loss: 0.003240 | Time: 85.6s
+[20:59:34][INFO] [Inference] ⚠️ No images found in /mnt/f/monet2photo/monet2photo/test
+[21:00:56][INFO] ==================================================
+[21:00:56][INFO] Initializing Trainer
+[21:00:56][INFO] Device      : cuda
+[21:00:56][INFO] Batch Size  : 64
+[21:00:56][INFO] Resolution  : 256x256
+[21:00:56][INFO] ==================================================
+[21:00:56][INFO] [Init] Loading VAE (stabilityai/sd-vae-ft-mse)...
+[21:00:59][INFO] [Init] Loading Training Dataset...
+[21:00:59][INFO] [Init] Dataset Ready. Total Latents: 7359
+[21:00:59][INFO] [Stage 1] Checkpoint found. Skipping training.
+[21:00:59][INFO] ==================================================
+[21:00:59][INFO] >>> Starting Stage 2: Distillation (Reflow)
+[21:00:59][INFO] ==================================================
+[21:00:59][INFO] [Model] Compiling network with torch.compile (max-autotune)...
+[21:02:23][INFO] [S2] Epoch 001 | Avg Loss: 0.003272 | Time: 83.1s
+[21:02:23][INFO] [Inference] ❌ Path NOT found: /mnt/f/monet2photo/monet2hoto/test
+[21:02:23][INFO]    -> Please check 'image_path' in config.json (Use /mnt/f/... for WSL)
+[21:03:32][INFO] [S2] Epoch 002 | Avg Loss: 0.000867 | Time: 68.4s
+[21:03:32][INFO] [Inference] ❌ Path NOT found: /mnt/f/monet2photo/monet2hoto/test
+[21:03:32][INFO]    -> Please check 'image_path' in config.json (Use /mnt/f/... for WSL)
+[21:04:11][INFO] ==================================================
+[21:04:11][INFO] Initializing Trainer
+[21:04:11][INFO] Device      : cuda
+[21:04:11][INFO] Batch Size  : 64
+[21:04:11][INFO] Resolution  : 256x256
+[21:04:11][INFO] ==================================================
+[21:04:11][INFO] [Init] Loading VAE (stabilityai/sd-vae-ft-mse)...
+[21:04:13][INFO] [Init] Loading Training Dataset...
+[21:04:13][INFO] [Init] Dataset Ready. Total Latents: 7359
+[21:04:13][INFO] [Stage 1] Checkpoint found. Skipping training.
+[21:04:13][INFO] ==================================================
+[21:04:13][INFO] >>> Starting Stage 2: Distillation (Reflow)
+[21:04:13][INFO] ==================================================
+[21:04:13][INFO] [Model] Compiling network with torch.compile (max-autotune)...
+[21:05:38][INFO] [S2] Epoch 001 | Avg Loss: 0.003022 | Time: 83.8s
+[21:05:39][INFO] [Inference] ⚠️ No images found in /mnt/f/monet2photo/monet2photo/test
+[21:06:48][INFO] [S2] Epoch 002 | Avg Loss: 0.000899 | Time: 69.6s
+[21:06:49][INFO] [Inference] ⚠️ No images found in /mnt/f/monet2photo/monet2photo/test
+[21:10:16][INFO] ==================================================
+[21:10:16][INFO] Initializing Trainer
+[21:10:16][INFO] Device      : cuda
+[21:10:16][INFO] Batch Size  : 64
+[21:10:16][INFO] Resolution  : 256x256
+[21:10:16][INFO] ==================================================
+[21:10:16][INFO] [Init] Loading VAE (stabilityai/sd-vae-ft-mse)...
+[21:10:18][INFO] [Init] Loading Training Dataset...
+[21:10:18][INFO] [Init] Dataset Ready. Total Latents: 7359
+[21:10:18][INFO] [Stage 1] Checkpoint found. Skipping training.
+[21:10:18][INFO] ==================================================
+[21:10:18][INFO] >>> Starting Stage 2: Distillation (Reflow)
+[21:10:18][INFO] ==================================================
+[21:10:18][INFO] [Model] Compiling network with torch.compile (max-autotune)...
+[21:11:43][INFO] [S2] Epoch 001 | Avg Loss: 0.003149 | Time: 83.7s
+[21:11:43][INFO] [Inference] ⚠️ No images found in /mnt/f/monet2photo/monet2photo/test
+[21:13:01][INFO] ==================================================
+[21:13:01][INFO] Initializing Trainer
+[21:13:01][INFO] Device      : cuda
+[21:13:01][INFO] Batch Size  : 64
+[21:13:01][INFO] Resolution  : 256x256
+[21:13:01][INFO] ==================================================
+[21:13:01][INFO] [Init] Loading VAE (stabilityai/sd-vae-ft-mse)...
+[21:13:29][INFO] ==================================================
+[21:13:29][INFO] Initializing Trainer
+[21:13:29][INFO] Device      : cuda
+[21:13:29][INFO] Batch Size  : 64
+[21:13:29][INFO] Resolution  : 256x256
+[21:13:29][INFO] ==================================================
+[21:13:29][INFO] [Init] Loading VAE (stabilityai/sd-vae-ft-mse)...
+[21:15:32][INFO] ==================================================
+[21:15:32][INFO] Initializing Trainer
+[21:15:32][INFO] Device      : cuda
+[21:15:32][INFO] Batch Size  : 64
+[21:15:32][INFO] Resolution  : 256x256
+[21:15:32][INFO] ==================================================
+[21:15:32][INFO] [Init] Loading VAE (stabilityai/sd-vae-ft-mse)...
+[21:15:35][INFO] [Init] Loading Training Dataset...
+[21:15:35][INFO] [Init] Dataset Ready. Total Latents: 7359
+[21:15:35][INFO] [Stage 1] Checkpoint found. Skipping training.
+[21:15:35][INFO] ==================================================
+[21:15:35][INFO] >>> Starting Stage 2: Distillation (Reflow)
+[21:15:35][INFO] ==================================================
+[21:15:36][INFO] [Model] Compiling network with torch.compile (max-autotune)...
+[21:18:06][INFO] [S2] Epoch 001 | Avg Loss: 0.002781 | Time: 148.9s
+[21:18:06][INFO] [Inference] ⚠️ No images found in /mnt/f/monet2photo/monet2photo/test
+[21:19:28][INFO] ==================================================
+[21:19:28][INFO] Initializing Trainer
+[21:19:28][INFO] Device      : cuda
+[21:19:28][INFO] Batch Size  : 64
+[21:19:28][INFO] Resolution  : 256x256
+[21:19:28][INFO] ==================================================
+[21:19:28][INFO] [Init] Loading VAE (stabilityai/sd-vae-ft-mse)...
+[21:19:30][INFO] [Init] Loading Training Dataset...
+[21:19:30][INFO] [Init] Dataset Ready. Total Latents: 7359
+[21:19:30][INFO] [Stage 1] Checkpoint found. Skipping training.
+[21:19:30][INFO] ==================================================
+[21:19:30][INFO] >>> Starting Stage 2: Distillation (Reflow)
+[21:19:30][INFO] ==================================================
+[21:19:30][INFO] [Model] Compiling network with torch.compile (max-autotune)...
+[21:21:13][INFO] [S2] Epoch 001 | Avg Loss: 0.003412 | Time: 101.0s
+[21:21:13][INFO] [Inference] ⚠️ No images found in /mnt/f/monet2photo/test
+[21:24:04][INFO] ==================================================
+[21:24:04][INFO] Initializing Trainer
+[21:24:04][INFO] Device      : cuda
+[21:24:04][INFO] Batch Size  : 64
+[21:24:04][INFO] Resolution  : 256x256
+[21:24:04][INFO] ==================================================
+[21:24:04][INFO] [Init] Loading VAE (stabilityai/sd-vae-ft-mse)...
+[21:24:06][INFO] [Init] Loading Training Dataset...
+[21:24:06][INFO] [Init] Dataset Ready. Total Latents: 7359
+[21:24:06][INFO] [Stage 1] Checkpoint found. Skipping training.
+[21:24:06][INFO] ==================================================
+[21:24:06][INFO] >>> Starting Stage 2: Distillation (Reflow)
+[21:24:06][INFO] ==================================================
+[21:24:06][INFO] [Model] Compiling network with torch.compile (max-autotune)...
+[21:25:35][INFO] [S2] Epoch 001 | Avg Loss: 0.003501 | Time: 87.6s
+[21:25:35][INFO] [Inference] Starting Epoch 1 | Steps: 4
+[21:26:12][INFO] [Inference] Successfully finished. Output: inference_results/stage2/ep1
+[21:27:22][INFO] [S2] Epoch 002 | Avg Loss: 0.000792 | Time: 69.8s
+[21:27:22][INFO] [Inference] Starting Epoch 2 | Steps: 4
+[21:27:22][INFO] [Inference] Successfully finished. Output: inference_results/stage2/ep2
+[21:28:32][INFO] [S2] Epoch 003 | Avg Loss: 0.001108 | Time: 69.5s
+[21:28:32][INFO] [Inference] Starting Epoch 3 | Steps: 4
+[21:28:33][INFO] [Inference] Successfully finished. Output: inference_results/stage2/ep3
+[21:29:41][INFO] [S2] Epoch 004 | Avg Loss: 0.000959 | Time: 68.6s
+[21:29:42][INFO] [Inference] Starting Epoch 4 | Steps: 4
+[21:29:42][INFO] [Inference] Successfully finished. Output: inference_results/stage2/ep4
+[21:30:50][INFO] [S2] Epoch 005 | Avg Loss: 0.000789 | Time: 67.2s
+[21:30:50][INFO] [Inference] Starting Epoch 5 | Steps: 4
+[21:30:51][INFO] [Inference] Successfully finished. Output: inference_results/stage2/ep5
+[21:32:01][INFO] [S2] Epoch 006 | Avg Loss: 0.000840 | Time: 70.0s
+[21:32:01][INFO] [Inference] Starting Epoch 6 | Steps: 4
+[21:32:02][INFO] [Inference] Successfully finished. Output: inference_results/stage2/ep6
+[21:33:12][INFO] [S2] Epoch 007 | Avg Loss: 0.000946 | Time: 69.9s
+[21:33:12][INFO] [Inference] Starting Epoch 7 | Steps: 4
+[21:33:13][INFO] [Inference] Successfully finished. Output: inference_results/stage2/ep7
+[21:34:22][INFO] [S2] Epoch 008 | Avg Loss: 0.000976 | Time: 69.6s
+[21:34:23][INFO] [Inference] Starting Epoch 8 | Steps: 4
+[21:34:24][INFO] [Inference] Successfully finished. Output: inference_results/stage2/ep8
+[21:35:32][INFO] [S2] Epoch 009 | Avg Loss: 0.000712 | Time: 68.7s
+[21:35:33][INFO] [Inference] Starting Epoch 9 | Steps: 4
+[21:35:33][INFO] [Inference] Successfully finished. Output: inference_results/stage2/ep9
+[21:36:45][INFO] [S2] Epoch 010 | Avg Loss: 0.000845 | Time: 71.5s
+[21:36:45][INFO] [Inference] Starting Epoch 10 | Steps: 4
+[21:36:46][INFO] [Inference] Successfully finished. Output: inference_results/stage2/ep10
+[21:37:56][INFO] [S2] Epoch 011 | Avg Loss: 0.000828 | Time: 70.0s
+[21:37:56][INFO] [Inference] Starting Epoch 11 | Steps: 4
+[21:37:57][INFO] [Inference] Successfully finished. Output: inference_results/stage2/ep11
+[21:39:07][INFO] [S2] Epoch 012 | Avg Loss: 0.000865 | Time: 70.2s
+[21:39:08][INFO] [Inference] Starting Epoch 12 | Steps: 4
+[21:39:07][INFO] [Inference] Successfully finished. Output: inference_results/stage2/ep12
+[21:40:17][INFO] [S2] Epoch 013 | Avg Loss: 0.000653 | Time: 69.9s
+[21:40:17][INFO] [Inference] Starting Epoch 13 | Steps: 4
+[21:40:18][INFO] [Inference] Successfully finished. Output: inference_results/stage2/ep13
+[21:41:28][INFO] [S2] Epoch 014 | Avg Loss: 0.001231 | Time: 70.0s
+[21:41:28][INFO] [Inference] Starting Epoch 14 | Steps: 4
+[21:41:29][INFO] [Inference] Successfully finished. Output: inference_results/stage2/ep14
+[21:42:37][INFO] [S2] Epoch 015 | Avg Loss: 0.000694 | Time: 68.0s
+[21:42:37][INFO] [Inference] Starting Epoch 15 | Steps: 4
+[21:42:38][INFO] [Inference] Successfully finished. Output: inference_results/stage2/ep15
+[21:43:46][INFO] [S2] Epoch 016 | Avg Loss: 0.000842 | Time: 68.1s
+[21:43:47][INFO] [Inference] Starting Epoch 16 | Steps: 4
+[21:43:48][INFO] [Inference] Successfully finished. Output: inference_results/stage2/ep16
+[21:44:56][INFO] [S2] Epoch 017 | Avg Loss: 0.000892 | Time: 68.8s
+[21:44:57][INFO] [Inference] Starting Epoch 17 | Steps: 4
+[21:44:58][INFO] [Inference] Successfully finished. Output: inference_results/stage2/ep17
+[21:46:11][INFO] [S2] Epoch 018 | Avg Loss: 0.000714 | Time: 73.0s
+[21:46:11][INFO] [Inference] Starting Epoch 18 | Steps: 4
+[21:46:12][INFO] [Inference] Successfully finished. Output: inference_results/stage2/ep18
+[21:47:25][INFO] [S2] Epoch 019 | Avg Loss: 0.000989 | Time: 73.2s
+[21:47:25][INFO] [Inference] Starting Epoch 19 | Steps: 4
+[21:47:25][INFO] [Inference] Successfully finished. Output: inference_results/stage2/ep19
+[21:48:36][INFO] [S2] Epoch 020 | Avg Loss: 0.000867 | Time: 71.6s
+[21:48:37][INFO] [Inference] Starting Epoch 20 | Steps: 4
+[21:48:38][INFO] [Inference] Successfully finished. Output: inference_results/stage2/ep20

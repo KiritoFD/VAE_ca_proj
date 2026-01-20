@@ -7,26 +7,26 @@
     "kernel_size": 7
   },
   "training": {
-    "batch_size": 22,
+    "batch_size": 64,
     "gen_batch_size": 64,
     "learning_rate": 2e-4,
     "use_amp": true,
     "num_workers":0,
     "stage1_epochs": 50,
     "stage2_epochs": 100,
-    "reflow_data_dir": "data_reflow_cache",
-    "resume_checkpoint": "/mnt/g/GitHub/VAE_ca_proj/src/stage1_epoch10.pt"
+    "reflow_data_dir": "data_reflow_cache_256_SpectralLoss",
+    "resume_checkpoint": ""
   },
   "data": {
-    "data_root": "/mnt/f/monet2photo/latents/monet2photo",
+    "raw_data_root": "/mnt/f/monet2photo/monet2photo/train",
+    "data_root": "/mnt/f/monet2photo/monet2photo/train_latents",
     "num_classes": 2
   },
   "checkpoint": {
-    "save_dir": "checkpoints-lsfm-identity"
+    "save_dir": "checkpoints-lsfm-identity-256_SpectralLoss"
   },
   "inference":{
-    "image_path": "/mnt/f/monet2photo/monet2photo/inf",
-    "save_dir": "inference_results",
+    "image_path": "/mnt/f/monet2photo/test",
     "num_inference_steps": 5
   }
 }
