@@ -8,23 +8,24 @@
   },
   "training": {
     "batch_size": 22,
+    "gen_batch_size": 64,
     "learning_rate": 2e-4,
     "use_amp": true,
-    "num_workers": 4,
+    "num_workers":0,
     "stage1_epochs": 50,
     "stage2_epochs": 100,
     "reflow_data_dir": "data_reflow_cache",
-    "resume_checkpoint": "G:\\GitHub\\VAE_ca_proj\\src\\stage1_epoch10.pt"
+    "resume_checkpoint": "/mnt/g/GitHub/VAE_ca_proj/src/stage1_epoch10.pt"
   },
   "data": {
-    "data_root": "F:\\monet2photo\\latents\\monet2photo",
+    "data_root": "/mnt/f/monet2photo/latents/monet2photo",
     "num_classes": 2
   },
   "checkpoint": {
-    "save_dir": "checkpoints-lsfm"
+    "save_dir": "checkpoints-lsfm-identity"
   },
   "inference":{
-    "image_path": "F:\\monet2photo\\monet2photo\\inf",
+    "image_path": "/mnt/f/monet2photo/monet2photo/inf",
     "save_dir": "inference_results",
     "num_inference_steps": 5
   }
