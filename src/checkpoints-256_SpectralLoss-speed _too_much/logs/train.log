@@ -1,0 +1,43 @@
+[22:12:29][INFO] ==================================================
+[22:12:29][INFO] Initializing Trainer
+[22:12:29][INFO] Device      : cuda
+[22:12:29][INFO] Batch Size  : 64
+[22:12:29][INFO] Resolution  : 256x256
+[22:12:29][INFO] ==================================================
+[22:12:29][INFO] [Init] Loading VAE (stabilityai/sd-vae-ft-mse)...
+[22:12:30][INFO] [Init] Loading Training Dataset...
+[22:12:30][INFO] [Init] Dataset Ready. Total Latents: 7359
+[22:12:30][INFO] ==================================================
+[22:12:30][INFO] >>> Starting Stage 1: LSFM Training (with Velocity Amplification)
+[22:12:30][INFO] ==================================================
+[22:12:30][INFO] [Model] Compiling network with torch.compile (max-autotune)...
+[22:13:07][INFO] [S1] Epoch 001 | Avg Loss: 2.575671 | Time: 35.6s
+[22:13:08][INFO] [Inference] Starting Epoch 1 | Steps: 5
+[22:13:14][INFO] [Inference] Successfully finished. Output: checkpoints-256_SpectralLoss/inf/stage1/ep1
+[22:13:38][INFO] [S1] Epoch 002 | Avg Loss: 1.923827 | Time: 24.0s
+[22:13:39][INFO] [Inference] Starting Epoch 2 | Steps: 5
+[22:13:39][INFO] [Inference] Successfully finished. Output: checkpoints-256_SpectralLoss/inf/stage1/ep2
+[22:14:05][INFO] [S1] Epoch 003 | Avg Loss: 1.769442 | Time: 25.6s
+[22:14:04][INFO] [Inference] Starting Epoch 3 | Steps: 5
+[22:14:05][INFO] [Inference] Successfully finished. Output: checkpoints-256_SpectralLoss/inf/stage1/ep3
+[22:14:30][INFO] [S1] Epoch 004 | Avg Loss: 1.549969 | Time: 25.4s
+[22:14:30][INFO] [Inference] Starting Epoch 4 | Steps: 5
+[22:14:31][INFO] [Inference] Successfully finished. Output: checkpoints-256_SpectralLoss/inf/stage1/ep4
+[22:14:55][INFO] [S1] Epoch 005 | Avg Loss: 1.411347 | Time: 24.2s
+[22:14:56][INFO] [Inference] Starting Epoch 5 | Steps: 5
+[22:14:57][INFO] [Inference] Successfully finished. Output: checkpoints-256_SpectralLoss/inf/stage1/ep5
+[22:15:21][INFO] [S1] Epoch 006 | Avg Loss: 1.383377 | Time: 23.9s
+[22:15:21][INFO] [Inference] Starting Epoch 6 | Steps: 5
+[22:15:22][INFO] [Inference] Successfully finished. Output: checkpoints-256_SpectralLoss/inf/stage1/ep6
+[22:15:46][INFO] [S1] Epoch 007 | Avg Loss: 1.430639 | Time: 24.0s
+[22:15:46][INFO] [Inference] Starting Epoch 7 | Steps: 5
+[22:15:47][INFO] [Inference] Successfully finished. Output: checkpoints-256_SpectralLoss/inf/stage1/ep7
+[22:16:11][INFO] [S1] Epoch 008 | Avg Loss: 1.444795 | Time: 23.8s
+[22:16:11][INFO] [Inference] Starting Epoch 8 | Steps: 5
+[22:16:12][INFO] [Inference] Successfully finished. Output: checkpoints-256_SpectralLoss/inf/stage1/ep8
+[22:16:37][INFO] [S1] Epoch 009 | Avg Loss: 1.258437 | Time: 25.5s
+[22:16:38][INFO] [Inference] Starting Epoch 9 | Steps: 5
+[22:16:38][INFO] [Inference] Successfully finished. Output: checkpoints-256_SpectralLoss/inf/stage1/ep9
+[22:17:02][INFO] [S1] Epoch 010 | Avg Loss: 1.246355 | Time: 24.0s
+[22:17:03][INFO] [Inference] Starting Epoch 10 | Steps: 5
+[22:17:04][INFO] [Inference] Successfully finished. Output: checkpoints-256_SpectralLoss/inf/stage1/ep10

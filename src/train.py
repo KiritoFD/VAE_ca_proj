@@ -86,12 +86,16 @@ class LSFMTrainer:
         # 初始化日志
         self.logger = TrainingLogger(self.ckpt_dir / "logs")
         self.reflow_dir = Path(self.cfg['training'].get('reflow_data_dir', 'data/reflow_pairs'))
+        
+        # 🟢 读取可配置的损失权重
+        self.transfer_weight = self.cfg['training'].get('transfer_loss_weight', 1.0)
 
         self.logger.info("="*50)
         self.logger.info(f"Initializing Trainer")
         self.logger.info(f"Device      : {self.device}")
         self.logger.info(f"Batch Size  : {self.cfg['training']['batch_size']}")
         self.logger.info(f"Resolution  : 256x256")
+        self.logger.info(f"Transfer Loss Weight: {self.transfer_weight}")  # 🟢 记录到日志
         self.logger.info("="*50)
 
         # 2. 加载 VAE (FT-MSE)
@@ -202,35 +206,42 @@ class LSFMTrainer:
 
                 opt.zero_grad(set_to_none=True)
                 with torch.amp.autocast(device_type="cuda", dtype=torch.bfloat16):
-                    # 1. 原始目标速度向量
-                    v_gt_raw = target - x_c
+                    # 1. 🟢 物理真实的目标速度 (不放大，不篡改)
+                    v_gt = target - x_c
                     
-                    # 2. 速度放大 (Velocity Amplification)
-                    # 转换任务放大3倍，强迫模型输出大位移
-                    is_transfer = (s_id != t_id).view(-1, 1, 1, 1).float()
-                    ampl_factor = 1.0 + (is_transfer * 2.0)
-                    v_gt_amplified = v_gt_raw * ampl_factor
-                    
-                    # 3. 模型预测
+                    # 2. 模型预测
                     t = torch.rand(x_c.size(0), device=self.device)
                     x_t = (1 - t.view(-1,1,1,1)) * x_c + t.view(-1,1,1,1) * target
                     v_pred = model(x_t, x_c, t, t_id)
                     
-                    # 4. 计算组合 Loss
-                    # A. 基础 MSE
-                    loss_mse = F.mse_loss(v_pred, v_gt_amplified)
+                    # 3. 计算组件 Loss
+                    # A. 🟢 基础 MSE (reduction='none' 以便逐样本加权)
+                    loss_mse_raw = F.mse_loss(v_pred, v_gt, reduction='none')
+                    loss_mse_per_sample = loss_mse_raw.mean(dim=[1, 2, 3])  # [B, C, H, W] -> [B]
                     
                     # B. 频谱 Loss (Spectral Amplitude Loss)
-                    loss_spec = compute_spectral_loss(v_pred, v_gt_amplified)
+                    loss_spec = compute_spectral_loss(v_pred, v_gt)
                     
                     # C. 方向一致性 (Cosine Loss)
                     v_pred_flat = v_pred.flatten(1)
-                    v_gt_flat = v_gt_amplified.flatten(1)
+                    v_gt_flat = v_gt.flatten(1)
                     cos_sim = F.cosine_similarity(v_pred_flat, v_gt_flat, dim=1, eps=1e-6)
                     loss_dir = (1 - cos_sim).mean()
                     
-                    # D. 最终加权
-                    loss = loss_mse + 0.1 * loss_spec + 0.2 * loss_dir
+                    # 4. 🟢 动态加权逻辑 (Loss Balancing)
+                    # 识别哪些样本是"风格迁移"(困难任务)，哪些是"自保持"(简单任务)
+                    is_transfer = (s_id != t_id).float()  # [B]
+                    
+                    # 构建权重向量:
+                    # Identity: 权重 = 1.0
+                    # Transfer: 权重 = self.transfer_weight (从配置读取)
+                    sample_weights = 1.0 + is_transfer * (self.transfer_weight - 1.0)
+                    
+                    # 加权平均 MSE
+                    weighted_mse = (loss_mse_per_sample * sample_weights).mean()
+                    
+                    # 5. 🟢 总 Loss (调整了辅助 Loss 的权重)
+                    loss = weighted_mse + 0.1 * loss_spec + 0.1 * loss_dir
 
                 loss.backward()
                 nn.utils.clip_grad_norm_(model.parameters(), MAX_GRAD_NORM)

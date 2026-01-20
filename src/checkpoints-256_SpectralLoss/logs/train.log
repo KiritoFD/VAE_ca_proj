@@ -1,0 +1,14 @@
+[22:20:13][INFO] ==================================================
+[22:20:13][INFO] Initializing Trainer
+[22:20:13][INFO] Device      : cuda
+[22:20:13][INFO] Batch Size  : 64
+[22:20:13][INFO] Resolution  : 256x256
+[22:20:13][INFO] Transfer Loss Weight: 1.0
+[22:20:13][INFO] ==================================================
+[22:20:13][INFO] [Init] Loading VAE (stabilityai/sd-vae-ft-mse)...
+[22:20:15][INFO] [Init] Loading Training Dataset...
+[22:20:15][INFO] [Init] Dataset Ready. Total Latents: 7359
+[22:20:15][INFO] ==================================================
+[22:20:15][INFO] >>> Starting Stage 1: LSFM Training (with Velocity Amplification)
+[22:20:15][INFO] ==================================================
+[22:20:15][INFO] [Model] Compiling network with torch.compile (max-autotune)...
