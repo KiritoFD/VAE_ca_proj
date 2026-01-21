@@ -151,10 +151,19 @@ def deep_update(orig, overrides):
 
 def prepare_experiment(name, base_config_path, overrides):
     exp_dir = EXPERIMENTS_DIR / name
-    if exp_dir.exists():
-        # keep existing but back it up
+    
+    # Determine checkpoint directory for this experiment
+    ckpt_dir = Path('checkpoints') / name
+    latest_ckpt = ckpt_dir / 'latest.pt'
+    
+    # Check if we should resume from existing checkpoint
+    should_resume = latest_ckpt.exists()
+    
+    if exp_dir.exists() and not should_resume:
+        # Backup only if no checkpoint to resume from
         backup = exp_dir.parent / f"{name}_bak_{int(time.time())}"
         shutil.move(str(exp_dir), str(backup))
+    
     exp_dir.mkdir(parents=True, exist_ok=True)
 
     # Load base config
@@ -166,16 +175,19 @@ def prepare_experiment(name, base_config_path, overrides):
         deep_update(cfg, overrides)
 
     # Ensure checkpoint save dir is namespaced
-    ckpt_dir = Path(cfg.get('checkpoint', {}).get('save_dir', 'checkpoints'))
     cfg.setdefault('checkpoint', {})
-    cfg['checkpoint']['save_dir'] = str(Path('checkpoints') / name)
+    cfg['checkpoint']['save_dir'] = str(ckpt_dir)
 
     # Set default test_image_dir to current if missing
     cfg.setdefault('training', {})
     cfg['training'].setdefault('test_image_dir', cfg.get('training', {}).get('test_image_dir', "/mnt/f/monet2photo/test"))
 
-    # Clear any resume flag for fresh experiments
-    cfg['training']['resume_checkpoint'] = None
+    # Auto-resume: If checkpoint exists, set resume path
+    if should_resume:
+        cfg['training']['resume_checkpoint'] = str(latest_ckpt)
+        print(f"  [Auto-Resume] Found existing checkpoint: {latest_ckpt}")
+    else:
+        cfg['training']['resume_checkpoint'] = None
 
     # Write experiment config
     config_path = exp_dir / 'config.json'

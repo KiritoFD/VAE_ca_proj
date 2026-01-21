@@ -124,12 +124,16 @@ class CosineSSMLoss(nn.Module):
     allows style-induced scaling but preserves topological structure.
     
     Critical: L2-normalization and matmul in FP32 for stability.
+    
+    Optimization: Optional Monte Carlo sampling to reduce O(N^2) memory cost.
     """
     
-    def __init__(self, use_fp32=True, normalize_by_num_elements=True):
+    def __init__(self, use_fp32=True, normalize_by_num_elements=True, max_spatial_samples=None):
         super().__init__()
         self.use_fp32 = use_fp32
         self.normalize_by_num_elements = normalize_by_num_elements
+        # If set, randomly sample spatial positions to reduce memory from O(N^2) to O(S^2)
+        self.max_spatial_samples = max_spatial_samples
     
     def forward(self, x_pred, x_src):
         """
@@ -140,8 +144,6 @@ class CosineSSMLoss(nn.Module):
         Returns:
             loss: scalar SSM loss
         """
-        original_dtype = x_pred.dtype
-        
         # Convert to FP32 for numerical stability
         if self.use_fp32:
             x_pred = x_pred.float()
@@ -153,6 +155,13 @@ class CosineSSMLoss(nn.Module):
         # Step 1: Reshape to [B, C, N]
         z_pred = x_pred.view(B, C, N)
         z_src = x_src.view(B, C, N)
+        
+        # Optional: Monte Carlo sampling to reduce memory (O(N^2) -> O(S^2))
+        if self.max_spatial_samples is not None and N > self.max_spatial_samples:
+            indices = torch.randperm(N, device=x_pred.device)[:self.max_spatial_samples]
+            z_pred = z_pred[..., indices]
+            z_src = z_src[..., indices]
+            N = self.max_spatial_samples
         
         # Step 2: L2-normalize along channel dimension (critical for cosine similarity)
         # This removes magnitude/intensity, keeping only directional info

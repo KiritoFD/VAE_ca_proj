@@ -86,6 +86,8 @@ class StyleDynamicConv(nn.Module):
     """
     Dynamic Depthwise Convolution conditioned on style.
     HyperNet generates convolution kernels from style embeddings.
+    
+    Optimized: Uses grouped convolution to process entire batch in one kernel launch.
     """
     
     def __init__(self, in_channels, kernel_size=3, style_dim=256, padding=1):
@@ -109,23 +111,27 @@ class StyleDynamicConv(nn.Module):
             style_emb: [B, style_dim] style conditioning
         Returns:
             out: [B, C, H, W] dynamically filtered features
+        
+        Optimization: Fold batch into channels, use one grouped conv (B*C groups).
+        This replaces B separate kernel launches with 1 large launch.
         """
         B, C, H, W = x.shape
+        K = self.kernel_size
         
-        # Generate dynamic weights from style
-        weights = self.hypernet(style_emb)  # [B, C*K*K]
-        weights = weights.view(B, C, 1, self.kernel_size, self.kernel_size)
+        # Generate dynamic weights: [B, C*K*K] -> [B*C, 1, K, K]
+        weights = self.hypernet(style_emb)
+        weights = weights.view(B * C, 1, K, K)
         
-        # Apply depthwise conv for each sample in batch
-        # Note: F.conv2d doesn't support batched weights directly
-        # We process each sample separately (batched implementation for efficiency)
-        outputs = []
-        for i in range(B):
-            w = weights[i]  # [C, 1, K, K]
-            out = F.conv2d(x[i:i+1], w, padding=self.padding, groups=C)
-            outputs.append(out)
+        # Reshape input: [B, C, H, W] -> [1, B*C, H, W]
+        # This is a zero-copy stride operation
+        x_reshaped = x.view(1, B * C, H, W)
         
-        return torch.cat(outputs, dim=0)
+        # Single grouped convolution: groups=B*C
+        # Each of the B*C input channels gets its own 1x1xKxK kernel
+        out = F.conv2d(x_reshaped, weights, padding=self.padding, groups=B * C)
+        
+        # Reshape back: [1, B*C, H, W] -> [B, C, H, W]
+        return out.view(B, C, H, W)
 
 
 class ResidualBlock(nn.Module):

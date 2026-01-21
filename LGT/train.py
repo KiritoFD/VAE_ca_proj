@@ -235,6 +235,8 @@ class LGTTrainer:
         Uses simple Euler integration for efficiency.
         dx/dt = v(x, t, style)
         
+        Optimization: Uses gradient checkpointing to reduce memory from O(steps) to O(1).
+        
         Args:
             x_t: [B, 4, H, W] starting state at time t_start
             t_start: [B] starting times
@@ -244,20 +246,32 @@ class LGTTrainer:
         Returns:
             x_1: [B, 4, H, W] terminal state at t=1
         """
+        from torch.utils.checkpoint import checkpoint
+        
         x = x_t.clone()
         t = t_start.clone()
         
         # Number of integration steps
         num_steps = self.ode_steps
+        use_checkpoint = self.config['training'].get('use_gradient_checkpointing', True)
+        
+        # Define single-step function for checkpointing
+        def step_func(x_in, t_in, style_id_in):
+            with torch.amp.autocast('cuda', enabled=self.use_amp, dtype=torch.bfloat16):
+                return self.model(x_in, t_in, style_id_in, use_avg_style=use_avg_style)
         
         for _ in range(num_steps):
             # Compute remaining time
             t_remaining = 1.0 - t
             dt = t_remaining / num_steps
             
-            # Velocity at current state
-            with torch.cuda.amp.autocast(enabled=self.use_amp, dtype=torch.bfloat16):
-                v = self.model(x, t, style_id, use_avg_style=use_avg_style)
+            # Velocity at current state (with or without checkpointing)
+            if use_checkpoint and self.model.training:
+                # Gradient checkpointing: trade compute for memory
+                # Reduces activation memory from O(steps) to O(1)
+                v = checkpoint(step_func, x, t, style_id, use_reentrant=False)
+            else:
+                v = step_func(x, t, style_id)
             
             # Euler step
             x = x + v * dt.view(-1, 1, 1, 1)
@@ -318,7 +332,7 @@ class LGTTrainer:
         # Optional: Add velocity regularization
         if self.use_vel_reg:
             # Compute velocity at intermediate point for regularization
-            with torch.cuda.amp.autocast(enabled=self.use_amp, dtype=torch.bfloat16):
+            with torch.amp.autocast('cuda', enabled=self.use_amp, dtype=torch.bfloat16):
                 v_mid = self.model(x_t, t, style_id_tgt, use_avg_style=False)
             vel_reg_loss = self.vel_reg(v_mid)
             loss_dict['total'] = loss_dict['total'] + vel_reg_loss
@@ -354,7 +368,7 @@ class LGTTrainer:
             self.optimizer.zero_grad(set_to_none=True)
             
             # Forward pass with mixed precision
-            with torch.cuda.amp.autocast(enabled=self.use_amp, dtype=torch.bfloat16):
+            with torch.amp.autocast('cuda', enabled=self.use_amp, dtype=torch.bfloat16):
                 loss_dict = self.compute_energy_loss(
                     latent, style_id, style_id_tgt, epoch
                 )
@@ -667,7 +681,7 @@ class LGTTrainer:
             t_forward = 1.0 - step_idx * dt
             t = torch.full((B,), t_forward, device=device)
             
-            with torch.cuda.amp.autocast(enabled=self.use_amp, dtype=torch.bfloat16):
+            with torch.amp.autocast('cuda', enabled=self.use_amp, dtype=torch.bfloat16):
                 v = self.model(x, t, style_id, use_avg_style=False)
             
             x = x - v * dt
@@ -700,7 +714,7 @@ class LGTTrainer:
             t_current = step_idx * dt
             t = torch.full((B,), t_current, device=device)
             
-            with torch.cuda.amp.autocast(enabled=self.use_amp, dtype=torch.bfloat16):
+            with torch.amp.autocast('cuda', enabled=self.use_amp, dtype=torch.bfloat16):
                 v = self.model(x, t, style_id, use_avg_style=False)
             
             # Deterministic step
