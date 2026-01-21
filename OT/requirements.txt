@@ -1,0 +1,21 @@
+# PyTorch (安装适合您CUDA版本的版本)
+# 例如: pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+torch>=2.0.0
+torchvision>=0.15.0
+
+# Diffusers (用于VAE)
+diffusers>=0.21.0
+transformers>=4.30.0
+accelerate>=0.20.0
+
+# 图像处理
+pillow>=9.0.0
+
+# 数据处理
+numpy>=1.21.0
+
+# 进度条
+tqdm>=4.65.0
+
+# 可选: 更快的数据加载
+# nvidia-dali-cuda110  # 根据CUDA版本选择
