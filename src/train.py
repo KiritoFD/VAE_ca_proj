@@ -116,6 +116,10 @@ class LSFMTrainer:
         # 🟢 读取可配置的损失权重
         self.transfer_weight = self.cfg['training'].get('transfer_loss_weight', 1.0)
 
+        # 🟢 读取标签丢弃概率（CFG 训练必需）
+        self.label_drop_prob = self.cfg['training'].get('label_drop_prob', 0.15)
+        self.null_class_id = self.cfg['model']['num_styles']  # N+1 是空类别
+        
         self.logger.info("="*50)
         self.logger.info(f"🚀 Initializing Experiment")
         self.logger.info(f"📂 Save Dir  : {self.ckpt_dir}")
@@ -123,6 +127,7 @@ class LSFMTrainer:
         self.logger.info(f"Batch Size  : {self.cfg['training']['batch_size']}")
         self.logger.info(f"Resolution  : 256x256")
         self.logger.info(f"⚡ LR: {self.cfg['training']['learning_rate']} | Weight: {self.transfer_weight}")
+        self.logger.info(f"🎲 Label Drop Prob: {self.label_drop_prob} (Null ID: {self.null_class_id})")
         self.logger.info("="*50)
 
         # 2. 加载 VAE (FT-MSE)
@@ -167,6 +172,70 @@ class LSFMTrainer:
         return sd
 
     # -----------------------------------------------------------------------------
+    # 🟢 新增：检查点恢复逻辑
+    # -----------------------------------------------------------------------------
+    def find_latest_checkpoint(self, stage="stage1"):
+        """查找最新的训练检查点"""
+        ckpt_pattern = f"{stage}_epoch*.pt"
+        ckpts = list(self.ckpt_dir.glob(ckpt_pattern))
+        if not ckpts:
+            return None, 0
+        
+        # 提取 epoch 数字并排序
+        import re
+        ckpt_epochs = []
+        for ckpt in ckpts:
+            match = re.search(r'epoch(\d+)', ckpt.name)
+            if match:
+                ckpt_epochs.append((int(match.group(1)), ckpt))
+        
+        if not ckpt_epochs:
+            return None, 0
+        
+        # 返回最新的检查点
+        latest_epoch, latest_path = max(ckpt_epochs, key=lambda x: x[0])
+        return latest_path, latest_epoch
+
+    def load_training_state(self, checkpoint_path, model, optimizer, scheduler):
+        """加载完整的训练状态"""
+        self.logger.info(f"📂 Loading checkpoint: {checkpoint_path}")
+        checkpoint = torch.load(checkpoint_path, map_location=self.device)
+        
+        # 🟢 新增：向后兼容旧格式检查点
+        # 旧格式：直接是 state_dict (没有包裹在字典中)
+        # 新格式：{'model_state_dict': ..., 'optimizer_state_dict': ..., ...}
+        if 'model_state_dict' not in checkpoint:
+            # 这是旧格式，直接当作 state_dict 加载
+            self.logger.info("⚠️  Old checkpoint format detected (no training state)")
+            self.safe_load(model, checkpoint)
+            return 0, float('inf')  # 从头开始训练
+        
+        # 加载模型权重
+        self.safe_load(model, checkpoint['model_state_dict'])
+        
+        # 加载优化器状态
+        if 'optimizer_state_dict' in checkpoint:
+            try:
+                optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+                self.logger.info("✅ Optimizer state restored")
+            except Exception as e:
+                self.logger.info(f"⚠️  Failed to load optimizer state: {e}")
+        
+        # 加载调度器状态
+        if 'scheduler_state_dict' in checkpoint:
+            try:
+                scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
+                self.logger.info("✅ Scheduler state restored")
+            except Exception as e:
+                self.logger.info(f"⚠️  Failed to load scheduler state: {e}")
+        
+        start_epoch = checkpoint.get('epoch', 0)
+        best_loss = checkpoint.get('best_loss', float('inf'))
+        
+        self.logger.info(f"✅ Resumed from epoch {start_epoch}, best_loss={best_loss:.6f}")
+        return start_epoch, best_loss
+
+    # -----------------------------------------------------------------------------
     # Stage 1: Latent Structure Flow Matching
     # -----------------------------------------------------------------------------
     def construct_target_lsfm(self, x_c, x_s):
@@ -197,12 +266,11 @@ class LSFMTrainer:
         return target
 
     def run_stage1(self):
-        if (self.ckpt_dir / "stage1_final.pt").exists():
-            self.logger.info("[Stage 1] Checkpoint found. Skipping training.")
-            return
+        # 🟢 修改：检查 final 而非跳过训练
+        final_ckpt = self.ckpt_dir / "stage1_final.pt"
         
         self.logger.info("="*50)
-        self.logger.info(">>> Starting Stage 1: LSFM Training (with Velocity Amplification)")
+        self.logger.info(">>> Starting Stage 1: LSFM Training")
         self.logger.info("="*50)
         
         model = self.get_model()
@@ -218,7 +286,24 @@ class LSFMTrainer:
             eta_min=1e-6
         )
 
-        for epoch in range(1, total_epochs + 1):
+        # 🟢 新增：断点续训逻辑
+        start_epoch = 0
+        best_loss = float('inf')
+        
+        # 优先检查是否已完成训练
+        if final_ckpt.exists():
+            self.logger.info("[Stage 1] ✅ Final checkpoint exists. Skipping training.")
+            return
+        
+        # 查找最新的中间检查点
+        latest_ckpt, latest_epoch = self.find_latest_checkpoint("stage1")
+        if latest_ckpt:
+            start_epoch, best_loss = self.load_training_state(
+                latest_ckpt, model, opt, scheduler
+            )
+
+        # 🟢 修改：从 start_epoch + 1 开始训练
+        for epoch in range(start_epoch + 1, total_epochs + 1):
             model.train()
             epoch_loss = 0.0
             start_time = time.time()
@@ -231,8 +316,17 @@ class LSFMTrainer:
                 t_id, s_id = t_id.to(self.device, non_blocking=True), s_id.to(self.device, non_blocking=True)
 
                 with torch.no_grad():
+                    # 🟢 Identity 采样
                     if random.random() < IDENTITY_PROB:
                         x_s, t_id = x_c.clone(), s_id.clone()
+                    
+                    # 🟢 关键：Label Dropping (CFG 训练)
+                    # 以一定概率将 t_id 替换为 null_class_id
+                    drop_mask = torch.rand(t_id.shape[0], device=self.device) < self.label_drop_prob
+                    t_id_dropped = torch.where(drop_mask, 
+                                               torch.full_like(t_id, self.null_class_id), 
+                                               t_id)
+                    
                     target = self.construct_target_lsfm(x_c, x_s).to(memory_format=torch.channels_last)
                     is_id = (s_id == t_id).view(-1, 1, 1, 1).float()
                     target = is_id * x_c + (1 - is_id) * target
@@ -243,23 +337,38 @@ class LSFMTrainer:
                     
                     t = torch.rand(x_c.size(0), device=self.device)
                     x_t = (1 - t.view(-1,1,1,1)) * x_c + t.view(-1,1,1,1) * target
-                    v_pred = model(x_t, x_c, t, t_id)
                     
+                    # 🟢 使用 dropped 的 label 训练
+                    v_pred = model(x_t, x_c, t, t_id_dropped)
+                    
+                    # 🟢 基础 MSE
                     loss_mse_raw = F.mse_loss(v_pred, v_gt, reduction='none')
                     loss_mse_per_sample = loss_mse_raw.mean(dim=[1, 2, 3])
                     
-                    loss_spec = compute_spectral_loss(v_pred, v_gt)
-                    
-                    v_pred_flat = v_pred.flatten(1)
-                    v_gt_flat = v_gt.flatten(1)
-                    cos_sim = F.cosine_similarity(v_pred_flat, v_gt_flat, dim=1, eps=1e-6)
-                    loss_dir = (1 - cos_sim).mean()
-                    
+                    # 🟢 辅助损失仅用于非空类别的转换任务
                     is_transfer = (s_id != t_id).float()
-                    sample_weights = 1.0 + is_transfer * (self.transfer_weight - 1.0)
+                    is_not_null = (t_id_dropped != self.null_class_id).float()
+                    apply_aux_loss = (is_transfer * is_not_null).bool()
                     
+                    if apply_aux_loss.any():
+                        loss_spec = compute_spectral_loss(
+                            v_pred[apply_aux_loss], 
+                            v_gt[apply_aux_loss]
+                        )
+                        
+                        v_pred_flat = v_pred[apply_aux_loss].flatten(1)
+                        v_gt_flat = v_gt[apply_aux_loss].flatten(1)
+                        cos_sim = F.cosine_similarity(v_pred_flat, v_gt_flat, dim=1, eps=1e-6)
+                        loss_dir = (1 - cos_sim).mean()
+                    else:
+                        loss_spec = torch.tensor(0.0, device=self.device)
+                        loss_dir = torch.tensor(0.0, device=self.device)
+                    
+                    # 🟢 加权 MSE
+                    sample_weights = 1.0 + is_transfer * (self.transfer_weight - 1.0)
                     weighted_mse = (loss_mse_per_sample * sample_weights).mean()
                     
+                    # 🟢 总损失
                     loss = weighted_mse + 0.1 * loss_spec + 0.1 * loss_dir
 
                 loss.backward()
@@ -272,17 +381,30 @@ class LSFMTrainer:
             avg_loss = epoch_loss / len(dl)
             elapsed = time.time() - start_time
             
+            # 🟢 更新 best_loss
+            if avg_loss < best_loss:
+                best_loss = avg_loss
+            
             current_lr = scheduler.get_last_lr()[0]
-            self.logger.info(f"[S1] Epoch {epoch:03d} | Avg Loss: {avg_loss:.6f} | LR: {current_lr:.2e} | Time: {elapsed:.1f}s")
+            self.logger.info(f"[S1] Epoch {epoch:03d} | Avg Loss: {avg_loss:.6f} | Best: {best_loss:.6f} | LR: {current_lr:.2e} | Time: {elapsed:.1f}s")
             
             scheduler.step()
 
+            # 🟢 修改：保存包含训练状态的检查点
             if epoch % EVAL_STEP == 0:
-                self.save_ckpt(model, epoch, "stage1")
+                self.save_ckpt(model, opt, scheduler, epoch, avg_loss, best_loss, "stage1")
                 self.do_inference(model, epoch, "stage1")
         
-        self.logger.info("[Stage 1] Training Completed.")
-        torch.save(self.clean_sd(model.state_dict()), self.ckpt_dir / "stage1_final.pt")
+        # 🟢 最后保存 final 检查点
+        self.logger.info("[Stage 1] Training Completed. Saving final checkpoint...")
+        torch.save({
+            'epoch': total_epochs,
+            'model_state_dict': self.clean_sd(model.state_dict()),
+            'optimizer_state_dict': opt.state_dict(),
+            'scheduler_state_dict': scheduler.state_dict(),
+            'best_loss': best_loss,
+            'config': self.cfg
+        }, final_ckpt)
 
     # -----------------------------------------------------------------------------
     # Intermediate: Reflow Data Generation
@@ -297,7 +419,14 @@ class LSFMTrainer:
         self.logger.info("="*50)
         
         model = self.get_model()
-        self.safe_load(model, torch.load(self.ckpt_dir / "stage1_final.pt"))
+        
+        # 🟢 修复：加载时处理新旧格式
+        stage1_ckpt = torch.load(self.ckpt_dir / "stage1_final.pt", map_location=self.device)
+        if 'model_state_dict' in stage1_ckpt:
+            self.safe_load(model, stage1_ckpt['model_state_dict'])
+        else:
+            self.safe_load(model, stage1_ckpt)
+        
         model.eval()
         
         self.reflow_dir.mkdir(parents=True, exist_ok=True)
@@ -328,14 +457,22 @@ class LSFMTrainer:
     # Stage 2: Reflow (Distillation)
     # -----------------------------------------------------------------------------
     def run_stage2(self):
+        # 🟢 同样的断点续训逻辑
+        final_ckpt = self.ckpt_dir / "stage2_final.pt"
+        
         self.logger.info("="*50)
         self.logger.info(">>> Starting Stage 2: Distillation (Reflow)")
         self.logger.info("="*50)
         
         model = self.get_model()
-        self.safe_load(model, torch.load(self.ckpt_dir / "stage1_final.pt"), strict=False)
         
-        # 内存加载 Dataset
+        # 🟢 修复：加载 stage1_final 时处理新旧格式
+        stage1_ckpt = torch.load(self.ckpt_dir / "stage1_final.pt", map_location=self.device)
+        if 'model_state_dict' in stage1_ckpt:
+            self.safe_load(model, stage1_ckpt['model_state_dict'], strict=False)
+        else:
+            self.safe_load(model, stage1_ckpt, strict=False)
+        
         ds = Stage2Dataset(self.reflow_dir)
         dl = DataLoader(ds, batch_size=self.cfg['training']['batch_size'], 
                         shuffle=True, num_workers=8, pin_memory=True, 
@@ -344,14 +481,27 @@ class LSFMTrainer:
         opt = torch.optim.AdamW(model.parameters(), lr=self.cfg['training']['learning_rate'])
         total_epochs = self.cfg['training']['stage2_epochs']
         
-        # 🟢 Stage 2 也加上调度器 (继续优化路径)
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
             opt, 
             T_max=total_epochs, 
             eta_min=1e-6
         )
         
-        for epoch in range(1, total_epochs + 1):
+        # 🟢 断点续训
+        start_epoch = 0
+        best_loss = float('inf')
+        
+        if final_ckpt.exists():
+            self.logger.info("[Stage 2] ✅ Final checkpoint exists. Skipping training.")
+            return
+        
+        latest_ckpt, latest_epoch = self.find_latest_checkpoint("stage2")
+        if latest_ckpt:
+            start_epoch, best_loss = self.load_training_state(
+                latest_ckpt, model, opt, scheduler
+            )
+        
+        for epoch in range(start_epoch + 1, total_epochs + 1):
             model.train()
             epoch_loss = 0.0
             start_time = time.time()
@@ -379,14 +529,27 @@ class LSFMTrainer:
             avg_loss = epoch_loss / len(dl)
             elapsed = time.time() - start_time
             
+            if avg_loss < best_loss:
+                best_loss = avg_loss
+            
             current_lr = scheduler.get_last_lr()[0]
-            self.logger.info(f"[S2] Epoch {epoch:03d} | Avg Loss: {avg_loss:.6f} | LR: {current_lr:.2e} | Time: {elapsed:.1f}s")
+            self.logger.info(f"[S2] Epoch {epoch:03d} | Avg Loss: {avg_loss:.6f} | Best: {best_loss:.6f} | LR: {current_lr:.2e} | Time: {elapsed:.1f}s")
             
             scheduler.step()
             
             if epoch % EVAL_STEP == 0:
-                self.save_ckpt(model, epoch, "stage2")
+                self.save_ckpt(model, opt, scheduler, epoch, avg_loss, best_loss, "stage2")
                 self.do_inference(model, epoch, "stage2", steps_override=4)
+        
+        # 保存 final
+        torch.save({
+            'epoch': total_epochs,
+            'model_state_dict': self.clean_sd(model.state_dict()),
+            'optimizer_state_dict': opt.state_dict(),
+            'scheduler_state_dict': scheduler.state_dict(),
+            'best_loss': best_loss,
+            'config': self.cfg
+        }, final_ckpt)
 
     # -----------------------------------------------------------------------------
     # Inference / Validation
@@ -414,6 +577,10 @@ class LSFMTrainer:
         save_root.mkdir(parents=True, exist_ok=True)
         
         steps = steps_override if steps_override else inf_cfg.get('num_inference_steps', 5)
+        cfg_scale = inf_cfg.get('cfg_scale', 2.0)
+        use_cfg = inf_cfg.get('use_cfg', True)
+        latent_clamp = inf_cfg.get('latent_clamp', 3.0)
+        
         dt = 1.0 / steps
 
         # 遍历子目录
@@ -443,11 +610,30 @@ class LSFMTrainer:
                         z_t = z_c.clone()
                         t_vec = torch.tensor([tid], device=self.device)
                         
+                        # 🟢 CFG 推理
                         for k in range(steps):
-                            t = torch.ones(1, device=self.device) * (k * dt)
+                            t_step = torch.ones(1, device=self.device) * (k * dt)
+                            
                             with torch.amp.autocast(device_type="cuda", dtype=torch.bfloat16):
-                                v = model(z_t, z_c, t, t_vec)
+                                if use_cfg:
+                                    # 条件预测
+                                    v_cond = model(z_t, z_c, t_step, t_vec)
+                                    
+                                    # 无条件预测
+                                    null_vec = torch.tensor([self.null_class_id], device=self.device)
+                                    v_uncond = model(z_t, z_c, t_step, null_vec)
+                                    
+                                    # 🟢 CFG 公式: v = v_uncond + scale * (v_cond - v_uncond)
+                                    v = v_uncond + cfg_scale * (v_cond - v_uncond)
+                                else:
+                                    v = model(z_t, z_c, t_step, t_vec)
+                            
+                            # 欧拉积分
                             z_t = z_t + v.float() * dt
+                            
+                            # 🟢 数值裁剪（防止爆炸）
+                            if latent_clamp > 0:
+                                z_t = z_t.clamp(-latent_clamp, latent_clamp)
                         
                         # 🟢 关键：除以缩放因子，保证解码清晰度
                         res_pixel = self.vae.decode(z_t.float() / 0.18215).sample
@@ -459,12 +645,27 @@ class LSFMTrainer:
         self.logger.info(f"[Inference] Successfully finished. Output: {save_root}")
         model.train()
 
-    def save_ckpt(self, model, epoch, stage):
-        sd = self.clean_sd(model.state_dict())
+    def save_ckpt(self, model, optimizer, scheduler, epoch, loss, best_loss, stage):
+        """保存包含完整训练状态的检查点"""
+        checkpoint = {
+            'epoch': epoch,
+            'model_state_dict': self.clean_sd(model.state_dict()),
+            'optimizer_state_dict': optimizer.state_dict(),
+            'scheduler_state_dict': scheduler.state_dict(),
+            'loss': loss,
+            'best_loss': best_loss,
+            'config': self.cfg
+        }
+        
         path = self.ckpt_dir / f"{stage}_epoch{epoch}.pt"
-        torch.save(sd, path)
+        torch.save(checkpoint, path)
+        
+        # 🟢 保留最近 3 个检查点
         ckpts = sorted(list(self.ckpt_dir.glob(f"{stage}_epoch*.pt")), key=os.path.getmtime)
-        if len(ckpts) > 3: [os.remove(p) for p in ckpts[:-3]]
+        if len(ckpts) > 3: 
+            for old_ckpt in ckpts[:-3]:
+                os.remove(old_ckpt)
+                self.logger.info(f"🗑️  Removed old checkpoint: {old_ckpt.name}")
 
     def save_img(self, tensor, path):
         img = (tensor.cpu().permute(0,2,3,1).numpy()[0] * 0.5 + 0.5).clip(0, 1)

@@ -1,0 +1,44 @@
+🚀 Starting Grid Search: 7 Experiments Queued.
+📂 Root Output: /mnt/g/GitHub/VAE_ca_proj/src/AutoSearch_Results
+
+############################################################
+▶️  [1/7] Running Experiment: Exp1_Baseline
+ℹ️  Description: 【基准线】各项参数中庸，用于对比其他实验的提升幅度。
+############################################################
+[11:43:29][INFO] ==================================================
+[11:43:29][INFO] 🚀 Initializing Experiment
+[11:43:29][INFO] 📂 Save Dir  : AutoSearch_Results/Exp1_Baseline/checkpoints
+[11:43:29][INFO] Device      : cuda
+[11:43:29][INFO] Batch Size  : 64
+[11:43:29][INFO] Resolution  : 256x256
+[11:43:29][INFO] ⚡ LR: 0.0001 | Weight: 5.0
+[11:43:29][INFO] 🎲 Label Drop Prob: 0.15 (Null ID: 2)
+[11:43:29][INFO] ==================================================
+[11:43:29][INFO] [Init] Loading VAE (stabilityai/sd-vae-ft-mse)...
+[11:43:31][INFO] [Init] Loading Training Dataset...
+🔍 [Dataset] 扫描 Latent 数据: /mnt/f/monet2photo/monet2photo/train_latents
+   📂 类别 0 (trainA): 1072 个文件
+   📂 类别 1 (trainB): 6287 个文件
+[11:43:31][INFO] [Init] Dataset Ready. Total Latents: 7359
+[11:43:31][INFO] ==================================================
+[11:43:31][INFO] >>> Starting Stage 1: LSFM Training
+[11:43:31][INFO] ==================================================
+[11:43:31][INFO] [Model] Compiling network with torch.compile (max-autotune)...
+[11:43:32][INFO] [Stage 1] ✅ Final checkpoint exists. Skipping training.
+🎨 Running Final Inference...
+[11:43:32][INFO] [Model] Compiling network with torch.compile (max-autotune)...
+[11:43:33][INFO] [Inference] Starting Epoch final | Steps: 4
+[11:43:43][INFO] [Inference] Error processing 00010.jpg: Error: accessing tensor output of CUDAGraphs that has been overwritten by a subsequent run. Stack trace: File "/mnt/g/GitHub/VAE_ca_proj/src/SAFlow.py", line 242, in forward
+    v = self.final(x). To prevent overwriting, clone the tensor outside of torch.compile() or call torch.compiler.cudagraph_mark_step_begin() before each model invocation.
+[11:43:45][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp1_Baseline/checkpoints/inf/stage1_final/epfinal
+✅ Experiment [Exp1_Baseline] Training Completed in 0.3 mins.
+
+============================================================
+📊 Running Evaluations for: Exp1_Baseline
+📂 Results will be saved to: AutoSearch_Results/Exp1_Baseline/checkpoints/evaluation
+============================================================
+
+🔹 [1/3] Running LPIPS Evaluation...
+Setting up [LPIPS] perceptual loss: trunk [alex], v[0.1], spatial [off]
+Loading model from: /home/xy/miniconda3/envs/cu128/lib/python3.12/site-packages/lpips/weights/v0.1/alex.pth
+Total images found: 872

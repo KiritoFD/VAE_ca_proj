@@ -1,0 +1,16 @@
+[10:27:59][INFO] ==================================================
+[10:27:59][INFO] 🚀 Initializing Experiment
+[10:27:59][INFO] 📂 Save Dir  : checkpoints-256_AdaGN
+[10:27:59][INFO] Device      : cuda
+[10:27:59][INFO] Batch Size  : 64
+[10:27:59][INFO] Resolution  : 256x256
+[10:27:59][INFO] ⚡ LR: 0.0001 | Weight: 10.0
+[10:27:59][INFO] 🎲 Label Drop Prob: 0.15 (Null ID: 2)
+[10:27:59][INFO] ==================================================
+[10:27:59][INFO] [Init] Loading VAE (stabilityai/sd-vae-ft-mse)...
+[10:28:02][INFO] [Init] Loading Training Dataset...
+[10:28:02][INFO] [Init] Dataset Ready. Total Latents: 7359
+[10:28:02][INFO] ==================================================
+[10:28:02][INFO] >>> Starting Stage 1: LSFM Training
+[10:28:02][INFO] ==================================================
+[10:28:02][INFO] [Model] Compiling network with torch.compile (max-autotune)...

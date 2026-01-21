@@ -1,0 +1,6 @@
+{
+    "experiment_name": "Exp1_Baseline",
+    "checkpoint_path": "AutoSearch_Results/Exp1_Baseline/checkpoints/stage1_final.pt",
+    "evaluation_time": "2026-01-21 09:19:19",
+    "metrics": {}
+}

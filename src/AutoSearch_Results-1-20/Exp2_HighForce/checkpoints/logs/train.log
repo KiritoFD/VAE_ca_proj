@@ -1,0 +1,496 @@
+[00:47:11][INFO] ==================================================
+[00:47:11][INFO] 🚀 Initializing Experiment
+[00:47:11][INFO] 📂 Save Dir  : AutoSearch_Results/Exp2_HighForce/checkpoints
+[00:47:11][INFO] Device      : cuda
+[00:47:11][INFO] Batch Size  : 64
+[00:47:11][INFO] Resolution  : 256x256
+[00:47:11][INFO] ⚡ LR: 8e-05 | Weight: 20.0
+[00:47:11][INFO] ==================================================
+[00:47:11][INFO] [Init] Loading VAE (stabilityai/sd-vae-ft-mse)...
+[00:47:13][INFO] [Init] Loading Training Dataset...
+[00:47:13][INFO] [Init] Dataset Ready. Total Latents: 7359
+[00:47:13][INFO] ==================================================
+[00:47:13][INFO] >>> Starting Stage 1: LSFM Training
+[00:47:13][INFO] ==================================================
+[00:47:13][INFO] [Model] Compiling network with torch.compile (max-autotune)...
+[00:47:35][INFO] [S1] Epoch 001 | Avg Loss: 3.095871 | Best: 3.095871 | LR: 8.00e-05 | Time: 22.5s
+[00:47:36][INFO] [Inference] Starting Epoch 1 | Steps: 4
+[00:47:37][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep1
+[00:47:59][INFO] [S1] Epoch 002 | Avg Loss: 2.087720 | Best: 2.087720 | LR: 8.00e-05 | Time: 22.3s
+[00:48:00][INFO] [Inference] Starting Epoch 2 | Steps: 4
+[00:48:01][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep2
+[00:48:25][INFO] [S1] Epoch 003 | Avg Loss: 1.630692 | Best: 1.630692 | LR: 7.99e-05 | Time: 24.0s
+[00:48:26][INFO] [Inference] Starting Epoch 3 | Steps: 4
+[00:48:26][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep3
+[00:48:49][INFO] [S1] Epoch 004 | Avg Loss: 1.477317 | Best: 1.477317 | LR: 7.99e-05 | Time: 22.3s
+[00:48:49][INFO] 🗑️  Removed old checkpoint: stage1_epoch1.pt
+[00:48:50][INFO] [Inference] Starting Epoch 4 | Steps: 4
+[00:48:50][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep4
+[00:49:13][INFO] [S1] Epoch 005 | Avg Loss: 1.334704 | Best: 1.334704 | LR: 7.98e-05 | Time: 22.3s
+[00:49:13][INFO] 🗑️  Removed old checkpoint: stage1_epoch2.pt
+[00:49:13][INFO] [Inference] Starting Epoch 5 | Steps: 4
+[00:49:14][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep5
+[00:49:36][INFO] [S1] Epoch 006 | Avg Loss: 1.285351 | Best: 1.285351 | LR: 7.97e-05 | Time: 22.3s
+[00:49:37][INFO] 🗑️  Removed old checkpoint: stage1_epoch3.pt
+[00:49:37][INFO] [Inference] Starting Epoch 6 | Steps: 4
+[00:49:38][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep6
+[00:50:01][INFO] [S1] Epoch 007 | Avg Loss: 1.130007 | Best: 1.130007 | LR: 7.95e-05 | Time: 22.6s
+[00:50:02][INFO] 🗑️  Removed old checkpoint: stage1_epoch4.pt
+[00:50:02][INFO] [Inference] Starting Epoch 7 | Steps: 4
+[00:50:02][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep7
+[00:50:26][INFO] [S1] Epoch 008 | Avg Loss: 1.090174 | Best: 1.090174 | LR: 7.93e-05 | Time: 24.1s
+[00:50:27][INFO] 🗑️  Removed old checkpoint: stage1_epoch5.pt
+[00:50:27][INFO] [Inference] Starting Epoch 8 | Steps: 4
+[00:50:28][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep8
+[00:50:50][INFO] [S1] Epoch 009 | Avg Loss: 0.968628 | Best: 0.968628 | LR: 7.91e-05 | Time: 22.3s
+[00:50:51][INFO] 🗑️  Removed old checkpoint: stage1_epoch6.pt
+[00:50:51][INFO] [Inference] Starting Epoch 9 | Steps: 4
+[00:50:52][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep9
+[00:51:14][INFO] [S1] Epoch 010 | Avg Loss: 0.820644 | Best: 0.820644 | LR: 7.89e-05 | Time: 22.3s
+[00:51:15][INFO] 🗑️  Removed old checkpoint: stage1_epoch7.pt
+[00:51:15][INFO] [Inference] Starting Epoch 10 | Steps: 4
+[00:51:16][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep10
+[00:51:38][INFO] [S1] Epoch 011 | Avg Loss: 0.766701 | Best: 0.766701 | LR: 7.87e-05 | Time: 22.3s
+[00:51:39][INFO] 🗑️  Removed old checkpoint: stage1_epoch8.pt
+[00:51:39][INFO] [Inference] Starting Epoch 11 | Steps: 4
+[00:51:40][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep11
+[00:52:02][INFO] [S1] Epoch 012 | Avg Loss: 0.640597 | Best: 0.640597 | LR: 7.84e-05 | Time: 22.2s
+[00:52:03][INFO] 🗑️  Removed old checkpoint: stage1_epoch9.pt
+[00:52:03][INFO] [Inference] Starting Epoch 12 | Steps: 4
+[00:52:03][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep12
+[00:52:27][INFO] [S1] Epoch 013 | Avg Loss: 0.655054 | Best: 0.640597 | LR: 7.81e-05 | Time: 24.1s
+[00:52:28][INFO] 🗑️  Removed old checkpoint: stage1_epoch10.pt
+[00:52:28][INFO] [Inference] Starting Epoch 13 | Steps: 4
+[00:52:29][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep13
+[00:52:51][INFO] [S1] Epoch 014 | Avg Loss: 0.565454 | Best: 0.565454 | LR: 7.77e-05 | Time: 22.3s
+[00:52:52][INFO] 🗑️  Removed old checkpoint: stage1_epoch11.pt
+[00:52:52][INFO] [Inference] Starting Epoch 14 | Steps: 4
+[00:52:53][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep14
+[00:53:15][INFO] [S1] Epoch 015 | Avg Loss: 0.504074 | Best: 0.504074 | LR: 7.74e-05 | Time: 22.3s
+[00:53:16][INFO] 🗑️  Removed old checkpoint: stage1_epoch12.pt
+[00:53:16][INFO] [Inference] Starting Epoch 15 | Steps: 4
+[00:53:17][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep15
+[00:53:39][INFO] [S1] Epoch 016 | Avg Loss: 0.458701 | Best: 0.458701 | LR: 7.70e-05 | Time: 22.3s
+[00:53:40][INFO] 🗑️  Removed old checkpoint: stage1_epoch13.pt
+[00:53:40][INFO] [Inference] Starting Epoch 16 | Steps: 4
+[00:53:41][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep16
+[00:54:05][INFO] [S1] Epoch 017 | Avg Loss: 0.425816 | Best: 0.425816 | LR: 7.66e-05 | Time: 24.1s
+[00:54:05][INFO] 🗑️  Removed old checkpoint: stage1_epoch14.pt
+[00:54:05][INFO] [Inference] Starting Epoch 17 | Steps: 4
+[00:54:04][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep17
+[00:54:28][INFO] [S1] Epoch 018 | Avg Loss: 0.398080 | Best: 0.398080 | LR: 7.62e-05 | Time: 24.1s
+[00:54:29][INFO] 🗑️  Removed old checkpoint: stage1_epoch15.pt
+[00:54:29][INFO] [Inference] Starting Epoch 18 | Steps: 4
+[00:54:30][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep18
+[00:54:52][INFO] [S1] Epoch 019 | Avg Loss: 0.385859 | Best: 0.385859 | LR: 7.57e-05 | Time: 22.4s
+[00:54:53][INFO] 🗑️  Removed old checkpoint: stage1_epoch16.pt
+[00:54:53][INFO] [Inference] Starting Epoch 19 | Steps: 4
+[00:54:54][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep19
+[00:55:16][INFO] [S1] Epoch 020 | Avg Loss: 0.422342 | Best: 0.385859 | LR: 7.52e-05 | Time: 22.3s
+[00:55:17][INFO] 🗑️  Removed old checkpoint: stage1_epoch17.pt
+[00:55:17][INFO] [Inference] Starting Epoch 20 | Steps: 4
+[00:55:18][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep20
+[00:55:43][INFO] [S1] Epoch 021 | Avg Loss: 0.414254 | Best: 0.385859 | LR: 7.47e-05 | Time: 25.3s
+[00:55:44][INFO] 🗑️  Removed old checkpoint: stage1_epoch18.pt
+[00:55:44][INFO] [Inference] Starting Epoch 21 | Steps: 4
+[00:55:45][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep21
+[00:56:20][INFO] [S1] Epoch 022 | Avg Loss: 0.392590 | Best: 0.385859 | LR: 7.42e-05 | Time: 34.7s
+[00:56:20][INFO] 🗑️  Removed old checkpoint: stage1_epoch19.pt
+[00:56:20][INFO] [Inference] Starting Epoch 22 | Steps: 4
+[00:56:22][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep22
+[00:56:56][INFO] [S1] Epoch 023 | Avg Loss: 0.347375 | Best: 0.347375 | LR: 7.36e-05 | Time: 34.8s
+[00:56:57][INFO] 🗑️  Removed old checkpoint: stage1_epoch20.pt
+[00:56:57][INFO] [Inference] Starting Epoch 23 | Steps: 4
+[00:56:58][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep23
+[00:57:33][INFO] [S1] Epoch 024 | Avg Loss: 0.343665 | Best: 0.343665 | LR: 7.31e-05 | Time: 34.8s
+[00:57:34][INFO] 🗑️  Removed old checkpoint: stage1_epoch21.pt
+[00:57:34][INFO] [Inference] Starting Epoch 24 | Steps: 4
+[00:57:35][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep24
+[00:58:10][INFO] [S1] Epoch 025 | Avg Loss: 0.338016 | Best: 0.338016 | LR: 7.25e-05 | Time: 34.8s
+[00:58:11][INFO] 🗑️  Removed old checkpoint: stage1_epoch22.pt
+[00:58:11][INFO] [Inference] Starting Epoch 25 | Steps: 4
+[00:58:10][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep25
+[00:58:45][INFO] [S1] Epoch 026 | Avg Loss: 0.330521 | Best: 0.330521 | LR: 7.18e-05 | Time: 34.8s
+[00:58:45][INFO] 🗑️  Removed old checkpoint: stage1_epoch23.pt
+[00:58:45][INFO] [Inference] Starting Epoch 26 | Steps: 4
+[00:58:47][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep26
+[00:59:21][INFO] [S1] Epoch 027 | Avg Loss: 0.338742 | Best: 0.330521 | LR: 7.12e-05 | Time: 34.8s
+[00:59:22][INFO] 🗑️  Removed old checkpoint: stage1_epoch24.pt
+[00:59:22][INFO] [Inference] Starting Epoch 27 | Steps: 4
+[00:59:23][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep27
+[00:59:58][INFO] [S1] Epoch 028 | Avg Loss: 0.350227 | Best: 0.330521 | LR: 7.05e-05 | Time: 34.6s
+[00:59:59][INFO] 🗑️  Removed old checkpoint: stage1_epoch25.pt
+[00:59:59][INFO] [Inference] Starting Epoch 28 | Steps: 4
+[01:00:00][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep28
+[01:00:34][INFO] [S1] Epoch 029 | Avg Loss: 0.334012 | Best: 0.330521 | LR: 6.99e-05 | Time: 34.6s
+[01:00:35][INFO] 🗑️  Removed old checkpoint: stage1_epoch26.pt
+[01:00:35][INFO] [Inference] Starting Epoch 29 | Steps: 4
+[01:00:36][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep29
+[01:01:11][INFO] [S1] Epoch 030 | Avg Loss: 0.310264 | Best: 0.310264 | LR: 6.92e-05 | Time: 34.8s
+[01:01:12][INFO] 🗑️  Removed old checkpoint: stage1_epoch27.pt
+[01:01:12][INFO] [Inference] Starting Epoch 30 | Steps: 4
+[01:01:13][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep30
+[01:01:46][INFO] [S1] Epoch 031 | Avg Loss: 0.336718 | Best: 0.310264 | LR: 6.84e-05 | Time: 32.9s
+[01:01:47][INFO] 🗑️  Removed old checkpoint: stage1_epoch28.pt
+[01:01:47][INFO] [Inference] Starting Epoch 31 | Steps: 4
+[01:01:48][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep31
+[01:02:22][INFO] [S1] Epoch 032 | Avg Loss: 0.308480 | Best: 0.308480 | LR: 6.77e-05 | Time: 34.8s
+[01:02:23][INFO] 🗑️  Removed old checkpoint: stage1_epoch29.pt
+[01:02:23][INFO] [Inference] Starting Epoch 32 | Steps: 4
+[01:02:24][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep32
+[01:02:59][INFO] [S1] Epoch 033 | Avg Loss: 0.322203 | Best: 0.308480 | LR: 6.69e-05 | Time: 34.6s
+[01:03:00][INFO] 🗑️  Removed old checkpoint: stage1_epoch30.pt
+[01:03:00][INFO] [Inference] Starting Epoch 33 | Steps: 4
+[01:03:01][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep33
+[01:03:35][INFO] [S1] Epoch 034 | Avg Loss: 0.301008 | Best: 0.301008 | LR: 6.62e-05 | Time: 34.7s
+[01:03:36][INFO] 🗑️  Removed old checkpoint: stage1_epoch31.pt
+[01:03:36][INFO] [Inference] Starting Epoch 34 | Steps: 4
+[01:03:37][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep34
+[01:04:12][INFO] [S1] Epoch 035 | Avg Loss: 0.300032 | Best: 0.300032 | LR: 6.54e-05 | Time: 34.8s
+[01:04:13][INFO] 🗑️  Removed old checkpoint: stage1_epoch32.pt
+[01:04:13][INFO] [Inference] Starting Epoch 35 | Steps: 4
+[01:04:14][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep35
+[01:04:49][INFO] [S1] Epoch 036 | Avg Loss: 0.311544 | Best: 0.300032 | LR: 6.45e-05 | Time: 34.7s
+[01:04:49][INFO] 🗑️  Removed old checkpoint: stage1_epoch33.pt
+[01:04:49][INFO] [Inference] Starting Epoch 36 | Steps: 4
+[01:04:49][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep36
+[01:05:23][INFO] [S1] Epoch 037 | Avg Loss: 0.285345 | Best: 0.285345 | LR: 6.37e-05 | Time: 34.8s
+[01:05:24][INFO] 🗑️  Removed old checkpoint: stage1_epoch34.pt
+[01:05:24][INFO] [Inference] Starting Epoch 37 | Steps: 4
+[01:05:25][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep37
+[01:06:00][INFO] [S1] Epoch 038 | Avg Loss: 0.306980 | Best: 0.285345 | LR: 6.29e-05 | Time: 34.8s
+[01:06:01][INFO] 🗑️  Removed old checkpoint: stage1_epoch35.pt
+[01:06:01][INFO] [Inference] Starting Epoch 38 | Steps: 4
+[01:06:02][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep38
+[01:06:37][INFO] [S1] Epoch 039 | Avg Loss: 0.279596 | Best: 0.279596 | LR: 6.20e-05 | Time: 34.6s
+[01:06:37][INFO] 🗑️  Removed old checkpoint: stage1_epoch36.pt
+[01:06:37][INFO] [Inference] Starting Epoch 39 | Steps: 4
+[01:06:38][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep39
+[01:07:13][INFO] [S1] Epoch 040 | Avg Loss: 0.291135 | Best: 0.279596 | LR: 6.11e-05 | Time: 34.8s
+[01:07:14][INFO] 🗑️  Removed old checkpoint: stage1_epoch37.pt
+[01:07:14][INFO] [Inference] Starting Epoch 40 | Steps: 4
+[01:07:15][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep40
+[01:07:50][INFO] [S1] Epoch 041 | Avg Loss: 0.305433 | Best: 0.279596 | LR: 6.02e-05 | Time: 34.7s
+[01:07:51][INFO] 🗑️  Removed old checkpoint: stage1_epoch38.pt
+[01:07:51][INFO] [Inference] Starting Epoch 41 | Steps: 4
+[01:07:52][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep41
+[01:08:25][INFO] [S1] Epoch 042 | Avg Loss: 0.268360 | Best: 0.268360 | LR: 5.93e-05 | Time: 32.8s
+[01:08:25][INFO] 🗑️  Removed old checkpoint: stage1_epoch39.pt
+[01:08:25][INFO] [Inference] Starting Epoch 42 | Steps: 4
+[01:08:26][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep42
+[01:09:01][INFO] [S1] Epoch 043 | Avg Loss: 0.287091 | Best: 0.268360 | LR: 5.84e-05 | Time: 34.8s
+[01:09:02][INFO] 🗑️  Removed old checkpoint: stage1_epoch40.pt
+[01:09:02][INFO] [Inference] Starting Epoch 43 | Steps: 4
+[01:09:03][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep43
+[01:09:38][INFO] [S1] Epoch 044 | Avg Loss: 0.276742 | Best: 0.268360 | LR: 5.75e-05 | Time: 34.8s
+[01:09:39][INFO] 🗑️  Removed old checkpoint: stage1_epoch41.pt
+[01:09:39][INFO] [Inference] Starting Epoch 44 | Steps: 4
+[01:09:40][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep44
+[01:10:14][INFO] [S1] Epoch 045 | Avg Loss: 0.309752 | Best: 0.268360 | LR: 5.66e-05 | Time: 34.8s
+[01:10:15][INFO] 🗑️  Removed old checkpoint: stage1_epoch42.pt
+[01:10:15][INFO] [Inference] Starting Epoch 45 | Steps: 4
+[01:10:16][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep45
+[01:10:51][INFO] [S1] Epoch 046 | Avg Loss: 0.244678 | Best: 0.244678 | LR: 5.56e-05 | Time: 34.7s
+[01:10:52][INFO] 🗑️  Removed old checkpoint: stage1_epoch43.pt
+[01:10:52][INFO] [Inference] Starting Epoch 46 | Steps: 4
+[01:10:53][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep46
+[01:11:28][INFO] [S1] Epoch 047 | Avg Loss: 0.261825 | Best: 0.244678 | LR: 5.47e-05 | Time: 34.8s
+[01:11:28][INFO] 🗑️  Removed old checkpoint: stage1_epoch44.pt
+[01:11:28][INFO] [Inference] Starting Epoch 47 | Steps: 4
+[01:11:28][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep47
+[01:12:02][INFO] [S1] Epoch 048 | Avg Loss: 0.259197 | Best: 0.244678 | LR: 5.37e-05 | Time: 34.7s
+[01:12:03][INFO] 🗑️  Removed old checkpoint: stage1_epoch45.pt
+[01:12:03][INFO] [Inference] Starting Epoch 48 | Steps: 4
+[01:12:04][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep48
+[01:12:39][INFO] [S1] Epoch 049 | Avg Loss: 0.243645 | Best: 0.243645 | LR: 5.27e-05 | Time: 34.8s
+[01:12:40][INFO] 🗑️  Removed old checkpoint: stage1_epoch46.pt
+[01:12:40][INFO] [Inference] Starting Epoch 49 | Steps: 4
+[01:12:41][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep49
+[01:13:15][INFO] [S1] Epoch 050 | Avg Loss: 0.273861 | Best: 0.243645 | LR: 5.17e-05 | Time: 34.6s
+[01:13:16][INFO] 🗑️  Removed old checkpoint: stage1_epoch47.pt
+[01:13:16][INFO] [Inference] Starting Epoch 50 | Steps: 4
+[01:13:17][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep50
+[01:13:52][INFO] [S1] Epoch 051 | Avg Loss: 0.276656 | Best: 0.243645 | LR: 5.07e-05 | Time: 34.6s
+[01:13:53][INFO] 🗑️  Removed old checkpoint: stage1_epoch48.pt
+[01:13:53][INFO] [Inference] Starting Epoch 51 | Steps: 4
+[01:13:54][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep51
+[01:14:28][INFO] [S1] Epoch 052 | Avg Loss: 0.274414 | Best: 0.243645 | LR: 4.97e-05 | Time: 34.6s
+[01:14:29][INFO] 🗑️  Removed old checkpoint: stage1_epoch49.pt
+[01:14:29][INFO] [Inference] Starting Epoch 52 | Steps: 4
+[01:14:30][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep52
+[01:15:03][INFO] [S1] Epoch 053 | Avg Loss: 0.223960 | Best: 0.223960 | LR: 4.87e-05 | Time: 33.0s
+[01:15:04][INFO] 🗑️  Removed old checkpoint: stage1_epoch50.pt
+[01:15:04][INFO] [Inference] Starting Epoch 53 | Steps: 4
+[01:15:05][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep53
+[01:15:40][INFO] [S1] Epoch 054 | Avg Loss: 0.247562 | Best: 0.223960 | LR: 4.77e-05 | Time: 34.8s
+[01:15:41][INFO] 🗑️  Removed old checkpoint: stage1_epoch51.pt
+[01:15:41][INFO] [Inference] Starting Epoch 54 | Steps: 4
+[01:15:42][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep54
+[01:16:16][INFO] [S1] Epoch 055 | Avg Loss: 0.244613 | Best: 0.223960 | LR: 4.67e-05 | Time: 34.7s
+[01:16:17][INFO] 🗑️  Removed old checkpoint: stage1_epoch52.pt
+[01:16:17][INFO] [Inference] Starting Epoch 55 | Steps: 4
+[01:16:18][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep55
+[01:16:53][INFO] [S1] Epoch 056 | Avg Loss: 0.226911 | Best: 0.223960 | LR: 4.57e-05 | Time: 34.9s
+[01:16:54][INFO] 🗑️  Removed old checkpoint: stage1_epoch53.pt
+[01:16:54][INFO] [Inference] Starting Epoch 56 | Steps: 4
+[01:16:55][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep56
+[01:17:30][INFO] [S1] Epoch 057 | Avg Loss: 0.240414 | Best: 0.223960 | LR: 4.46e-05 | Time: 34.8s
+[01:17:30][INFO] 🗑️  Removed old checkpoint: stage1_epoch54.pt
+[01:17:30][INFO] [Inference] Starting Epoch 57 | Steps: 4
+[01:17:32][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep57
+[01:18:06][INFO] [S1] Epoch 058 | Avg Loss: 0.223380 | Best: 0.223380 | LR: 4.36e-05 | Time: 34.7s
+[01:18:07][INFO] 🗑️  Removed old checkpoint: stage1_epoch55.pt
+[01:18:07][INFO] [Inference] Starting Epoch 58 | Steps: 4
+[01:18:06][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep58
+[01:18:41][INFO] [S1] Epoch 059 | Avg Loss: 0.243212 | Best: 0.223380 | LR: 4.26e-05 | Time: 34.8s
+[01:18:42][INFO] 🗑️  Removed old checkpoint: stage1_epoch56.pt
+[01:18:42][INFO] [Inference] Starting Epoch 59 | Steps: 4
+[01:18:43][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep59
+[01:19:18][INFO] [S1] Epoch 060 | Avg Loss: 0.226570 | Best: 0.223380 | LR: 4.15e-05 | Time: 34.8s
+[01:19:19][INFO] 🗑️  Removed old checkpoint: stage1_epoch57.pt
+[01:19:19][INFO] [Inference] Starting Epoch 60 | Steps: 4
+[01:19:20][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep60
+[01:19:54][INFO] [S1] Epoch 061 | Avg Loss: 0.210928 | Best: 0.210928 | LR: 4.05e-05 | Time: 34.7s
+[01:19:55][INFO] 🗑️  Removed old checkpoint: stage1_epoch58.pt
+[01:19:55][INFO] [Inference] Starting Epoch 61 | Steps: 4
+[01:19:56][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep61
+[01:20:31][INFO] [S1] Epoch 062 | Avg Loss: 0.226263 | Best: 0.210928 | LR: 3.95e-05 | Time: 34.8s
+[01:20:32][INFO] 🗑️  Removed old checkpoint: stage1_epoch59.pt
+[01:20:32][INFO] [Inference] Starting Epoch 62 | Steps: 4
+[01:20:33][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep62
+[01:21:08][INFO] [S1] Epoch 063 | Avg Loss: 0.250288 | Best: 0.210928 | LR: 3.84e-05 | Time: 34.8s
+[01:21:09][INFO] 🗑️  Removed old checkpoint: stage1_epoch60.pt
+[01:21:09][INFO] [Inference] Starting Epoch 63 | Steps: 4
+[01:21:10][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep63
+[01:21:43][INFO] [S1] Epoch 064 | Avg Loss: 0.206322 | Best: 0.206322 | LR: 3.74e-05 | Time: 32.8s
+[01:21:43][INFO] 🗑️  Removed old checkpoint: stage1_epoch61.pt
+[01:21:43][INFO] [Inference] Starting Epoch 64 | Steps: 4
+[01:21:44][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep64
+[01:22:19][INFO] [S1] Epoch 065 | Avg Loss: 0.230602 | Best: 0.206322 | LR: 3.64e-05 | Time: 34.6s
+[01:22:20][INFO] 🗑️  Removed old checkpoint: stage1_epoch62.pt
+[01:22:20][INFO] [Inference] Starting Epoch 65 | Steps: 4
+[01:22:21][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep65
+[01:22:56][INFO] [S1] Epoch 066 | Avg Loss: 0.211007 | Best: 0.206322 | LR: 3.53e-05 | Time: 34.6s
+[01:22:56][INFO] 🗑️  Removed old checkpoint: stage1_epoch63.pt
+[01:22:56][INFO] [Inference] Starting Epoch 66 | Steps: 4
+[01:22:57][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep66
+[01:23:32][INFO] [S1] Epoch 067 | Avg Loss: 0.240837 | Best: 0.206322 | LR: 3.43e-05 | Time: 34.7s
+[01:23:33][INFO] 🗑️  Removed old checkpoint: stage1_epoch64.pt
+[01:23:33][INFO] [Inference] Starting Epoch 67 | Steps: 4
+[01:23:34][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep67
+[01:24:09][INFO] [S1] Epoch 068 | Avg Loss: 0.198319 | Best: 0.198319 | LR: 3.33e-05 | Time: 34.8s
+[01:24:10][INFO] 🗑️  Removed old checkpoint: stage1_epoch65.pt
+[01:24:10][INFO] [Inference] Starting Epoch 68 | Steps: 4
+[01:24:11][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep68
+[01:24:45][INFO] [S1] Epoch 069 | Avg Loss: 0.200108 | Best: 0.198319 | LR: 3.23e-05 | Time: 34.7s
+[01:24:46][INFO] 🗑️  Removed old checkpoint: stage1_epoch66.pt
+[01:24:46][INFO] [Inference] Starting Epoch 69 | Steps: 4
+[01:24:46][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep69
+[01:25:20][INFO] [S1] Epoch 070 | Avg Loss: 0.194184 | Best: 0.194184 | LR: 3.13e-05 | Time: 34.8s
+[01:25:21][INFO] 🗑️  Removed old checkpoint: stage1_epoch67.pt
+[01:25:21][INFO] [Inference] Starting Epoch 70 | Steps: 4
+[01:25:22][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep70
+[01:25:57][INFO] [S1] Epoch 071 | Avg Loss: 0.219881 | Best: 0.194184 | LR: 3.03e-05 | Time: 34.6s
+[01:25:58][INFO] 🗑️  Removed old checkpoint: stage1_epoch68.pt
+[01:25:58][INFO] [Inference] Starting Epoch 71 | Steps: 4
+[01:25:59][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep71
+[01:26:34][INFO] [S1] Epoch 072 | Avg Loss: 0.206168 | Best: 0.194184 | LR: 2.93e-05 | Time: 34.7s
+[01:26:34][INFO] 🗑️  Removed old checkpoint: stage1_epoch69.pt
+[01:26:34][INFO] [Inference] Starting Epoch 72 | Steps: 4
+[01:26:35][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep72
+[01:27:10][INFO] [S1] Epoch 073 | Avg Loss: 0.201169 | Best: 0.194184 | LR: 2.83e-05 | Time: 34.6s
+[01:27:11][INFO] 🗑️  Removed old checkpoint: stage1_epoch70.pt
+[01:27:11][INFO] [Inference] Starting Epoch 73 | Steps: 4
+[01:27:12][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep73
+[01:27:47][INFO] [S1] Epoch 074 | Avg Loss: 0.186974 | Best: 0.186974 | LR: 2.73e-05 | Time: 34.6s
+[01:27:47][INFO] 🗑️  Removed old checkpoint: stage1_epoch71.pt
+[01:27:47][INFO] [Inference] Starting Epoch 74 | Steps: 4
+[01:27:48][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep74
+[01:28:21][INFO] [S1] Epoch 075 | Avg Loss: 0.193452 | Best: 0.186974 | LR: 2.63e-05 | Time: 32.9s
+[01:28:22][INFO] 🗑️  Removed old checkpoint: stage1_epoch72.pt
+[01:28:22][INFO] [Inference] Starting Epoch 75 | Steps: 4
+[01:28:23][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep75
+[01:28:58][INFO] [S1] Epoch 076 | Avg Loss: 0.191255 | Best: 0.186974 | LR: 2.54e-05 | Time: 34.6s
+[01:28:59][INFO] 🗑️  Removed old checkpoint: stage1_epoch73.pt
+[01:28:59][INFO] [Inference] Starting Epoch 76 | Steps: 4
+[01:29:00][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep76
+[01:29:35][INFO] [S1] Epoch 077 | Avg Loss: 0.203463 | Best: 0.186974 | LR: 2.44e-05 | Time: 34.8s
+[01:29:35][INFO] 🗑️  Removed old checkpoint: stage1_epoch74.pt
+[01:29:35][INFO] [Inference] Starting Epoch 77 | Steps: 4
+[01:29:36][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep77
+[01:30:11][INFO] [S1] Epoch 078 | Avg Loss: 0.196457 | Best: 0.186974 | LR: 2.35e-05 | Time: 34.7s
+[01:30:12][INFO] 🗑️  Removed old checkpoint: stage1_epoch75.pt
+[01:30:12][INFO] [Inference] Starting Epoch 78 | Steps: 4
+[01:30:13][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep78
+[01:30:48][INFO] [S1] Epoch 079 | Avg Loss: 0.192977 | Best: 0.186974 | LR: 2.26e-05 | Time: 34.8s
+[01:30:48][INFO] 🗑️  Removed old checkpoint: stage1_epoch76.pt
+[01:30:48][INFO] [Inference] Starting Epoch 79 | Steps: 4
+[01:30:50][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep79
+[01:31:24][INFO] [S1] Epoch 080 | Avg Loss: 0.179269 | Best: 0.179269 | LR: 2.17e-05 | Time: 34.8s
+[01:31:23][INFO] 🗑️  Removed old checkpoint: stage1_epoch77.pt
+[01:31:23][INFO] [Inference] Starting Epoch 80 | Steps: 4
+[01:31:24][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep80
+[01:31:59][INFO] [S1] Epoch 081 | Avg Loss: 0.194279 | Best: 0.179269 | LR: 2.08e-05 | Time: 34.9s
+[01:32:00][INFO] 🗑️  Removed old checkpoint: stage1_epoch78.pt
+[01:32:00][INFO] [Inference] Starting Epoch 81 | Steps: 4
+[01:32:01][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep81
+[01:32:36][INFO] [S1] Epoch 082 | Avg Loss: 0.190871 | Best: 0.179269 | LR: 1.99e-05 | Time: 34.8s
+[01:32:37][INFO] 🗑️  Removed old checkpoint: stage1_epoch79.pt
+[01:32:37][INFO] [Inference] Starting Epoch 82 | Steps: 4
+[01:32:38][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep82
+[01:33:13][INFO] [S1] Epoch 083 | Avg Loss: 0.175720 | Best: 0.175720 | LR: 1.90e-05 | Time: 34.8s
+[01:33:13][INFO] 🗑️  Removed old checkpoint: stage1_epoch80.pt
+[01:33:13][INFO] [Inference] Starting Epoch 83 | Steps: 4
+[01:33:14][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep83
+[01:33:49][INFO] [S1] Epoch 084 | Avg Loss: 0.169529 | Best: 0.169529 | LR: 1.81e-05 | Time: 34.6s
+[01:33:50][INFO] 🗑️  Removed old checkpoint: stage1_epoch81.pt
+[01:33:50][INFO] [Inference] Starting Epoch 84 | Steps: 4
+[01:33:51][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep84
+[01:34:26][INFO] [S1] Epoch 085 | Avg Loss: 0.172300 | Best: 0.169529 | LR: 1.73e-05 | Time: 34.7s
+[01:34:26][INFO] 🗑️  Removed old checkpoint: stage1_epoch82.pt
+[01:34:27][INFO] [Inference] Starting Epoch 85 | Steps: 4
+[01:34:28][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep85
+[01:35:00][INFO] [S1] Epoch 086 | Avg Loss: 0.173347 | Best: 0.169529 | LR: 1.65e-05 | Time: 32.8s
+[01:35:01][INFO] 🗑️  Removed old checkpoint: stage1_epoch83.pt
+[01:35:01][INFO] [Inference] Starting Epoch 86 | Steps: 4
+[01:35:02][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep86
+[01:35:37][INFO] [S1] Epoch 087 | Avg Loss: 0.183268 | Best: 0.169529 | LR: 1.56e-05 | Time: 34.6s
+[01:35:38][INFO] 🗑️  Removed old checkpoint: stage1_epoch84.pt
+[01:35:38][INFO] [Inference] Starting Epoch 87 | Steps: 4
+[01:35:39][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep87
+[01:36:14][INFO] [S1] Epoch 088 | Avg Loss: 0.175108 | Best: 0.169529 | LR: 1.48e-05 | Time: 34.8s
+[01:36:14][INFO] 🗑️  Removed old checkpoint: stage1_epoch85.pt
+[01:36:14][INFO] [Inference] Starting Epoch 88 | Steps: 4
+[01:36:15][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep88
+[01:36:50][INFO] [S1] Epoch 089 | Avg Loss: 0.179192 | Best: 0.169529 | LR: 1.41e-05 | Time: 34.8s
+[01:36:51][INFO] 🗑️  Removed old checkpoint: stage1_epoch86.pt
+[01:36:51][INFO] [Inference] Starting Epoch 89 | Steps: 4
+[01:36:52][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep89
+[01:37:27][INFO] [S1] Epoch 090 | Avg Loss: 0.177485 | Best: 0.169529 | LR: 1.33e-05 | Time: 34.6s
+[01:37:27][INFO] 🗑️  Removed old checkpoint: stage1_epoch87.pt
+[01:37:27][INFO] [Inference] Starting Epoch 90 | Steps: 4
+[01:37:29][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep90
+[01:38:03][INFO] [S1] Epoch 091 | Avg Loss: 0.187944 | Best: 0.169529 | LR: 1.26e-05 | Time: 34.8s
+[01:38:02][INFO] 🗑️  Removed old checkpoint: stage1_epoch88.pt
+[01:38:02][INFO] [Inference] Starting Epoch 91 | Steps: 4
+[01:38:03][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep91
+[01:38:38][INFO] [S1] Epoch 092 | Avg Loss: 0.174005 | Best: 0.169529 | LR: 1.18e-05 | Time: 34.8s
+[01:38:39][INFO] 🗑️  Removed old checkpoint: stage1_epoch89.pt
+[01:38:39][INFO] [Inference] Starting Epoch 92 | Steps: 4
+[01:38:40][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep92
+[01:39:15][INFO] [S1] Epoch 093 | Avg Loss: 0.165309 | Best: 0.165309 | LR: 1.11e-05 | Time: 34.6s
+[01:39:15][INFO] 🗑️  Removed old checkpoint: stage1_epoch90.pt
+[01:39:15][INFO] [Inference] Starting Epoch 93 | Steps: 4
+[01:39:16][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep93
+[01:39:51][INFO] [S1] Epoch 094 | Avg Loss: 0.169333 | Best: 0.165309 | LR: 1.05e-05 | Time: 34.6s
+[01:39:52][INFO] 🗑️  Removed old checkpoint: stage1_epoch91.pt
+[01:39:52][INFO] [Inference] Starting Epoch 94 | Steps: 4
+[01:39:53][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep94
+[01:40:28][INFO] [S1] Epoch 095 | Avg Loss: 0.172445 | Best: 0.165309 | LR: 9.80e-06 | Time: 34.6s
+[01:40:28][INFO] 🗑️  Removed old checkpoint: stage1_epoch92.pt
+[01:40:28][INFO] [Inference] Starting Epoch 95 | Steps: 4
+[01:40:29][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep95
+[01:41:04][INFO] [S1] Epoch 096 | Avg Loss: 0.164336 | Best: 0.164336 | LR: 9.16e-06 | Time: 34.8s
+[01:41:05][INFO] 🗑️  Removed old checkpoint: stage1_epoch93.pt
+[01:41:05][INFO] [Inference] Starting Epoch 96 | Steps: 4
+[01:41:06][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep96
+[01:41:39][INFO] [S1] Epoch 097 | Avg Loss: 0.148414 | Best: 0.148414 | LR: 8.54e-06 | Time: 32.9s
+[01:41:40][INFO] 🗑️  Removed old checkpoint: stage1_epoch94.pt
+[01:41:40][INFO] [Inference] Starting Epoch 97 | Steps: 4
+[01:41:41][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep97
+[01:42:16][INFO] [S1] Epoch 098 | Avg Loss: 0.160310 | Best: 0.148414 | LR: 7.95e-06 | Time: 34.8s
+[01:42:16][INFO] 🗑️  Removed old checkpoint: stage1_epoch95.pt
+[01:42:16][INFO] [Inference] Starting Epoch 98 | Steps: 4
+[01:42:18][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep98
+[01:42:52][INFO] [S1] Epoch 099 | Avg Loss: 0.165497 | Best: 0.148414 | LR: 7.37e-06 | Time: 34.8s
+[01:42:53][INFO] 🗑️  Removed old checkpoint: stage1_epoch96.pt
+[01:42:53][INFO] [Inference] Starting Epoch 99 | Steps: 4
+[01:42:54][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep99
+[01:43:29][INFO] [S1] Epoch 100 | Avg Loss: 0.166774 | Best: 0.148414 | LR: 6.82e-06 | Time: 34.6s
+[01:43:30][INFO] 🗑️  Removed old checkpoint: stage1_epoch97.pt
+[01:43:30][INFO] [Inference] Starting Epoch 100 | Steps: 4
+[01:43:31][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep100
+[01:44:05][INFO] [S1] Epoch 101 | Avg Loss: 0.165012 | Best: 0.148414 | LR: 6.29e-06 | Time: 34.6s
+[01:44:06][INFO] 🗑️  Removed old checkpoint: stage1_epoch98.pt
+[01:44:06][INFO] [Inference] Starting Epoch 101 | Steps: 4
+[01:44:07][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep101
+[01:44:40][INFO] [S1] Epoch 102 | Avg Loss: 0.161697 | Best: 0.148414 | LR: 5.79e-06 | Time: 32.9s
+[01:44:41][INFO] 🗑️  Removed old checkpoint: stage1_epoch99.pt
+[01:44:41][INFO] [Inference] Starting Epoch 102 | Steps: 4
+[01:44:42][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep102
+[01:45:17][INFO] [S1] Epoch 103 | Avg Loss: 0.161958 | Best: 0.148414 | LR: 5.31e-06 | Time: 35.5s
+[01:45:18][INFO] 🗑️  Removed old checkpoint: stage1_epoch100.pt
+[01:45:18][INFO] [Inference] Starting Epoch 103 | Steps: 4
+[01:45:19][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep103
+[01:45:54][INFO] [S1] Epoch 104 | Avg Loss: 0.143870 | Best: 0.143870 | LR: 4.85e-06 | Time: 34.9s
+[01:45:55][INFO] 🗑️  Removed old checkpoint: stage1_epoch101.pt
+[01:45:55][INFO] [Inference] Starting Epoch 104 | Steps: 4
+[01:45:56][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep104
+[01:46:31][INFO] [S1] Epoch 105 | Avg Loss: 0.147669 | Best: 0.143870 | LR: 4.41e-06 | Time: 34.8s
+[01:46:32][INFO] 🗑️  Removed old checkpoint: stage1_epoch102.pt
+[01:46:32][INFO] [Inference] Starting Epoch 105 | Steps: 4
+[01:46:33][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep105
+[01:47:07][INFO] [S1] Epoch 106 | Avg Loss: 0.154600 | Best: 0.143870 | LR: 4.01e-06 | Time: 34.6s
+[01:47:08][INFO] 🗑️  Removed old checkpoint: stage1_epoch103.pt
+[01:47:08][INFO] [Inference] Starting Epoch 106 | Steps: 4
+[01:47:09][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep106
+[01:47:44][INFO] [S1] Epoch 107 | Avg Loss: 0.152458 | Best: 0.143870 | LR: 3.62e-06 | Time: 34.8s
+[01:47:45][INFO] 🗑️  Removed old checkpoint: stage1_epoch104.pt
+[01:47:45][INFO] [Inference] Starting Epoch 107 | Steps: 4
+[01:47:44][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep107
+[01:48:19][INFO] [S1] Epoch 108 | Avg Loss: 0.141599 | Best: 0.141599 | LR: 3.27e-06 | Time: 34.6s
+[01:48:19][INFO] 🗑️  Removed old checkpoint: stage1_epoch105.pt
+[01:48:19][INFO] [Inference] Starting Epoch 108 | Steps: 4
+[01:48:21][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep108
+[01:48:55][INFO] [S1] Epoch 109 | Avg Loss: 0.157921 | Best: 0.141599 | LR: 2.93e-06 | Time: 34.6s
+[01:48:56][INFO] 🗑️  Removed old checkpoint: stage1_epoch106.pt
+[01:48:56][INFO] [Inference] Starting Epoch 109 | Steps: 4
+[01:48:57][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep109
+[01:49:32][INFO] [S1] Epoch 110 | Avg Loss: 0.166139 | Best: 0.141599 | LR: 2.63e-06 | Time: 34.8s
+[01:49:33][INFO] 🗑️  Removed old checkpoint: stage1_epoch107.pt
+[01:49:33][INFO] [Inference] Starting Epoch 110 | Steps: 4
+[01:49:34][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep110
+[01:50:08][INFO] [S1] Epoch 111 | Avg Loss: 0.142630 | Best: 0.141599 | LR: 2.35e-06 | Time: 34.7s
+[01:50:09][INFO] 🗑️  Removed old checkpoint: stage1_epoch108.pt
+[01:50:09][INFO] [Inference] Starting Epoch 111 | Steps: 4
+[01:50:10][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep111
+[01:50:45][INFO] [S1] Epoch 112 | Avg Loss: 0.136303 | Best: 0.136303 | LR: 2.09e-06 | Time: 34.8s
+[01:50:46][INFO] 🗑️  Removed old checkpoint: stage1_epoch109.pt
+[01:50:46][INFO] [Inference] Starting Epoch 112 | Steps: 4
+[01:50:47][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep112
+[01:51:20][INFO] [S1] Epoch 113 | Avg Loss: 0.139018 | Best: 0.136303 | LR: 1.86e-06 | Time: 32.9s
+[01:51:21][INFO] 🗑️  Removed old checkpoint: stage1_epoch110.pt
+[01:51:21][INFO] [Inference] Starting Epoch 113 | Steps: 4
+[01:51:22][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep113
+[01:51:56][INFO] [S1] Epoch 114 | Avg Loss: 0.142748 | Best: 0.136303 | LR: 1.66e-06 | Time: 34.6s
+[01:51:57][INFO] 🗑️  Removed old checkpoint: stage1_epoch111.pt
+[01:51:57][INFO] [Inference] Starting Epoch 114 | Steps: 4
+[01:51:58][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep114
+[01:52:33][INFO] [S1] Epoch 115 | Avg Loss: 0.151501 | Best: 0.136303 | LR: 1.49e-06 | Time: 34.8s
+[01:52:34][INFO] 🗑️  Removed old checkpoint: stage1_epoch112.pt
+[01:52:34][INFO] [Inference] Starting Epoch 115 | Steps: 4
+[01:52:35][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep115
+[01:53:10][INFO] [S1] Epoch 116 | Avg Loss: 0.143794 | Best: 0.136303 | LR: 1.34e-06 | Time: 34.8s
+[01:53:10][INFO] 🗑️  Removed old checkpoint: stage1_epoch113.pt
+[01:53:10][INFO] [Inference] Starting Epoch 116 | Steps: 4
+[01:53:11][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep116
+[01:53:46][INFO] [S1] Epoch 117 | Avg Loss: 0.150707 | Best: 0.136303 | LR: 1.22e-06 | Time: 34.6s
+[01:53:47][INFO] 🗑️  Removed old checkpoint: stage1_epoch114.pt
+[01:53:47][INFO] [Inference] Starting Epoch 117 | Steps: 4
+[01:53:48][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep117
+[01:54:23][INFO] [S1] Epoch 118 | Avg Loss: 0.143551 | Best: 0.136303 | LR: 1.12e-06 | Time: 34.8s
+[01:54:24][INFO] 🗑️  Removed old checkpoint: stage1_epoch115.pt
+[01:54:24][INFO] [Inference] Starting Epoch 118 | Steps: 4
+[01:54:23][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep118
+[01:54:57][INFO] [S1] Epoch 119 | Avg Loss: 0.149045 | Best: 0.136303 | LR: 1.05e-06 | Time: 34.6s
+[01:54:58][INFO] 🗑️  Removed old checkpoint: stage1_epoch116.pt
+[01:54:58][INFO] [Inference] Starting Epoch 119 | Steps: 4
+[01:54:59][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep119
+[01:55:34][INFO] [S1] Epoch 120 | Avg Loss: 0.149728 | Best: 0.136303 | LR: 1.01e-06 | Time: 34.8s
+[01:55:35][INFO] 🗑️  Removed old checkpoint: stage1_epoch117.pt
+[01:55:35][INFO] [Inference] Starting Epoch 120 | Steps: 4
+[01:55:36][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1/ep120
+[01:55:36][INFO] [Stage 1] Training Completed. Saving final checkpoint...
+[01:55:37][INFO] [Model] Compiling network with torch.compile (max-autotune)...
+[01:55:37][INFO] [Inference] Starting Epoch final | Steps: 4
+[01:55:39][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/Exp2_HighForce/checkpoints/inf/stage1_final/epfinal

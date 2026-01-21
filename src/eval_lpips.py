@@ -84,7 +84,7 @@ class Evaluator:
         imgs_gen = torch.clamp(self.vae.decode(x_t / 0.18215).sample, -1, 1)
         return self.loss_fn_lpips(imgs.to(self.device), imgs_gen, normalize=True).view(-1).cpu().numpy()
 
-    def evaluate(self, data_dir, batch_size=2):
+    def evaluate(self, data_dir, batch_size=1, save_dir=None):
         dataset = MatrixImageDataset(data_dir)
         dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
         
@@ -99,19 +99,59 @@ class Evaluator:
                     if sub_dir != "error":
                         matrix_results[sub_dir][tgt_id].append(float(batch_scores[i]))
 
+        # 计算汇总统计
+        summary = {
+            "metric": "LPIPS",
+            "description": "Perceptual similarity (lower is better)",
+            "per_subdirectory": {},
+            "overall_average": {}
+        }
+        
+        all_subdirs = sorted(matrix_results.keys())
+        overall_by_style = defaultdict(list)
+        
+        for sd in all_subdirs:
+            summary["per_subdirectory"][sd] = {}
+            for t_id in range(num_styles):
+                scores = matrix_results[sd][t_id]
+                avg = float(np.mean(scores)) if scores else 0.0
+                summary["per_subdirectory"][sd][f"style_{t_id}"] = {
+                    "mean": avg,
+                    "std": float(np.std(scores)) if scores else 0.0,
+                    "count": len(scores)
+                }
+                overall_by_style[t_id].extend(scores)
+        
+        # 全局平均
+        for t_id in range(num_styles):
+            all_scores = overall_by_style[t_id]
+            summary["overall_average"][f"style_{t_id}"] = {
+                "mean": float(np.mean(all_scores)) if all_scores else 0.0,
+                "std": float(np.std(all_scores)) if all_scores else 0.0,
+                "count": len(all_scores)
+            }
+
         # 打印详细矩阵表格
         print("\n" + "="*60)
         print(f"{'Sub-Directory':<20} | {'Target Style':<12} | {'Avg LPIPS':<10}")
         print("-" * 60)
         
-        all_subdirs = sorted(matrix_results.keys())
         for sd in all_subdirs:
             for t_id in range(num_styles):
-                scores = matrix_results[sd][t_id]
-                avg = np.mean(scores) if scores else 0
+                avg = summary["per_subdirectory"][sd][f"style_{t_id}"]["mean"]
                 print(f"{sd:<20} | Style {t_id:<8} | {avg:.5f}")
             print("-" * 60)
         print("="*60)
+        
+        # 保存到文件
+        if save_dir:
+            save_path = Path(save_dir) / "lpips_results.json"
+            save_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(save_path, 'w', encoding='utf-8') as f:
+                json.dump(summary, f, indent=4, ensure_ascii=False)
+            print(f"\n✅ LPIPS results saved to: {save_path}")
+        
+        return summary
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

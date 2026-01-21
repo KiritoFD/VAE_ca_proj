@@ -1,0 +1,58 @@
+[23:28:29][INFO] ==================================================
+[23:28:29][INFO] 🚀 Initializing Experiment
+[23:28:29][INFO] 📂 Save Dir  : AutoSearch_Results/test/checkpoints
+[23:28:29][INFO] Device      : cuda
+[23:28:29][INFO] Batch Size  : 64
+[23:28:29][INFO] Resolution  : 256x256
+[23:28:29][INFO] ⚡ LR: 0.0001 | Weight: 10.0
+[23:28:29][INFO] ==================================================
+[23:28:29][INFO] [Init] Loading VAE (stabilityai/sd-vae-ft-mse)...
+[23:28:31][INFO] [Init] Loading Training Dataset...
+[23:28:31][INFO] [Init] Dataset Ready. Total Latents: 7359
+[23:28:31][INFO] ==================================================
+[23:28:31][INFO] >>> Starting Stage 1: LSFM Training
+[23:28:31][INFO] ==================================================
+[23:28:32][INFO] [Model] Compiling network with torch.compile (max-autotune)...
+[23:29:08][INFO] [S1] Epoch 001 | Avg Loss: 1.617193 | Best: 1.617193 | LR: 1.00e-04 | Time: 35.6s
+[23:29:09][INFO] [Inference] Starting Epoch 1 | Steps: 4
+[23:29:15][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/test/checkpoints/inf/stage1/ep1
+[23:29:15][INFO] [Stage 1] Training Completed. Saving final checkpoint...
+[23:29:16][INFO] [Model] Compiling network with torch.compile (max-autotune)...
+[23:33:08][INFO] ==================================================
+[23:33:08][INFO] 🚀 Initializing Experiment
+[23:33:08][INFO] 📂 Save Dir  : AutoSearch_Results/test/checkpoints
+[23:33:08][INFO] Device      : cuda
+[23:33:08][INFO] Batch Size  : 64
+[23:33:08][INFO] Resolution  : 256x256
+[23:33:08][INFO] ⚡ LR: 0.0001 | Weight: 10.0
+[23:33:08][INFO] ==================================================
+[23:33:08][INFO] [Init] Loading VAE (stabilityai/sd-vae-ft-mse)...
+[23:33:09][INFO] [Init] Loading Training Dataset...
+[23:33:09][INFO] [Init] Dataset Ready. Total Latents: 7359
+[23:33:09][INFO] ==================================================
+[23:33:09][INFO] >>> Starting Stage 1: LSFM Training
+[23:33:09][INFO] ==================================================
+[23:33:09][INFO] [Model] Compiling network with torch.compile (max-autotune)...
+[23:33:10][INFO] [Stage 1] ✅ Final checkpoint exists. Skipping training.
+[23:33:11][INFO] [Model] Compiling network with torch.compile (max-autotune)...
+[23:33:11][INFO] [Inference] Starting Epoch final | Steps: 4
+[23:33:19][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/test/checkpoints/inf/stage1_final/epfinal
+[23:35:26][INFO] ==================================================
+[23:35:26][INFO] 🚀 Initializing Experiment
+[23:35:26][INFO] 📂 Save Dir  : AutoSearch_Results/test/checkpoints
+[23:35:26][INFO] Device      : cuda
+[23:35:26][INFO] Batch Size  : 64
+[23:35:26][INFO] Resolution  : 256x256
+[23:35:26][INFO] ⚡ LR: 0.0001 | Weight: 10.0
+[23:35:26][INFO] ==================================================
+[23:35:26][INFO] [Init] Loading VAE (stabilityai/sd-vae-ft-mse)...
+[23:35:27][INFO] [Init] Loading Training Dataset...
+[23:35:28][INFO] [Init] Dataset Ready. Total Latents: 7359
+[23:35:28][INFO] ==================================================
+[23:35:28][INFO] >>> Starting Stage 1: LSFM Training
+[23:35:28][INFO] ==================================================
+[23:35:28][INFO] [Model] Compiling network with torch.compile (max-autotune)...
+[23:35:29][INFO] [Stage 1] ✅ Final checkpoint exists. Skipping training.
+[23:35:29][INFO] [Model] Compiling network with torch.compile (max-autotune)...
+[23:35:30][INFO] [Inference] Starting Epoch final | Steps: 4
+[23:35:38][INFO] [Inference] Successfully finished. Output: AutoSearch_Results/test/checkpoints/inf/stage1_final/epfinal

@@ -1,0 +1,16 @@
+{
+    "experiment_name": "Exp2_HighForce",
+    "checkpoint_path": "AutoSearch_Results/Exp2_HighForce/checkpoints/stage1_final.pt",
+    "evaluation_time": "2026-01-21 01:55:39",
+    "metrics": {
+        "lpips": {
+            "error": "Evaluator.evaluate() got an unexpected keyword argument 'save_dir'"
+        },
+        "clip": {
+            "error": "Evaluator.evaluate() got an unexpected keyword argument 'save_dir'"
+        },
+        "vgg": {
+            "error": "Evaluator.evaluate() got an unexpected keyword argument 'save_dir'"
+        }
+    }
+}

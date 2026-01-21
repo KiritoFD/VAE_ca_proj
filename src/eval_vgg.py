@@ -205,7 +205,7 @@ class Evaluator:
         return [g / count for g in grams_acc]
 
     @torch.no_grad()
-    def evaluate(self, bs=1):
+    def evaluate(self, bs=1, save_dir=None):
         content_path_str = self.cfg.get("inference", {}).get("image_path", "").strip('"').strip("'")
         content_path = Path(content_path_str)
         if not content_path.exists():
@@ -280,12 +280,12 @@ class Evaluator:
                     for b_idx in range(B):
                         subdir = sub_dirs[b_idx]
                         fname = fnames[b_idx]
-                        save_dir = self.cache_root / subdir
-                        save_dir.mkdir(parents=True, exist_ok=True)
+                        cache_save_dir = self.cache_root / subdir
+                        cache_save_dir.mkdir(parents=True, exist_ok=True)
                         ndarr = gen_imgs[b_idx].cpu().float().numpy()
                         ndarr = (ndarr / 2 + 0.5).clip(0, 1)
                         ndarr = ndarr.transpose(1, 2, 0) * 255
-                        Image.fromarray(ndarr.astype(np.uint8)).save(save_dir / f"{fname}_style{tgt_id}.png")
+                        Image.fromarray(ndarr.astype(np.uint8)).save(cache_save_dir / f"{fname}_style{tgt_id}.png")
 
                     # Calc Loss
                     gen_imgs_vgg = (gen_imgs + 1) / 2
@@ -307,24 +307,67 @@ class Evaluator:
                 del x_c
             del imgs
 
+        # 计算汇总统计
+        summary = {
+            "metric": "VGG_Style",
+            "description": "VGG Gram style distance (lower is better)",
+            "per_subdirectory": {},
+            "overall_average": {}
+        }
+        
+        all_subdirs = sorted(matrix_results.keys())
+        overall_by_style = defaultdict(list)
+        
+        for sd in all_subdirs:
+            summary["per_subdirectory"][sd] = {}
+            for t_id in range(num_styles):
+                scores = matrix_results[sd][t_id]
+                avg = float(np.mean(scores)) if scores else 0.0
+                summary["per_subdirectory"][sd][f"style_{t_id}"] = {
+                    "mean": avg,
+                    "mean_scaled": avg * 1e5,  # 保存缩放版本便于阅读
+                    "std": float(np.std(scores)) if scores else 0.0,
+                    "count": len(scores)
+                }
+                overall_by_style[t_id].extend(scores)
+        
+        # 全局平均
+        for t_id in range(num_styles):
+            all_scores = overall_by_style[t_id]
+            avg_val = float(np.mean(all_scores)) if all_scores else 0.0
+            summary["overall_average"][f"style_{t_id}"] = {
+                "mean": avg_val,
+                "mean_scaled": avg_val * 1e5,
+                "std": float(np.std(all_scores)) if all_scores else 0.0,
+                "count": len(all_scores)
+            }
+
         print("\n" + "="*70)
         print("VGG Gram Style Distance Matrix (Lower is Better, Scaled x1e5)")
         print("-" * 70)
         print(f"{'Sub-Directory':<20} | {'Target Style':<12} | {'Avg VGG Dist':<15}")
         print("-" * 70)
         
-        all_subdirs = sorted(matrix_results.keys())
         for sd in all_subdirs:
             for t_id in range(num_styles):
-                scores = matrix_results[sd][t_id]
-                if scores:
-                    avg = np.mean(scores) * 1e5
+                if summary["per_subdirectory"][sd][f"style_{t_id}"]["count"] > 0:
+                    avg = summary["per_subdirectory"][sd][f"style_{t_id}"]["mean_scaled"]
                     print(f"{sd:<20} | Style {t_id:<8} | {avg:.5f}")
                 else:
                     print(f"{sd:<20} | Style {t_id:<8} | N/A")
             print("-" * 70)
         print("="*70)
         print(f"[Done] Cache saved in: {self.cache_root.resolve()}")
+        
+        # 保存到文件
+        if save_dir:
+            save_path = Path(save_dir) / "vgg_results.json"
+            save_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(save_path, 'w', encoding='utf-8') as f:
+                json.dump(summary, f, indent=4, ensure_ascii=False)
+            print(f"\n✅ VGG results saved to: {save_path}")
+        
+        return summary
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
