@@ -66,6 +66,44 @@ def compute_spectral_loss(v_pred, v_gt):
     # 4. 频域 MSE
     return F.mse_loss(amp_pred, amp_gt)
 
+# 🔴 新增：Latent Gram Loss（极简风格损失）
+def compute_latent_gram_loss(v_pred, v_gt):
+    """
+    计算 VAE Latent 空间的 Gram 矩阵损失。
+    
+    作用：强迫模型学习通道间的纹理相关性（笔触/色调），打破"完全一样"的僵局。
+    优势：
+        1. 零额外参数（不需要加载 VGG19）
+        2. 计算量极低（仅矩阵乘法）
+        3. 直接在 Latent 空间操作，无需解码到像素
+    
+    原理：
+        Gram Matrix 捕捉特征图中通道间的协方差关系。
+        例如：莫奈风格中，蓝色通道和绿色通道可能高度相关（水面倒影），
+        而照片中这种相关性较弱。通过匹配 Gram 矩阵，强制模型学习这种纹理统计量。
+    
+    Args:
+        v_pred: [B, C, H, W] - 预测的速度场
+        v_gt: [B, C, H, W] - 真实的速度场
+    
+    Returns:
+        loss: 标量，Gram 矩阵的 MSE 距离
+    """
+    B, C, H, W = v_pred.shape
+    
+    # 1. 展平空间维度: [B, C, H*W]
+    pred_flat = v_pred.view(B, C, -1)
+    gt_flat = v_gt.view(B, C, -1)
+    
+    # 2. 计算 Gram 矩阵（通道间的自相关）: [B, C, C]
+    # 🟢 这一步捕捉了"纹理指纹"：Channel i 和 Channel j 是否总是同时激活
+    gram_pred = torch.bmm(pred_flat, pred_flat.transpose(1, 2))
+    gram_gt = torch.bmm(gt_flat, gt_flat.transpose(1, 2))
+    
+    # 3. 归一化（防止数值过大导致梯度爆炸）
+    scale = C * H * W
+    return F.mse_loss(gram_pred / scale, gram_gt / scale)
+
 class TrainingLogger:
     def __init__(self, log_dir):
         self.log_dir = Path(log_dir)
@@ -135,8 +173,10 @@ class LSFMTrainer:
         self.vae = AutoencoderKL.from_pretrained("stabilityai/sd-vae-ft-mse").to(self.device)
         self.vae.eval().requires_grad_(False).float()
 
-        # 3. 移除 LPIPS 以节省显存 (我们现在用 Spectral Loss 替代它)
-        # self.lpips = ... (Deleted)
+        # 3. 🔴 配置 Latent Gram Loss 权重
+        # 🟢 Gram Loss 数值通常在 1e-5 ~ 1e-4 量级，需要较大权重（100-500）
+        self.gram_loss_weight = self.cfg['training'].get('gram_loss_weight', 100.0)
+        self.logger.info(f"⚡ Gram Loss Weight: {self.gram_loss_weight}")
 
         # 4. 初始化训练数据集
         self.logger.info("[Init] Loading Training Dataset...")
@@ -341,35 +381,45 @@ class LSFMTrainer:
                     # 🟢 使用 dropped 的 label 训练
                     v_pred = model(x_t, x_c, t, t_id_dropped)
                     
-                    # 🟢 基础 MSE
-                    loss_mse_raw = F.mse_loss(v_pred, v_gt, reduction='none')
-                    loss_mse_per_sample = loss_mse_raw.mean(dim=[1, 2, 3])
+                    # 🟢 A. 基础 MSE（内容一致性的守护者）
+                    # 保证图像结构不崩，轮廓还是那个轮廓
+                    loss_mse = F.mse_loss(v_pred, v_gt)
                     
-                    # 🟢 辅助损失仅用于非空类别的转换任务
-                    is_transfer = (s_id != t_id).float()
-                    is_not_null = (t_id_dropped != self.null_class_id).float()
-                    apply_aux_loss = (is_transfer * is_not_null).bool()
+                    # 🟢 B. 风格 Gram Loss（风格差异的驱动者）
+                    # 仅对真实的风格迁移任务计算（跳过 Identity 和 Null Class）
+                    is_transfer = (s_id != t_id)
+                    is_not_null = (t_id_dropped != self.null_class_id)
+                    valid_mask = is_transfer & is_not_null
                     
-                    if apply_aux_loss.any():
-                        loss_spec = compute_spectral_loss(
-                            v_pred[apply_aux_loss], 
-                            v_gt[apply_aux_loss]
+                    if valid_mask.any():
+                        # 🔴 在 Latent 空间直接计算 Gram Loss（极简高效）
+                        loss_gram = compute_latent_gram_loss(
+                            v_pred[valid_mask], 
+                            v_gt[valid_mask]
                         )
                         
-                        v_pred_flat = v_pred[apply_aux_loss].flatten(1)
-                        v_gt_flat = v_gt[apply_aux_loss].flatten(1)
+                        # 🟢 辅助损失：频谱对齐 + 方向一致性
+                        loss_spec = compute_spectral_loss(
+                            v_pred[valid_mask], 
+                            v_gt[valid_mask]
+                        )
+                        
+                        v_pred_flat = v_pred[valid_mask].flatten(1)
+                        v_gt_flat = v_gt[valid_mask].flatten(1)
                         cos_sim = F.cosine_similarity(v_pred_flat, v_gt_flat, dim=1, eps=1e-6)
                         loss_dir = (1 - cos_sim).mean()
                     else:
+                        loss_gram = torch.tensor(0.0, device=self.device)
                         loss_spec = torch.tensor(0.0, device=self.device)
                         loss_dir = torch.tensor(0.0, device=self.device)
                     
-                    # 🟢 加权 MSE
-                    sample_weights = 1.0 + is_transfer * (self.transfer_weight - 1.0)
-                    weighted_mse = (loss_mse_per_sample * sample_weights).mean()
-                    
-                    # 🟢 总损失
-                    loss = weighted_mse + 0.1 * loss_spec + 0.1 * loss_dir
+                    # 🔴 C. 最终组合：MSE 负责画对，Gram 负责画得有风格
+                    # 权重说明：
+                    #   - MSE: 1.0（基准，保证内容）
+                    #   - Gram: 100.0（Gram 数值在 1e-5 级别，需要放大）
+                    #   - Spectral: 0.1（辅助，防止高频丢失）
+                    #   - Direction: 0.1（辅助，保证速度场方向）
+                    loss = loss_mse + self.gram_loss_weight * loss_gram + 0.1 * loss_spec + 0.1 * loss_dir
 
                 loss.backward()
                 nn.utils.clip_grad_norm_(model.parameters(), MAX_GRAD_NORM)

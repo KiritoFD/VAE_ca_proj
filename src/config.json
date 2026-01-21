@@ -7,15 +7,16 @@
     "kernel_size": 7
   },
   "training": {
-    "batch_size": 64,
+    "batch_size": 32,
     "gen_batch_size": 64,
+    "style_loss_weight": 1.5,
     "learning_rate": 1e-4,
     "transfer_loss_weight": 10.0,
     "label_drop_prob": 0.15,
     "use_amp": true,
     "num_workers": 0,
     "stage1_epochs": 200,
-    "stage2_epochs": 0,
+    "stage2_epochs": 50,
     "reflow_data_dir": "data_reflow_cache_256_AdaGN",
     "resume_checkpoint": ""
   },
