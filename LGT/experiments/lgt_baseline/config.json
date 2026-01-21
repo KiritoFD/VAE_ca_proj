@@ -19,9 +19,9 @@
   },
   "training": {
     "batch_size": 48,
-    "learning_rate": 1e-4,
-    "min_learning_rate": 1e-6,
-    "weight_decay": 1e-5,
+    "learning_rate": 0.0001,
+    "min_learning_rate": 1e-06,
+    "weight_decay": 1e-05,
     "num_epochs": 100,
     "label_drop_prob": 0.1,
     "use_avg_style_for_uncond": true,
@@ -30,21 +30,24 @@
     "ode_integration_steps": 5,
     "use_amp": true,
     "use_compile": false,
-    "save_interval":1,
+    "save_interval": 1,
     "eval_interval": 5,
     "test_image_dir": "/mnt/f/monet/monet2photo",
     "resume_checkpoint": null
   },
   "data": {
     "data_root": "data/latents",
-    "style_subdirs": ["style0", "style1"],
+    "style_subdirs": [
+      "style0",
+      "style1"
+    ],
     "style_prompts": [
       "a photorealistic photograph",
       "a Monet-style painting"
     ]
   },
   "checkpoint": {
-    "save_dir": "checkpoints"
+    "save_dir": "checkpoints/lgt_baseline"
   },
   "inference": {
     "num_steps": 20,

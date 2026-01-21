@@ -33,20 +33,7 @@ EXPERIMENTS_DIR.mkdir(exist_ok=True)
 # =================================================================             
 PRESETS = {
     # -------------------------------------------------------------------------
-    # 0. 快速调试
-    # -------------------------------------------------------------------------
-    "debug_small": {
-        "desc": "⚡ Quick debug: minimal epochs to check pipeline",
-        "overrides": {
-            "training": {
-                "batch_size": 80,
-                "num_epochs": 1,
-                "ode_integration_steps": 3,
-                "save_interval": 1,
-                "eval_interval": 1
-            }
-        }
-    },
+    
 
     # -------------------------------------------------------------------------
     # 1. 基准线 (Baseline)

@@ -193,24 +193,34 @@ def main():
                 print(f"Error during inversion for {src_name} image {src_path.name}: {e}")
                 continue
 
-            # For each target style and each reference image in that style
+            # For each target style: generate ONCE, then evaluate against ALL references
             for tgt_id, (tgt_name, tgt_list) in test_images.items():
                 if tgt_id == src_id:
                     continue
+                
+                print(f"  -> Generating for target style: {tgt_name}")
+                
+                # Generation: only once per (src_image, tgt_style_id)
+                try:
+                    latent_tgt = lgt.generation(latent_x0, tgt_id, num_steps=15)
+                except Exception as e:
+                    print(f"Error during generation for {src_name}/{src_path.name} -> {tgt_name}: {e}")
+                    continue
+
+                # Decode generated image
+                img_gen = decode_latent(vae, latent_tgt, device)  # [B,3,H,W] in [0,1]
+                
+                # Save generated image (once per src/tgt_style pair)
+                out_img_name = f"{src_name}_{src_path.stem}_to_{tgt_name}.jpg"
+                out_img_path = out_dir / out_img_name
+                from torchvision.utils import save_image
+                save_image(img_gen, out_img_path)
+                
+                # Now evaluate against ALL reference images of this target style
                 for tgt_path in tgt_list:
-                    print(f"  -> Target: {tgt_name} (ref: {tgt_path.name})")
+                    print(f"    Evaluating against ref: {tgt_path.name}")
 
-                    # Generation (robust per pair)
-                    try:
-                        latent_tgt = lgt.generation(latent_x0, tgt_id, num_steps=15)
-                    except Exception as e:
-                        print(f"Error during generation for {src_path.name} -> {tgt_name}/{tgt_path.name}: {e}")
-                        continue
-
-                    # Decode generated image
-                    img_gen = decode_latent(vae, latent_tgt, device)  # [B,3,H,W] in [0,1]
-
-                    # Load target reference image (for style reference)
+                    # Load target reference image (for metric computation only, NOT as model input)
                     img_tgt_ref = load_image_to_tensor(tgt_path, size=256, device=device)
 
                     # Compute LPIPS
@@ -269,12 +279,6 @@ def main():
                             except Exception as e:
                                 print(f"Warning: CLIP text embedding failed for prompt '{prompt}': {e}")
                                 clip_text = None
-
-                    # Save generated image (unique filename per source/target/ref)
-                    out_img_name = f"{src_name}_{src_path.stem}_to_{tgt_name}_{tgt_path.stem}.jpg"
-                    out_img_path = out_dir / out_img_name
-                    from torchvision.utils import save_image
-                    save_image(img_gen, out_img_path)
 
                     entry = {
                         'src_style': src_name,

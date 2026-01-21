@@ -1,0 +1,4 @@
+{"epoch": 1, "timestamp": "2026-01-22T00:46:20.667848", "loss": 0.2802114681480757, "style_swd": 0.009970061255777193, "content_ssm": 0.2702414078844918, "learning_rate": 9.997557473810373e-05, "epoch_time": 0.0, "num_batches": null}
+{"epoch": 2, "timestamp": "2026-01-22T00:48:04.568990", "loss": 0.24478732643563764, "style_swd": 0.007326557374029767, "content_ssm": 0.23746076869029625, "learning_rate": 9.990232305719946e-05, "epoch_time": 0.0, "num_batches": null}
+{"epoch": 3, "timestamp": "2026-01-22T00:49:49.717205", "loss": 0.2313062919705522, "style_swd": 0.006680751164608142, "content_ssm": 0.22462553993549222, "learning_rate": 9.978031724785248e-05, "epoch_time": 0.0, "num_batches": null}
+{"epoch": 4, "timestamp": "2026-01-22T00:51:35.531412", "loss": 0.223025245019813, "style_swd": 0.00608001270459271, "content_ssm": 0.2169452324217441, "learning_rate": 9.960967771506668e-05, "epoch_time": 0.0, "num_batches": null}

@@ -1,0 +1,38 @@
+2026-01-22 00:43:58,600 - INFO - Using device: cuda
+2026-01-22 00:43:58,601 - INFO - Loading latents into memory...
+2026-01-22 00:43:58,615 - INFO -   Style 0 (style0): 1072 files
+2026-01-22 00:44:04,108 - INFO -   Style 1 (style1): 6287 files
+2026-01-22 00:44:32,595 - INFO - ✓ Loaded 7359 latents into memory
+2026-01-22 00:44:32,596 - INFO -   Shape: torch.Size([7359, 4, 32, 32])
+2026-01-22 00:44:32,596 - INFO -   Memory: 0.12 GB
+2026-01-22 00:44:32,911 - INFO - Model parameters: 20,337,668
+/mnt/g/GitHub/VAE_ca_proj/LGT/train.py:176: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  self.scaler = torch.cuda.amp.GradScaler(enabled=self.use_amp)
+2026-01-22 00:44:37,043 - INFO - ================================================================================
+2026-01-22 00:44:37,043 - INFO - Starting LGT Training
+2026-01-22 00:44:37,043 - INFO - ================================================================================
+2026-01-22 00:44:37,043 - INFO - Starting epoch 1/100
+/mnt/g/GitHub/VAE_ca_proj/LGT/train.py:357: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with torch.cuda.amp.autocast(enabled=self.use_amp, dtype=torch.bfloat16):
+/mnt/g/GitHub/VAE_ca_proj/LGT/train.py:259: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with torch.cuda.amp.autocast(enabled=self.use_amp, dtype=torch.bfloat16):
+2026-01-22 00:45:45,147 - INFO - Epoch 1 Step 100/153 | loss=0.2996 | swd=0.012308 | ssm=0.2873
+2026-01-22 00:46:20,657 - INFO - Epoch 1 Step 153/153 | loss=0.2778 | swd=0.012829 | ssm=0.2650
+2026-01-22 00:46:20,662 - INFO - Epoch 1/100 completed in 0.0s | Loss: 0.2802 | SWD: 0.0100 | SSM: 0.2702 | LR: 1.00e-04
+2026-01-22 00:46:22,114 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0001.pt
+2026-01-22 00:46:23,551 - INFO - Starting epoch 2/100
+2026-01-22 00:47:30,939 - INFO - Epoch 2 Step 100/153 | loss=0.2355 | swd=0.010756 | ssm=0.2248
+2026-01-22 00:48:04,560 - INFO - Epoch 2 Step 153/153 | loss=0.2757 | swd=0.004884 | ssm=0.2708
+2026-01-22 00:48:04,564 - INFO - Epoch 2/100 completed in 0.0s | Loss: 0.2448 | SWD: 0.0073 | SSM: 0.2375 | LR: 9.99e-05
+2026-01-22 00:48:05,932 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0002.pt
+2026-01-22 00:48:07,286 - INFO - Starting epoch 3/100
+2026-01-22 00:49:14,382 - INFO - Epoch 3 Step 100/153 | loss=0.2367 | swd=0.005690 | ssm=0.2310
+2026-01-22 00:49:49,707 - INFO - Epoch 3 Step 153/153 | loss=0.2059 | swd=0.008513 | ssm=0.1974
+2026-01-22 00:49:49,712 - INFO - Epoch 3/100 completed in 0.0s | Loss: 0.2313 | SWD: 0.0067 | SSM: 0.2246 | LR: 9.98e-05
+2026-01-22 00:49:51,213 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0003.pt
+2026-01-22 00:49:52,573 - INFO - Starting epoch 4/100
+2026-01-22 00:50:59,765 - INFO - Epoch 4 Step 100/153 | loss=0.2344 | swd=0.005559 | ssm=0.2288
+2026-01-22 00:51:35,523 - INFO - Epoch 4 Step 153/153 | loss=0.2238 | swd=0.007285 | ssm=0.2165
+2026-01-22 00:51:35,528 - INFO - Epoch 4/100 completed in 0.0s | Loss: 0.2230 | SWD: 0.0061 | SSM: 0.2169 | LR: 9.96e-05
+2026-01-22 00:51:37,688 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0004.pt
+2026-01-22 00:51:39,216 - INFO - Starting epoch 5/100
