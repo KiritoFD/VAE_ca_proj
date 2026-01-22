@@ -185,11 +185,72 @@ class CosineSSMLoss(nn.Module):
         return loss
 
 
+class FrequencyLoss(nn.Module):
+    """
+    Frequency (Gradient) Loss to enforce edge sharpness.
+    
+    Large-batch training tends to produce blurry outputs (averaging effect).
+    This loss explicitly penalizes lack of high-frequency details by comparing
+    spatial gradients (edges) between predicted and target latents.
+    
+    Uses Sobel filters to extract edge information.
+    """
+    
+    def __init__(self, weight=1.0):
+        super().__init__()
+        self.weight = weight
+        
+        # Sobel kernels for edge detection
+        self.register_buffer('kernel_x', torch.tensor(
+            [[-1., 0., 1.], [-2., 0., 2.], [-1., 0., 1.]],
+            dtype=torch.float32
+        ).view(1, 1, 3, 3))
+        
+        self.register_buffer('kernel_y', torch.tensor(
+            [[-1., -2., -1.], [0., 0., 0.], [1., 2., 1.]],
+            dtype=torch.float32
+        ).view(1, 1, 3, 3))
+    
+    def forward(self, x_pred, x_target):
+        """
+        Args:
+            x_pred: [B, 4, H, W] predicted latent
+            x_target: [B, 4, H, W] target latent
+        
+        Returns:
+            loss: scalar gradient matching loss
+        """
+        # Convert to float32 for stability
+        x_pred = x_pred.float()
+        x_target = x_target.float()
+        
+        B, C, H, W = x_pred.shape
+        
+        # Compute gradients for each channel separately (using groups=C)
+        # Expand kernels to match all channels
+        kernel_x = self.kernel_x.expand(C, -1, -1, -1)
+        kernel_y = self.kernel_y.expand(C, -1, -1, -1)
+        
+        # Compute x-direction gradients
+        gx_pred = F.conv2d(x_pred, kernel_x, padding=1, groups=C)
+        gx_target = F.conv2d(x_target, kernel_x, padding=1, groups=C)
+        
+        # Compute y-direction gradients
+        gy_pred = F.conv2d(x_pred, kernel_y, padding=1, groups=C)
+        gy_target = F.conv2d(x_target, kernel_y, padding=1, groups=C)
+        
+        # L1 loss on gradients (enforce edge sharpness)
+        loss = F.l1_loss(gx_pred, gx_target) + F.l1_loss(gy_pred, gy_target)
+        
+        return self.weight * loss
+
+
+
 class GeometricFreeEnergyLoss(nn.Module):
     """
     Total geometric free energy combining style and content potentials.
     
-    E_total = w_style * SWD(x, x_style) + w_content * SSM(x, x_src)
+    E_total = w_style * SWD(x, x_style) + w_content * SSM(x, x_src) + freq_loss(x, x_src)
     
     This is the fundamental loss that replaces MSE velocity matching.
     """
@@ -198,6 +259,7 @@ class GeometricFreeEnergyLoss(nn.Module):
         self,
         w_style=1.0,
         w_content=1.0,
+        w_freq=10.0,
         patch_size=3,
         num_projections=64,
         max_samples=4096
@@ -216,7 +278,12 @@ class GeometricFreeEnergyLoss(nn.Module):
         )
         
         # Content potential: Cosine-SSM
-        self.ssm_loss = CosineSSMLoss(use_fp32=True)
+        self.ssm_loss = CosineSSMLoss(
+            use_fp32=True, 
+            max_spatial_samples=128 # 或者 256，限制计算量
+        )
+        # Frequency loss: High-frequency sharpness (critical for large-batch training)
+        self.freq_loss = FrequencyLoss(weight=w_freq)
     
     def forward(self, x_pred, x_style, x_src):
         """
@@ -232,13 +299,22 @@ class GeometricFreeEnergyLoss(nn.Module):
         style_potential = self.swd_loss(x_pred, x_style)
         content_potential = self.ssm_loss(x_pred, x_src)
         
+        # Frequency loss: Enforce edge sharpness
+        # This is crucial for large-batch training to prevent over-smoothing
+        freq_potential = self.freq_loss(x_pred, x_src)
+        
         # Total free energy
-        total_energy = self.w_style * style_potential + self.w_content * content_potential
+        total_energy = (
+            self.w_style * style_potential +
+            self.w_content * content_potential +
+            freq_potential  # Already weighted in FrequencyLoss.__init__
+        )
         
         return {
             'total': total_energy,
             'style_swd': style_potential,
-            'content_ssm': content_potential
+            'content_ssm': content_potential,
+            'freq_loss': freq_potential
         }
 
 

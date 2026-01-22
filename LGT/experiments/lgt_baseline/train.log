@@ -1,25 +1,1511 @@
-2026-01-22 01:10:24,988 - INFO - Using device: cuda
-2026-01-22 01:10:24,988 - INFO - Loading latents into memory...
-2026-01-22 01:10:25,002 - INFO -   Style 0 (style0): 1072 files
-2026-01-22 01:10:30,263 - INFO -   Style 1 (style1): 6287 files
-2026-01-22 01:10:59,774 - INFO - ✓ Loaded 7359 latents into memory
-2026-01-22 01:10:59,775 - INFO -   Shape: torch.Size([7359, 4, 32, 32])
-2026-01-22 01:10:59,775 - INFO -   Memory: 0.12 GB
-2026-01-22 01:11:00,129 - INFO - Model parameters: 20,337,668
+2026-01-22 01:15:52,890 - INFO - Using device: cuda
+2026-01-22 01:15:52,891 - INFO - Loading latents into memory...
+2026-01-22 01:15:52,903 - INFO -   Style 0 (style0): 1072 files
+2026-01-22 01:15:58,641 - INFO -   Style 1 (style1): 6287 files
+2026-01-22 01:16:26,480 - INFO - ✓ Loaded 7359 latents into memory
+2026-01-22 01:16:26,480 - INFO -   Shape: torch.Size([7359, 4, 32, 32])
+2026-01-22 01:16:26,481 - INFO -   Memory: 0.12 GB
+2026-01-22 01:16:26,820 - INFO - Model parameters: 20,337,668
 /mnt/g/GitHub/VAE_ca_proj/LGT/train.py:176: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
   self.scaler = torch.cuda.amp.GradScaler(enabled=self.use_amp)
-2026-01-22 01:11:05,404 - INFO - Loading checkpoint: checkpoints/lgt_baseline/latest.pt
-2026-01-22 01:11:06,689 - INFO - ✓ Resumed from epoch 11
-2026-01-22 01:11:06,690 - INFO -   Next epoch will be: 12
-2026-01-22 01:11:06,690 - INFO - ================================================================================
-2026-01-22 01:11:06,690 - INFO - Starting LGT Training
-2026-01-22 01:11:06,690 - INFO - ================================================================================
-2026-01-22 01:11:06,691 - INFO - Starting epoch 12/100
-2026-01-22 01:12:19,554 - INFO - Epoch 12 Step 30/30 | loss=0.1951 | swd=0.002462 | ssm=0.1926
-2026-01-22 01:12:19,556 - INFO - Epoch 12/100 completed in 0.0s | Loss: 0.2034 | SWD: 0.0031 | SSM: 0.2003 | LR: 9.65e-05
-2026-01-22 01:12:20,947 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0012.pt
-2026-01-22 01:12:22,348 - INFO - Starting epoch 13/100
-2026-01-22 01:13:35,787 - INFO - Epoch 13 Step 30/30 | loss=0.2075 | swd=0.004730 | ssm=0.2027
-2026-01-22 01:13:35,789 - INFO - Epoch 13/100 completed in 0.0s | Loss: 0.2017 | SWD: 0.0032 | SSM: 0.1985 | LR: 9.59e-05
-2026-01-22 01:13:37,188 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0013.pt
-2026-01-22 01:13:38,650 - INFO - Starting epoch 14/100
+2026-01-22 01:16:30,935 - INFO - Loading checkpoint: checkpoints/lgt_baseline/latest.pt
+2026-01-22 01:16:32,217 - INFO - ✓ Resumed from epoch 14
+2026-01-22 01:16:32,217 - INFO -   Next epoch will be: 15
+2026-01-22 01:16:32,218 - INFO - ================================================================================
+2026-01-22 01:16:32,218 - INFO - Starting LGT Training
+2026-01-22 01:16:32,218 - INFO - ================================================================================
+2026-01-22 01:16:32,219 - INFO - Starting epoch 15/300
+2026-01-22 01:17:44,985 - INFO - Epoch 15 Step 30/30 | loss=0.1839 | swd=0.003617 | ssm=0.1803
+2026-01-22 01:17:44,987 - INFO - Epoch 15/300 completed in 0.0s | Loss: 0.2007 | SWD: 0.0033 | SSM: 0.1974 | LR: 9.46e-05
+2026-01-22 01:17:47,180 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0015.pt
+2026-01-22 01:17:48,784 - INFO - 
+================================================================================
+2026-01-22 01:17:48,784 - INFO - Running Inference Evaluation (Epoch 15)
+2026-01-22 01:17:48,784 - INFO - ================================================================================
+2026-01-22 01:17:48,796 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 01:17:48,796 - WARNING - No test images found. Skipping inference.
+2026-01-22 01:17:48,796 - INFO - Starting epoch 16/300
+2026-01-22 01:19:01,297 - INFO - Epoch 16 Step 30/30 | loss=0.2126 | swd=0.004166 | ssm=0.2084
+2026-01-22 01:19:01,299 - INFO - Epoch 16/300 completed in 0.0s | Loss: 0.2039 | SWD: 0.0036 | SSM: 0.2003 | LR: 9.39e-05
+2026-01-22 01:19:02,683 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0016.pt
+2026-01-22 01:19:04,083 - INFO - Starting epoch 17/300
+2026-01-22 01:20:16,400 - INFO - Epoch 17 Step 30/30 | loss=0.2062 | swd=0.002924 | ssm=0.2033
+2026-01-22 01:20:16,402 - INFO - Epoch 17/300 completed in 0.0s | Loss: 0.2065 | SWD: 0.0035 | SSM: 0.2029 | LR: 9.31e-05
+2026-01-22 01:20:17,814 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0017.pt
+2026-01-22 01:20:19,282 - INFO - Starting epoch 18/300
+2026-01-22 01:21:30,108 - INFO - Epoch 18 Step 30/30 | loss=0.1934 | swd=0.002298 | ssm=0.1911
+2026-01-22 01:21:30,109 - INFO - Epoch 18/300 completed in 0.0s | Loss: 0.2011 | SWD: 0.0030 | SSM: 0.1981 | LR: 9.23e-05
+2026-01-22 01:21:31,572 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0018.pt
+2026-01-22 01:21:32,976 - INFO - Starting epoch 19/300
+2026-01-22 01:22:45,484 - INFO - Epoch 19 Step 30/30 | loss=0.1882 | swd=0.002999 | ssm=0.1852
+2026-01-22 01:22:45,485 - INFO - Epoch 19/300 completed in 0.0s | Loss: 0.2028 | SWD: 0.0035 | SSM: 0.1994 | LR: 9.14e-05
+2026-01-22 01:22:47,031 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0019.pt
+2026-01-22 01:22:48,569 - INFO - Starting epoch 20/300
+2026-01-22 01:23:58,859 - INFO - Epoch 20 Step 30/30 | loss=0.1968 | swd=0.002883 | ssm=0.1939
+2026-01-22 01:23:58,861 - INFO - Epoch 20/300 completed in 0.0s | Loss: 0.2043 | SWD: 0.0035 | SSM: 0.2008 | LR: 9.05e-05
+2026-01-22 01:24:00,291 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0020.pt
+2026-01-22 01:24:01,761 - INFO - 
+================================================================================
+2026-01-22 01:24:01,762 - INFO - Running Inference Evaluation (Epoch 20)
+2026-01-22 01:24:01,762 - INFO - ================================================================================
+2026-01-22 01:24:01,765 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 01:24:01,765 - WARNING - No test images found. Skipping inference.
+2026-01-22 01:24:01,765 - INFO - Starting epoch 21/300
+2026-01-22 01:25:13,702 - INFO - Epoch 21 Step 30/30 | loss=0.2003 | swd=0.002910 | ssm=0.1974
+2026-01-22 01:25:13,704 - INFO - Epoch 21/300 completed in 0.0s | Loss: 0.2026 | SWD: 0.0032 | SSM: 0.1994 | LR: 8.96e-05
+2026-01-22 01:25:15,197 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0021.pt
+2026-01-22 01:25:16,615 - INFO - Starting epoch 22/300
+2026-01-22 01:26:26,642 - INFO - Epoch 22 Step 30/30 | loss=0.2054 | swd=0.003490 | ssm=0.2019
+2026-01-22 01:26:26,643 - INFO - Epoch 22/300 completed in 0.0s | Loss: 0.2000 | SWD: 0.0032 | SSM: 0.1968 | LR: 8.86e-05
+2026-01-22 01:26:28,080 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0022.pt
+2026-01-22 01:26:29,422 - INFO - Starting epoch 23/300
+2026-01-22 01:27:41,334 - INFO - Epoch 23 Step 30/30 | loss=0.2051 | swd=0.003399 | ssm=0.2017
+2026-01-22 01:27:41,335 - INFO - Epoch 23/300 completed in 0.0s | Loss: 0.2079 | SWD: 0.0039 | SSM: 0.2040 | LR: 8.76e-05
+2026-01-22 01:27:42,732 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0023.pt
+2026-01-22 01:27:44,194 - INFO - Starting epoch 24/300
+2026-01-22 01:28:56,329 - INFO - Epoch 24 Step 30/30 | loss=0.1898 | swd=0.003192 | ssm=0.1866
+2026-01-22 01:28:56,330 - INFO - Epoch 24/300 completed in 0.0s | Loss: 0.2023 | SWD: 0.0038 | SSM: 0.1985 | LR: 8.66e-05
+2026-01-22 01:28:57,719 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0024.pt
+2026-01-22 01:28:59,106 - INFO - Starting epoch 25/300
+2026-01-22 01:30:09,249 - INFO - Epoch 25 Step 30/30 | loss=0.1988 | swd=0.004006 | ssm=0.1948
+2026-01-22 01:30:09,250 - INFO - Epoch 25/300 completed in 0.0s | Loss: 0.2031 | SWD: 0.0032 | SSM: 0.1999 | LR: 8.55e-05
+2026-01-22 01:30:10,634 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0025.pt
+2026-01-22 01:30:12,010 - INFO - 
+================================================================================
+2026-01-22 01:30:12,011 - INFO - Running Inference Evaluation (Epoch 25)
+2026-01-22 01:30:12,011 - INFO - ================================================================================
+2026-01-22 01:30:12,014 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 01:30:12,014 - WARNING - No test images found. Skipping inference.
+2026-01-22 01:30:12,014 - INFO - Starting epoch 26/300
+2026-01-22 01:31:24,199 - INFO - Epoch 26 Step 30/30 | loss=0.2028 | swd=0.003670 | ssm=0.1991
+2026-01-22 01:31:24,200 - INFO - Epoch 26/300 completed in 0.0s | Loss: 0.2005 | SWD: 0.0032 | SSM: 0.1973 | LR: 8.44e-05
+2026-01-22 01:31:25,626 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0026.pt
+2026-01-22 01:31:27,026 - INFO - Starting epoch 27/300
+2026-01-22 01:32:37,196 - INFO - Epoch 27 Step 30/30 | loss=0.1898 | swd=0.004462 | ssm=0.1854
+2026-01-22 01:32:37,198 - INFO - Epoch 27/300 completed in 0.0s | Loss: 0.2020 | SWD: 0.0035 | SSM: 0.1985 | LR: 8.32e-05
+2026-01-22 01:32:38,583 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0027.pt
+2026-01-22 01:32:39,965 - INFO - Starting epoch 28/300
+2026-01-22 01:33:51,877 - INFO - Epoch 28 Step 30/30 | loss=0.2006 | swd=0.003573 | ssm=0.1970
+2026-01-22 01:33:51,879 - INFO - Epoch 28/300 completed in 0.0s | Loss: 0.2040 | SWD: 0.0038 | SSM: 0.2002 | LR: 8.21e-05
+2026-01-22 01:33:53,296 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0028.pt
+2026-01-22 01:33:54,753 - INFO - Starting epoch 29/300
+2026-01-22 01:35:06,770 - INFO - Epoch 29 Step 30/30 | loss=0.2214 | swd=0.004709 | ssm=0.2167
+2026-01-22 01:35:06,772 - INFO - Epoch 29/300 completed in 0.0s | Loss: 0.2044 | SWD: 0.0034 | SSM: 0.2010 | LR: 8.08e-05
+2026-01-22 01:35:08,189 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0029.pt
+2026-01-22 01:35:07,701 - INFO - Starting epoch 30/300
+2026-01-22 01:36:20,066 - INFO - Epoch 30 Step 30/30 | loss=0.2028 | swd=0.003365 | ssm=0.1995
+2026-01-22 01:36:20,068 - INFO - Epoch 30/300 completed in 0.0s | Loss: 0.2024 | SWD: 0.0033 | SSM: 0.1991 | LR: 7.96e-05
+2026-01-22 01:36:21,511 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0030.pt
+2026-01-22 01:36:22,891 - INFO - 
+================================================================================
+2026-01-22 01:36:22,892 - INFO - Running Inference Evaluation (Epoch 30)
+2026-01-22 01:36:22,892 - INFO - ================================================================================
+2026-01-22 01:36:22,895 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 01:36:22,895 - WARNING - No test images found. Skipping inference.
+2026-01-22 01:36:22,895 - INFO - Starting epoch 31/300
+2026-01-22 01:37:35,384 - INFO - Epoch 31 Step 30/30 | loss=0.2044 | swd=0.004079 | ssm=0.2003
+2026-01-22 01:37:35,386 - INFO - Epoch 31/300 completed in 0.0s | Loss: 0.1992 | SWD: 0.0032 | SSM: 0.1960 | LR: 7.83e-05
+2026-01-22 01:37:36,804 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0031.pt
+2026-01-22 01:37:38,214 - INFO - Starting epoch 32/300
+2026-01-22 01:38:48,788 - INFO - Epoch 32 Step 30/30 | loss=0.1868 | swd=0.002766 | ssm=0.1841
+2026-01-22 01:38:48,790 - INFO - Epoch 32/300 completed in 0.0s | Loss: 0.2013 | SWD: 0.0042 | SSM: 0.1971 | LR: 7.70e-05
+2026-01-22 01:38:50,176 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0032.pt
+2026-01-22 01:38:51,575 - INFO - Starting epoch 33/300
+2026-01-22 01:40:03,878 - INFO - Epoch 33 Step 30/30 | loss=0.2075 | swd=0.002951 | ssm=0.2045
+2026-01-22 01:40:03,879 - INFO - Epoch 33/300 completed in 0.0s | Loss: 0.2009 | SWD: 0.0039 | SSM: 0.1970 | LR: 7.57e-05
+2026-01-22 01:40:05,296 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0033.pt
+2026-01-22 01:40:06,707 - INFO - Starting epoch 34/300
+2026-01-22 01:41:17,374 - INFO - Epoch 34 Step 30/30 | loss=0.1905 | swd=0.003232 | ssm=0.1872
+2026-01-22 01:41:17,376 - INFO - Epoch 34/300 completed in 0.0s | Loss: 0.2018 | SWD: 0.0035 | SSM: 0.1982 | LR: 7.43e-05
+2026-01-22 01:41:18,808 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0034.pt
+2026-01-22 01:41:20,219 - INFO - Starting epoch 35/300
+2026-01-22 01:42:32,159 - INFO - Epoch 35 Step 30/30 | loss=0.1912 | swd=0.002177 | ssm=0.1890
+2026-01-22 01:42:32,160 - INFO - Epoch 35/300 completed in 0.0s | Loss: 0.2002 | SWD: 0.0034 | SSM: 0.1968 | LR: 7.30e-05
+2026-01-22 01:42:33,539 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0035.pt
+2026-01-22 01:42:34,923 - INFO - 
+================================================================================
+2026-01-22 01:42:34,923 - INFO - Running Inference Evaluation (Epoch 35)
+2026-01-22 01:42:34,924 - INFO - ================================================================================
+2026-01-22 01:42:34,927 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 01:42:34,927 - WARNING - No test images found. Skipping inference.
+2026-01-22 01:42:34,927 - INFO - Starting epoch 36/300
+2026-01-22 01:43:47,139 - INFO - Epoch 36 Step 30/30 | loss=0.2147 | swd=0.003492 | ssm=0.2113
+2026-01-22 01:43:47,140 - INFO - Epoch 36/300 completed in 0.0s | Loss: 0.2009 | SWD: 0.0033 | SSM: 0.1976 | LR: 7.16e-05
+2026-01-22 01:43:48,579 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0036.pt
+2026-01-22 01:43:49,997 - INFO - Starting epoch 37/300
+2026-01-22 01:45:00,015 - INFO - Epoch 37 Step 30/30 | loss=0.2066 | swd=0.003213 | ssm=0.2033
+2026-01-22 01:45:00,017 - INFO - Epoch 37/300 completed in 0.0s | Loss: 0.2018 | SWD: 0.0032 | SSM: 0.1986 | LR: 7.02e-05
+2026-01-22 01:45:01,402 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0037.pt
+2026-01-22 01:45:02,799 - INFO - Starting epoch 38/300
+2026-01-22 01:46:14,971 - INFO - Epoch 38 Step 30/30 | loss=0.2031 | swd=0.003896 | ssm=0.1992
+2026-01-22 01:46:14,973 - INFO - Epoch 38/300 completed in 0.0s | Loss: 0.2017 | SWD: 0.0040 | SSM: 0.1976 | LR: 6.87e-05
+2026-01-22 01:46:16,457 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0038.pt
+2026-01-22 01:46:17,833 - INFO - Starting epoch 39/300
+2026-01-22 01:47:28,137 - INFO - Epoch 39 Step 30/30 | loss=0.2098 | swd=0.003506 | ssm=0.2063
+2026-01-22 01:47:28,139 - INFO - Epoch 39/300 completed in 0.0s | Loss: 0.2009 | SWD: 0.0037 | SSM: 0.1972 | LR: 6.73e-05
+2026-01-22 01:47:29,550 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0039.pt
+2026-01-22 01:47:30,926 - INFO - Starting epoch 40/300
+2026-01-22 01:48:43,115 - INFO - Epoch 40 Step 30/30 | loss=0.1974 | swd=0.004586 | ssm=0.1928
+2026-01-22 01:48:43,116 - INFO - Epoch 40/300 completed in 0.0s | Loss: 0.2002 | SWD: 0.0034 | SSM: 0.1968 | LR: 6.58e-05
+2026-01-22 01:48:44,534 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0040.pt
+2026-01-22 01:48:45,993 - INFO - 
+================================================================================
+2026-01-22 01:48:45,994 - INFO - Running Inference Evaluation (Epoch 40)
+2026-01-22 01:48:45,994 - INFO - ================================================================================
+2026-01-22 01:48:45,997 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 01:48:45,997 - WARNING - No test images found. Skipping inference.
+2026-01-22 01:48:45,997 - INFO - Starting epoch 41/300
+2026-01-22 01:49:56,816 - INFO - Epoch 41 Step 30/30 | loss=0.1890 | swd=0.002910 | ssm=0.1861
+2026-01-22 01:49:56,818 - INFO - Epoch 41/300 completed in 0.0s | Loss: 0.1988 | SWD: 0.0031 | SSM: 0.1957 | LR: 6.43e-05
+2026-01-22 01:49:58,207 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0041.pt
+2026-01-22 01:49:59,599 - INFO - Starting epoch 42/300
+2026-01-22 01:51:12,053 - INFO - Epoch 42 Step 30/30 | loss=0.1921 | swd=0.004085 | ssm=0.1881
+2026-01-22 01:51:12,055 - INFO - Epoch 42/300 completed in 0.0s | Loss: 0.1994 | SWD: 0.0032 | SSM: 0.1962 | LR: 6.28e-05
+2026-01-22 01:51:13,445 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0042.pt
+2026-01-22 01:51:14,878 - INFO - Starting epoch 43/300
+2026-01-22 01:52:27,154 - INFO - Epoch 43 Step 30/30 | loss=0.1908 | swd=0.003782 | ssm=0.1870
+2026-01-22 01:52:27,155 - INFO - Epoch 43/300 completed in 0.0s | Loss: 0.2003 | SWD: 0.0038 | SSM: 0.1965 | LR: 6.13e-05
+2026-01-22 01:52:28,553 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0043.pt
+2026-01-22 01:52:29,962 - INFO - Starting epoch 44/300
+2026-01-22 01:53:39,987 - INFO - Epoch 44 Step 30/30 | loss=0.1844 | swd=0.003530 | ssm=0.1809
+2026-01-22 01:53:39,989 - INFO - Epoch 44/300 completed in 0.0s | Loss: 0.1977 | SWD: 0.0033 | SSM: 0.1945 | LR: 5.98e-05
+2026-01-22 01:53:41,379 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0044.pt
+2026-01-22 01:53:42,751 - INFO - Starting epoch 45/300
+2026-01-22 01:54:54,974 - INFO - Epoch 45 Step 30/30 | loss=0.2198 | swd=0.003484 | ssm=0.2163
+2026-01-22 01:54:54,975 - INFO - Epoch 45/300 completed in 0.0s | Loss: 0.1997 | SWD: 0.0035 | SSM: 0.1962 | LR: 5.82e-05
+2026-01-22 01:54:56,367 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0045.pt
+2026-01-22 01:54:57,724 - INFO - 
+================================================================================
+2026-01-22 01:54:57,724 - INFO - Running Inference Evaluation (Epoch 45)
+2026-01-22 01:54:57,724 - INFO - ================================================================================
+2026-01-22 01:54:57,727 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 01:54:57,727 - WARNING - No test images found. Skipping inference.
+2026-01-22 01:54:57,727 - INFO - Starting epoch 46/300
+2026-01-22 01:56:07,894 - INFO - Epoch 46 Step 30/30 | loss=0.2053 | swd=0.004891 | ssm=0.2004
+2026-01-22 01:56:07,896 - INFO - Epoch 46/300 completed in 0.0s | Loss: 0.1988 | SWD: 0.0036 | SSM: 0.1952 | LR: 5.67e-05
+2026-01-22 01:56:09,273 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0046.pt
+2026-01-22 01:56:10,648 - INFO - Starting epoch 47/300
+2026-01-22 01:57:22,798 - INFO - Epoch 47 Step 30/30 | loss=0.2059 | swd=0.002949 | ssm=0.2030
+2026-01-22 01:57:22,799 - INFO - Epoch 47/300 completed in 0.0s | Loss: 0.2022 | SWD: 0.0039 | SSM: 0.1984 | LR: 5.52e-05
+2026-01-22 01:57:24,171 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0047.pt
+2026-01-22 01:57:25,550 - INFO - Starting epoch 48/300
+2026-01-22 01:58:37,655 - INFO - Epoch 48 Step 30/30 | loss=0.2009 | swd=0.003050 | ssm=0.1979
+2026-01-22 01:58:37,656 - INFO - Epoch 48/300 completed in 0.0s | Loss: 0.1993 | SWD: 0.0032 | SSM: 0.1962 | LR: 5.36e-05
+2026-01-22 01:58:39,043 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0048.pt
+2026-01-22 01:58:38,543 - INFO - Starting epoch 49/300
+2026-01-22 01:59:50,723 - INFO - Epoch 49 Step 30/30 | loss=0.2234 | swd=0.004975 | ssm=0.2185
+2026-01-22 01:59:50,725 - INFO - Epoch 49/300 completed in 0.0s | Loss: 0.1970 | SWD: 0.0034 | SSM: 0.1936 | LR: 5.21e-05
+2026-01-22 01:59:52,126 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0049.pt
+2026-01-22 01:59:53,502 - INFO - Starting epoch 50/300
+2026-01-22 02:01:05,425 - INFO - Epoch 50 Step 30/30 | loss=0.2028 | swd=0.004219 | ssm=0.1986
+2026-01-22 02:01:05,426 - INFO - Epoch 50/300 completed in 0.0s | Loss: 0.1991 | SWD: 0.0034 | SSM: 0.1958 | LR: 5.05e-05
+2026-01-22 02:01:06,812 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0050.pt
+2026-01-22 02:01:08,176 - INFO - 
+================================================================================
+2026-01-22 02:01:08,177 - INFO - Running Inference Evaluation (Epoch 50)
+2026-01-22 02:01:08,177 - INFO - ================================================================================
+2026-01-22 02:01:08,180 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 02:01:08,180 - WARNING - No test images found. Skipping inference.
+2026-01-22 02:01:08,180 - INFO - Starting epoch 51/300
+2026-01-22 02:02:18,530 - INFO - Epoch 51 Step 30/30 | loss=0.2079 | swd=0.003916 | ssm=0.2040
+2026-01-22 02:02:18,531 - INFO - Epoch 51/300 completed in 0.0s | Loss: 0.2020 | SWD: 0.0032 | SSM: 0.1988 | LR: 4.89e-05
+2026-01-22 02:02:19,927 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0051.pt
+2026-01-22 02:02:21,347 - INFO - Starting epoch 52/300
+2026-01-22 02:03:51,431 - INFO - Epoch 52 Step 30/30 | loss=0.1925 | swd=0.004130 | ssm=0.1884
+2026-01-22 02:03:51,433 - INFO - Epoch 52/300 completed in 0.0s | Loss: 0.1979 | SWD: 0.0031 | SSM: 0.1948 | LR: 4.74e-05
+2026-01-22 02:03:52,809 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0052.pt
+2026-01-22 02:03:54,179 - INFO - Starting epoch 53/300
+2026-01-22 02:05:33,926 - INFO - Epoch 53 Step 30/30 | loss=0.2004 | swd=0.002826 | ssm=0.1975
+2026-01-22 02:05:33,928 - INFO - Epoch 53/300 completed in 0.0s | Loss: 0.1983 | SWD: 0.0030 | SSM: 0.1953 | LR: 4.58e-05
+2026-01-22 02:05:35,297 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0053.pt
+2026-01-22 02:05:36,658 - INFO - Starting epoch 54/300
+2026-01-22 02:07:16,387 - INFO - Epoch 54 Step 30/30 | loss=0.1820 | swd=0.002719 | ssm=0.1793
+2026-01-22 02:07:16,389 - INFO - Epoch 54/300 completed in 0.0s | Loss: 0.1989 | SWD: 0.0032 | SSM: 0.1957 | LR: 4.43e-05
+2026-01-22 02:07:17,763 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0054.pt
+2026-01-22 02:07:19,200 - INFO - Starting epoch 55/300
+2026-01-22 02:08:56,938 - INFO - Epoch 55 Step 30/30 | loss=0.1945 | swd=0.002290 | ssm=0.1922
+2026-01-22 02:08:56,939 - INFO - Epoch 55/300 completed in 0.0s | Loss: 0.1960 | SWD: 0.0031 | SSM: 0.1929 | LR: 4.28e-05
+2026-01-22 02:08:58,316 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0055.pt
+2026-01-22 02:08:59,649 - INFO - 
+================================================================================
+2026-01-22 02:08:59,650 - INFO - Running Inference Evaluation (Epoch 55)
+2026-01-22 02:08:59,650 - INFO - ================================================================================
+2026-01-22 02:08:59,653 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 02:08:59,653 - WARNING - No test images found. Skipping inference.
+2026-01-22 02:08:59,653 - INFO - Starting epoch 56/300
+2026-01-22 02:10:39,011 - INFO - Epoch 56 Step 30/30 | loss=0.2073 | swd=0.003173 | ssm=0.2041
+2026-01-22 02:10:39,012 - INFO - Epoch 56/300 completed in 0.0s | Loss: 0.1987 | SWD: 0.0033 | SSM: 0.1954 | LR: 4.12e-05
+2026-01-22 02:10:40,390 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0056.pt
+2026-01-22 02:10:41,743 - INFO - Starting epoch 57/300
+2026-01-22 02:12:21,355 - INFO - Epoch 57 Step 30/30 | loss=0.1990 | swd=0.003166 | ssm=0.1959
+2026-01-22 02:12:21,356 - INFO - Epoch 57/300 completed in 0.0s | Loss: 0.1960 | SWD: 0.0033 | SSM: 0.1927 | LR: 3.97e-05
+2026-01-22 02:12:22,755 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0057.pt
+2026-01-22 02:12:24,102 - INFO - Starting epoch 58/300
+2026-01-22 02:14:01,351 - INFO - Epoch 58 Step 30/30 | loss=0.1975 | swd=0.003553 | ssm=0.1940
+2026-01-22 02:14:01,353 - INFO - Epoch 58/300 completed in 0.0s | Loss: 0.1987 | SWD: 0.0032 | SSM: 0.1955 | LR: 3.82e-05
+2026-01-22 02:14:02,725 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0058.pt
+2026-01-22 02:14:04,072 - INFO - Starting epoch 59/300
+2026-01-22 02:15:43,293 - INFO - Epoch 59 Step 30/30 | loss=0.1976 | swd=0.002630 | ssm=0.1950
+2026-01-22 02:15:43,294 - INFO - Epoch 59/300 completed in 0.0s | Loss: 0.1966 | SWD: 0.0030 | SSM: 0.1936 | LR: 3.67e-05
+2026-01-22 02:15:44,681 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0059.pt
+2026-01-22 02:15:46,046 - INFO - Starting epoch 60/300
+2026-01-22 02:17:25,392 - INFO - Epoch 60 Step 30/30 | loss=0.1981 | swd=0.004546 | ssm=0.1935
+2026-01-22 02:17:25,393 - INFO - Epoch 60/300 completed in 0.0s | Loss: 0.1968 | SWD: 0.0032 | SSM: 0.1936 | LR: 3.52e-05
+2026-01-22 02:17:26,750 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0060.pt
+2026-01-22 02:17:28,107 - INFO - 
+================================================================================
+2026-01-22 02:17:28,107 - INFO - Running Inference Evaluation (Epoch 60)
+2026-01-22 02:17:28,108 - INFO - ================================================================================
+2026-01-22 02:17:28,111 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 02:17:28,111 - WARNING - No test images found. Skipping inference.
+2026-01-22 02:17:28,111 - INFO - Starting epoch 61/300
+2026-01-22 02:19:05,614 - INFO - Epoch 61 Step 30/30 | loss=0.1974 | swd=0.002526 | ssm=0.1948
+2026-01-22 02:19:05,615 - INFO - Epoch 61/300 completed in 0.0s | Loss: 0.1982 | SWD: 0.0034 | SSM: 0.1949 | LR: 3.37e-05
+2026-01-22 02:19:07,009 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0061.pt
+2026-01-22 02:19:08,352 - INFO - Starting epoch 62/300
+2026-01-22 02:20:48,122 - INFO - Epoch 62 Step 30/30 | loss=0.1987 | swd=0.003372 | ssm=0.1953
+2026-01-22 02:20:48,123 - INFO - Epoch 62/300 completed in 0.0s | Loss: 0.2002 | SWD: 0.0032 | SSM: 0.1970 | LR: 3.23e-05
+2026-01-22 02:20:49,511 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0062.pt
+2026-01-22 02:20:50,862 - INFO - Starting epoch 63/300
+2026-01-22 02:22:30,165 - INFO - Epoch 63 Step 30/30 | loss=0.2128 | swd=0.003035 | ssm=0.2098
+2026-01-22 02:22:30,166 - INFO - Epoch 63/300 completed in 0.0s | Loss: 0.1988 | SWD: 0.0032 | SSM: 0.1957 | LR: 3.08e-05
+2026-01-22 02:22:31,700 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0063.pt
+2026-01-22 02:22:33,194 - INFO - Starting epoch 64/300
+2026-01-22 02:24:10,658 - INFO - Epoch 64 Step 30/30 | loss=0.1985 | swd=0.002754 | ssm=0.1957
+2026-01-22 02:24:10,659 - INFO - Epoch 64/300 completed in 0.0s | Loss: 0.1977 | SWD: 0.0032 | SSM: 0.1945 | LR: 2.94e-05
+2026-01-22 02:24:11,996 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0064.pt
+2026-01-22 02:24:13,365 - INFO - Starting epoch 65/300
+2026-01-22 02:25:52,784 - INFO - Epoch 65 Step 30/30 | loss=0.2031 | swd=0.003670 | ssm=0.1994
+2026-01-22 02:25:52,786 - INFO - Epoch 65/300 completed in 0.0s | Loss: 0.1981 | SWD: 0.0031 | SSM: 0.1949 | LR: 2.80e-05
+2026-01-22 02:25:54,171 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0065.pt
+2026-01-22 02:25:55,534 - INFO - 
+================================================================================
+2026-01-22 02:25:55,534 - INFO - Running Inference Evaluation (Epoch 65)
+2026-01-22 02:25:55,534 - INFO - ================================================================================
+2026-01-22 02:25:55,537 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 02:25:55,537 - WARNING - No test images found. Skipping inference.
+2026-01-22 02:25:55,537 - INFO - Starting epoch 66/300
+2026-01-22 02:27:34,926 - INFO - Epoch 66 Step 30/30 | loss=0.1969 | swd=0.003594 | ssm=0.1933
+2026-01-22 02:27:34,927 - INFO - Epoch 66/300 completed in 0.0s | Loss: 0.1999 | SWD: 0.0034 | SSM: 0.1964 | LR: 2.67e-05
+2026-01-22 02:27:36,327 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0066.pt
+2026-01-22 02:27:37,704 - INFO - Starting epoch 67/300
+2026-01-22 02:29:15,473 - INFO - Epoch 67 Step 30/30 | loss=0.1929 | swd=0.002902 | ssm=0.1900
+2026-01-22 02:29:15,474 - INFO - Epoch 67/300 completed in 0.0s | Loss: 0.1958 | SWD: 0.0031 | SSM: 0.1927 | LR: 2.53e-05
+2026-01-22 02:29:16,860 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0067.pt
+2026-01-22 02:29:18,366 - INFO - Starting epoch 68/300
+2026-01-22 02:30:57,944 - INFO - Epoch 68 Step 30/30 | loss=0.2000 | swd=0.003342 | ssm=0.1966
+2026-01-22 02:30:57,946 - INFO - Epoch 68/300 completed in 0.0s | Loss: 0.1978 | SWD: 0.0032 | SSM: 0.1946 | LR: 2.40e-05
+2026-01-22 02:30:59,355 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0068.pt
+2026-01-22 02:31:00,740 - INFO - Starting epoch 69/300
+2026-01-22 02:32:40,209 - INFO - Epoch 69 Step 30/30 | loss=0.2023 | swd=0.003833 | ssm=0.1985
+2026-01-22 02:32:40,211 - INFO - Epoch 69/300 completed in 0.0s | Loss: 0.1980 | SWD: 0.0034 | SSM: 0.1945 | LR: 2.27e-05
+2026-01-22 02:32:41,593 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0069.pt
+2026-01-22 02:32:42,970 - INFO - Starting epoch 70/300
+2026-01-22 02:34:20,620 - INFO - Epoch 70 Step 30/30 | loss=0.1863 | swd=0.002325 | ssm=0.1839
+2026-01-22 02:34:20,621 - INFO - Epoch 70/300 completed in 0.0s | Loss: 0.1996 | SWD: 0.0034 | SSM: 0.1962 | LR: 2.14e-05
+2026-01-22 02:34:21,998 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0070.pt
+2026-01-22 02:34:23,356 - INFO - 
+================================================================================
+2026-01-22 02:34:23,357 - INFO - Running Inference Evaluation (Epoch 70)
+2026-01-22 02:34:23,357 - INFO - ================================================================================
+2026-01-22 02:34:23,360 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 02:34:23,360 - WARNING - No test images found. Skipping inference.
+2026-01-22 02:34:23,360 - INFO - Starting epoch 71/300
+2026-01-22 02:36:02,619 - INFO - Epoch 71 Step 30/30 | loss=0.1888 | swd=0.003077 | ssm=0.1857
+2026-01-22 02:36:02,620 - INFO - Epoch 71/300 completed in 0.0s | Loss: 0.1988 | SWD: 0.0031 | SSM: 0.1957 | LR: 2.02e-05
+2026-01-22 02:36:04,002 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0071.pt
+2026-01-22 02:36:05,410 - INFO - Starting epoch 72/300
+2026-01-22 02:37:44,695 - INFO - Epoch 72 Step 30/30 | loss=0.1948 | swd=0.003452 | ssm=0.1913
+2026-01-22 02:37:44,697 - INFO - Epoch 72/300 completed in 0.0s | Loss: 0.1952 | SWD: 0.0031 | SSM: 0.1921 | LR: 1.89e-05
+2026-01-22 02:37:46,064 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0072.pt
+2026-01-22 02:37:47,406 - INFO - Starting epoch 73/300
+2026-01-22 02:39:26,885 - INFO - Epoch 73 Step 30/30 | loss=0.1930 | swd=0.002937 | ssm=0.1900
+2026-01-22 02:39:26,886 - INFO - Epoch 73/300 completed in 0.0s | Loss: 0.1961 | SWD: 0.0032 | SSM: 0.1929 | LR: 1.78e-05
+2026-01-22 02:39:28,243 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0073.pt
+2026-01-22 02:39:27,658 - INFO - Starting epoch 74/300
+2026-01-22 02:41:07,041 - INFO - Epoch 74 Step 30/30 | loss=0.1861 | swd=0.003088 | ssm=0.1830
+2026-01-22 02:41:07,042 - INFO - Epoch 74/300 completed in 0.0s | Loss: 0.1971 | SWD: 0.0032 | SSM: 0.1939 | LR: 1.66e-05
+2026-01-22 02:41:08,429 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0074.pt
+2026-01-22 02:41:09,822 - INFO - Starting epoch 75/300
+2026-01-22 02:42:49,177 - INFO - Epoch 75 Step 30/30 | loss=0.1847 | swd=0.002610 | ssm=0.1821
+2026-01-22 02:42:49,178 - INFO - Epoch 75/300 completed in 0.0s | Loss: 0.1968 | SWD: 0.0030 | SSM: 0.1938 | LR: 1.55e-05
+2026-01-22 02:42:50,580 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0075.pt
+2026-01-22 02:42:52,018 - INFO - 
+================================================================================
+2026-01-22 02:42:52,018 - INFO - Running Inference Evaluation (Epoch 75)
+2026-01-22 02:42:52,018 - INFO - ================================================================================
+2026-01-22 02:42:52,021 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 02:42:52,021 - WARNING - No test images found. Skipping inference.
+2026-01-22 02:42:52,021 - INFO - Starting epoch 76/300
+2026-01-22 02:44:31,546 - INFO - Epoch 76 Step 30/30 | loss=0.1963 | swd=0.003376 | ssm=0.1929
+2026-01-22 02:44:31,547 - INFO - Epoch 76/300 completed in 0.0s | Loss: 0.1960 | SWD: 0.0030 | SSM: 0.1930 | LR: 1.44e-05
+2026-01-22 02:44:32,933 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0076.pt
+2026-01-22 02:44:34,282 - INFO - Starting epoch 77/300
+2026-01-22 02:46:11,633 - INFO - Epoch 77 Step 30/30 | loss=0.2000 | swd=0.002557 | ssm=0.1974
+2026-01-22 02:46:11,635 - INFO - Epoch 77/300 completed in 0.0s | Loss: 0.1970 | SWD: 0.0031 | SSM: 0.1939 | LR: 1.34e-05
+2026-01-22 02:46:13,000 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0077.pt
+2026-01-22 02:46:14,347 - INFO - Starting epoch 78/300
+2026-01-22 02:47:53,657 - INFO - Epoch 78 Step 30/30 | loss=0.2031 | swd=0.003314 | ssm=0.1998
+2026-01-22 02:47:53,658 - INFO - Epoch 78/300 completed in 0.0s | Loss: 0.1942 | SWD: 0.0029 | SSM: 0.1913 | LR: 1.24e-05
+2026-01-22 02:47:55,325 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0078.pt
+2026-01-22 02:47:56,878 - INFO - Starting epoch 79/300
+2026-01-22 02:49:36,467 - INFO - Epoch 79 Step 30/30 | loss=0.1944 | swd=0.002464 | ssm=0.1920
+2026-01-22 02:49:36,469 - INFO - Epoch 79/300 completed in 0.0s | Loss: 0.1981 | SWD: 0.0031 | SSM: 0.1950 | LR: 1.14e-05
+2026-01-22 02:49:37,913 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0079.pt
+2026-01-22 02:49:39,401 - INFO - Starting epoch 80/300
+2026-01-22 02:51:17,003 - INFO - Epoch 80 Step 30/30 | loss=0.1917 | swd=0.004013 | ssm=0.1877
+2026-01-22 02:51:17,005 - INFO - Epoch 80/300 completed in 0.0s | Loss: 0.1969 | SWD: 0.0031 | SSM: 0.1939 | LR: 1.05e-05
+2026-01-22 02:51:18,472 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0080.pt
+2026-01-22 02:51:19,958 - INFO - 
+================================================================================
+2026-01-22 02:51:19,958 - INFO - Running Inference Evaluation (Epoch 80)
+2026-01-22 02:51:19,958 - INFO - ================================================================================
+2026-01-22 02:51:19,962 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 02:51:19,962 - WARNING - No test images found. Skipping inference.
+2026-01-22 02:51:19,963 - INFO - Starting epoch 81/300
+2026-01-22 02:52:59,719 - INFO - Epoch 81 Step 30/30 | loss=0.2123 | swd=0.004179 | ssm=0.2082
+2026-01-22 02:52:59,720 - INFO - Epoch 81/300 completed in 0.0s | Loss: 0.1999 | SWD: 0.0032 | SSM: 0.1967 | LR: 9.56e-06
+2026-01-22 02:53:01,109 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0081.pt
+2026-01-22 02:53:02,514 - INFO - Starting epoch 82/300
+2026-01-22 02:54:41,932 - INFO - Epoch 82 Step 30/30 | loss=0.1883 | swd=0.002103 | ssm=0.1862
+2026-01-22 02:54:41,933 - INFO - Epoch 82/300 completed in 0.0s | Loss: 0.1991 | SWD: 0.0030 | SSM: 0.1961 | LR: 8.71e-06
+2026-01-22 02:54:43,299 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0082.pt
+2026-01-22 02:54:44,656 - INFO - Starting epoch 83/300
+2026-01-22 02:56:22,301 - INFO - Epoch 83 Step 30/30 | loss=0.2094 | swd=0.003718 | ssm=0.2057
+2026-01-22 02:56:22,302 - INFO - Epoch 83/300 completed in 0.0s | Loss: 0.1972 | SWD: 0.0031 | SSM: 0.1941 | LR: 7.89e-06
+2026-01-22 02:56:23,679 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0083.pt
+2026-01-22 02:56:25,035 - INFO - Starting epoch 84/300
+2026-01-22 02:58:04,348 - INFO - Epoch 84 Step 30/30 | loss=0.2113 | swd=0.002845 | ssm=0.2085
+2026-01-22 02:58:04,350 - INFO - Epoch 84/300 completed in 0.0s | Loss: 0.1995 | SWD: 0.0031 | SSM: 0.1964 | LR: 7.12e-06
+2026-01-22 02:58:05,763 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0084.pt
+2026-01-22 02:58:07,109 - INFO - Starting epoch 85/300
+2026-01-22 02:59:46,442 - INFO - Epoch 85 Step 30/30 | loss=0.2006 | swd=0.002789 | ssm=0.1978
+2026-01-22 02:59:46,443 - INFO - Epoch 85/300 completed in 0.0s | Loss: 0.1940 | SWD: 0.0028 | SSM: 0.1912 | LR: 6.40e-06
+2026-01-22 02:59:47,806 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0085.pt
+2026-01-22 02:59:49,142 - INFO - 
+================================================================================
+2026-01-22 02:59:49,143 - INFO - Running Inference Evaluation (Epoch 85)
+2026-01-22 02:59:49,143 - INFO - ================================================================================
+2026-01-22 02:59:49,146 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 02:59:49,146 - WARNING - No test images found. Skipping inference.
+2026-01-22 02:59:49,146 - INFO - Starting epoch 86/300
+2026-01-22 03:01:26,780 - INFO - Epoch 86 Step 30/30 | loss=0.1950 | swd=0.003148 | ssm=0.1919
+2026-01-22 03:01:26,781 - INFO - Epoch 86/300 completed in 0.0s | Loss: 0.1973 | SWD: 0.0030 | SSM: 0.1942 | LR: 5.71e-06
+2026-01-22 03:01:28,132 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0086.pt
+2026-01-22 03:01:29,516 - INFO - Starting epoch 87/300
+2026-01-22 03:03:08,689 - INFO - Epoch 87 Step 30/30 | loss=0.2128 | swd=0.002147 | ssm=0.2107
+2026-01-22 03:03:08,691 - INFO - Epoch 87/300 completed in 0.0s | Loss: 0.1959 | SWD: 0.0030 | SSM: 0.1929 | LR: 5.07e-06
+2026-01-22 03:03:10,053 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0087.pt
+2026-01-22 03:03:11,383 - INFO - Starting epoch 88/300
+2026-01-22 03:04:50,799 - INFO - Epoch 88 Step 30/30 | loss=0.1905 | swd=0.002469 | ssm=0.1880
+2026-01-22 03:04:50,800 - INFO - Epoch 88/300 completed in 0.0s | Loss: 0.1961 | SWD: 0.0029 | SSM: 0.1931 | LR: 4.48e-06
+2026-01-22 03:04:52,205 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0088.pt
+2026-01-22 03:04:53,552 - INFO - Starting epoch 89/300
+2026-01-22 03:06:30,868 - INFO - Epoch 89 Step 30/30 | loss=0.1987 | swd=0.003996 | ssm=0.1947
+2026-01-22 03:06:30,870 - INFO - Epoch 89/300 completed in 0.0s | Loss: 0.1938 | SWD: 0.0031 | SSM: 0.1908 | LR: 3.93e-06
+2026-01-22 03:06:32,236 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0089.pt
+2026-01-22 03:06:33,620 - INFO - Starting epoch 90/300
+2026-01-22 03:08:12,991 - INFO - Epoch 90 Step 30/30 | loss=0.2200 | swd=0.004130 | ssm=0.2158
+2026-01-22 03:08:12,992 - INFO - Epoch 90/300 completed in 0.0s | Loss: 0.2000 | SWD: 0.0032 | SSM: 0.1968 | LR: 3.42e-06
+2026-01-22 03:08:14,372 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0090.pt
+2026-01-22 03:08:15,742 - INFO - 
+================================================================================
+2026-01-22 03:08:15,743 - INFO - Running Inference Evaluation (Epoch 90)
+2026-01-22 03:08:15,743 - INFO - ================================================================================
+2026-01-22 03:08:15,746 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 03:08:15,746 - WARNING - No test images found. Skipping inference.
+2026-01-22 03:08:15,746 - INFO - Starting epoch 91/300
+2026-01-22 03:09:54,920 - INFO - Epoch 91 Step 30/30 | loss=0.1842 | swd=0.002943 | ssm=0.1813
+2026-01-22 03:09:54,921 - INFO - Epoch 91/300 completed in 0.0s | Loss: 0.1953 | SWD: 0.0030 | SSM: 0.1923 | LR: 2.97e-06
+2026-01-22 03:09:56,333 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0091.pt
+2026-01-22 03:09:57,723 - INFO - Starting epoch 92/300
+2026-01-22 03:11:35,043 - INFO - Epoch 92 Step 30/30 | loss=0.1854 | swd=0.002134 | ssm=0.1833
+2026-01-22 03:11:35,044 - INFO - Epoch 92/300 completed in 0.0s | Loss: 0.1957 | SWD: 0.0029 | SSM: 0.1928 | LR: 2.56e-06
+2026-01-22 03:11:36,408 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0092.pt
+2026-01-22 03:11:37,762 - INFO - Starting epoch 93/300
+2026-01-22 03:13:16,998 - INFO - Epoch 93 Step 30/30 | loss=0.1756 | swd=0.002443 | ssm=0.1732
+2026-01-22 03:13:16,999 - INFO - Epoch 93/300 completed in 0.0s | Loss: 0.1951 | SWD: 0.0030 | SSM: 0.1922 | LR: 2.19e-06
+2026-01-22 03:13:18,381 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0093.pt
+2026-01-22 03:13:19,760 - INFO - Starting epoch 94/300
+2026-01-22 03:14:59,039 - INFO - Epoch 94 Step 30/30 | loss=0.1957 | swd=0.003106 | ssm=0.1926
+2026-01-22 03:14:59,041 - INFO - Epoch 94/300 completed in 0.0s | Loss: 0.1960 | SWD: 0.0030 | SSM: 0.1929 | LR: 1.88e-06
+2026-01-22 03:15:00,462 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0094.pt
+2026-01-22 03:15:01,838 - INFO - Starting epoch 95/300
+2026-01-22 03:16:39,332 - INFO - Epoch 95 Step 30/30 | loss=0.1962 | swd=0.002895 | ssm=0.1933
+2026-01-22 03:16:39,333 - INFO - Epoch 95/300 completed in 0.0s | Loss: 0.1967 | SWD: 0.0032 | SSM: 0.1935 | LR: 1.61e-06
+2026-01-22 03:16:40,707 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0095.pt
+2026-01-22 03:16:42,059 - INFO - 
+================================================================================
+2026-01-22 03:16:42,059 - INFO - Running Inference Evaluation (Epoch 95)
+2026-01-22 03:16:42,059 - INFO - ================================================================================
+2026-01-22 03:16:42,063 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 03:16:42,063 - WARNING - No test images found. Skipping inference.
+2026-01-22 03:16:42,064 - INFO - Starting epoch 96/300
+2026-01-22 03:18:21,363 - INFO - Epoch 96 Step 30/30 | loss=0.1881 | swd=0.002300 | ssm=0.1858
+2026-01-22 03:18:21,364 - INFO - Epoch 96/300 completed in 0.0s | Loss: 0.1940 | SWD: 0.0030 | SSM: 0.1910 | LR: 1.39e-06
+2026-01-22 03:18:22,765 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0096.pt
+2026-01-22 03:18:24,120 - INFO - Starting epoch 97/300
+2026-01-22 03:20:03,461 - INFO - Epoch 97 Step 30/30 | loss=0.2102 | swd=0.003267 | ssm=0.2069
+2026-01-22 03:20:03,462 - INFO - Epoch 97/300 completed in 0.0s | Loss: 0.1965 | SWD: 0.0030 | SSM: 0.1934 | LR: 1.22e-06
+2026-01-22 03:20:04,844 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0097.pt
+2026-01-22 03:20:06,204 - INFO - Starting epoch 98/300
+2026-01-22 03:21:45,498 - INFO - Epoch 98 Step 30/30 | loss=0.1836 | swd=0.002141 | ssm=0.1814
+2026-01-22 03:21:45,499 - INFO - Epoch 98/300 completed in 0.0s | Loss: 0.1970 | SWD: 0.0030 | SSM: 0.1940 | LR: 1.10e-06
+2026-01-22 03:21:44,884 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0098.pt
+2026-01-22 03:21:46,337 - INFO - Starting epoch 99/300
+2026-01-22 03:23:25,665 - INFO - Epoch 99 Step 30/30 | loss=0.1908 | swd=0.002669 | ssm=0.1881
+2026-01-22 03:23:25,667 - INFO - Epoch 99/300 completed in 0.0s | Loss: 0.1945 | SWD: 0.0028 | SSM: 0.1916 | LR: 1.02e-06
+2026-01-22 03:23:27,088 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0099.pt
+2026-01-22 03:23:28,461 - INFO - Starting epoch 100/300
+2026-01-22 03:25:07,743 - INFO - Epoch 100 Step 30/30 | loss=0.2051 | swd=0.003483 | ssm=0.2017
+2026-01-22 03:25:07,744 - INFO - Epoch 100/300 completed in 0.0s | Loss: 0.1964 | SWD: 0.0029 | SSM: 0.1935 | LR: 1.00e-06
+2026-01-22 03:25:09,137 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0100.pt
+2026-01-22 03:25:10,509 - INFO - 
+================================================================================
+2026-01-22 03:25:10,509 - INFO - Running Inference Evaluation (Epoch 100)
+2026-01-22 03:25:10,509 - INFO - ================================================================================
+2026-01-22 03:25:10,521 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 03:25:10,521 - WARNING - No test images found. Skipping inference.
+2026-01-22 03:25:10,522 - INFO - Starting epoch 101/300
+2026-01-22 03:26:50,060 - INFO - Epoch 101 Step 30/30 | loss=0.1993 | swd=0.003165 | ssm=0.1962
+2026-01-22 03:26:50,062 - INFO - Epoch 101/300 completed in 0.0s | Loss: 0.1933 | SWD: 0.0029 | SSM: 0.1904 | LR: 1.02e-06
+2026-01-22 03:26:51,444 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0101.pt
+2026-01-22 03:26:50,845 - INFO - Starting epoch 102/300
+2026-01-22 03:28:30,223 - INFO - Epoch 102 Step 30/30 | loss=0.1945 | swd=0.002638 | ssm=0.1918
+2026-01-22 03:28:30,224 - INFO - Epoch 102/300 completed in 0.0s | Loss: 0.1971 | SWD: 0.0031 | SSM: 0.1940 | LR: 1.10e-06
+2026-01-22 03:28:31,605 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0102.pt
+2026-01-22 03:28:32,959 - INFO - Starting epoch 103/300
+2026-01-22 03:30:12,194 - INFO - Epoch 103 Step 30/30 | loss=0.1904 | swd=0.002955 | ssm=0.1875
+2026-01-22 03:30:12,195 - INFO - Epoch 103/300 completed in 0.0s | Loss: 0.1941 | SWD: 0.0030 | SSM: 0.1911 | LR: 1.22e-06
+2026-01-22 03:30:13,600 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0103.pt
+2026-01-22 03:30:15,000 - INFO - Starting epoch 104/300
+2026-01-22 03:31:54,430 - INFO - Epoch 104 Step 30/30 | loss=0.1796 | swd=0.002881 | ssm=0.1767
+2026-01-22 03:31:54,432 - INFO - Epoch 104/300 completed in 0.0s | Loss: 0.1957 | SWD: 0.0030 | SSM: 0.1927 | LR: 1.39e-06
+2026-01-22 03:31:55,786 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0104.pt
+2026-01-22 03:31:55,127 - INFO - Starting epoch 105/300
+2026-01-22 03:33:34,312 - INFO - Epoch 105 Step 30/30 | loss=0.1951 | swd=0.002720 | ssm=0.1924
+2026-01-22 03:33:34,313 - INFO - Epoch 105/300 completed in 0.0s | Loss: 0.1958 | SWD: 0.0029 | SSM: 0.1929 | LR: 1.61e-06
+2026-01-22 03:33:35,702 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0105.pt
+2026-01-22 03:33:37,102 - INFO - 
+================================================================================
+2026-01-22 03:33:37,102 - INFO - Running Inference Evaluation (Epoch 105)
+2026-01-22 03:33:37,102 - INFO - ================================================================================
+2026-01-22 03:33:37,105 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 03:33:37,105 - WARNING - No test images found. Skipping inference.
+2026-01-22 03:33:37,106 - INFO - Starting epoch 106/300
+2026-01-22 03:35:16,347 - INFO - Epoch 106 Step 30/30 | loss=0.1855 | swd=0.002668 | ssm=0.1829
+2026-01-22 03:35:16,348 - INFO - Epoch 106/300 completed in 0.0s | Loss: 0.1962 | SWD: 0.0030 | SSM: 0.1932 | LR: 1.88e-06
+2026-01-22 03:35:17,716 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0106.pt
+2026-01-22 03:35:19,058 - INFO - Starting epoch 107/300
+2026-01-22 03:36:58,331 - INFO - Epoch 107 Step 30/30 | loss=0.2028 | swd=0.002666 | ssm=0.2002
+2026-01-22 03:36:58,333 - INFO - Epoch 107/300 completed in 0.0s | Loss: 0.1950 | SWD: 0.0029 | SSM: 0.1921 | LR: 2.19e-06
+2026-01-22 03:36:59,711 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0107.pt
+2026-01-22 03:37:01,087 - INFO - Starting epoch 108/300
+2026-01-22 03:38:38,221 - INFO - Epoch 108 Step 30/30 | loss=0.1918 | swd=0.002989 | ssm=0.1888
+2026-01-22 03:38:38,222 - INFO - Epoch 108/300 completed in 0.0s | Loss: 0.1962 | SWD: 0.0030 | SSM: 0.1933 | LR: 2.56e-06
+2026-01-22 03:38:39,583 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0108.pt
+2026-01-22 03:38:40,940 - INFO - Starting epoch 109/300
+2026-01-22 03:40:20,322 - INFO - Epoch 109 Step 30/30 | loss=0.1953 | swd=0.003254 | ssm=0.1921
+2026-01-22 03:40:20,324 - INFO - Epoch 109/300 completed in 0.0s | Loss: 0.1957 | SWD: 0.0030 | SSM: 0.1928 | LR: 2.97e-06
+2026-01-22 03:40:21,712 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0109.pt
+2026-01-22 03:40:23,139 - INFO - Starting epoch 110/300
+2026-01-22 03:42:02,353 - INFO - Epoch 110 Step 30/30 | loss=0.2053 | swd=0.003028 | ssm=0.2023
+2026-01-22 03:42:02,355 - INFO - Epoch 110/300 completed in 0.0s | Loss: 0.1972 | SWD: 0.0029 | SSM: 0.1943 | LR: 3.42e-06
+2026-01-22 03:42:03,840 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0110.pt
+2026-01-22 03:42:05,295 - INFO - 
+================================================================================
+2026-01-22 03:42:05,295 - INFO - Running Inference Evaluation (Epoch 110)
+2026-01-22 03:42:05,295 - INFO - ================================================================================
+2026-01-22 03:42:05,299 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 03:42:05,299 - WARNING - No test images found. Skipping inference.
+2026-01-22 03:42:05,299 - INFO - Starting epoch 111/300
+2026-01-22 03:43:42,858 - INFO - Epoch 111 Step 30/30 | loss=0.1960 | swd=0.003210 | ssm=0.1928
+2026-01-22 03:43:42,860 - INFO - Epoch 111/300 completed in 0.0s | Loss: 0.1957 | SWD: 0.0030 | SSM: 0.1927 | LR: 3.93e-06
+2026-01-22 03:43:44,214 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0111.pt
+2026-01-22 03:43:45,586 - INFO - Starting epoch 112/300
+2026-01-22 03:45:24,793 - INFO - Epoch 112 Step 30/30 | loss=0.2082 | swd=0.002582 | ssm=0.2056
+2026-01-22 03:45:24,795 - INFO - Epoch 112/300 completed in 0.0s | Loss: 0.1934 | SWD: 0.0030 | SSM: 0.1904 | LR: 4.48e-06
+2026-01-22 03:45:26,155 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0112.pt
+2026-01-22 03:45:27,530 - INFO - Starting epoch 113/300
+2026-01-22 03:47:06,756 - INFO - Epoch 113 Step 30/30 | loss=0.1983 | swd=0.002846 | ssm=0.1954
+2026-01-22 03:47:06,758 - INFO - Epoch 113/300 completed in 0.0s | Loss: 0.1950 | SWD: 0.0030 | SSM: 0.1921 | LR: 5.07e-06
+2026-01-22 03:47:08,156 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0113.pt
+2026-01-22 03:47:09,556 - INFO - Starting epoch 114/300
+2026-01-22 03:48:46,987 - INFO - Epoch 114 Step 30/30 | loss=0.2021 | swd=0.002600 | ssm=0.1995
+2026-01-22 03:48:46,989 - INFO - Epoch 114/300 completed in 0.0s | Loss: 0.1951 | SWD: 0.0029 | SSM: 0.1923 | LR: 5.71e-06
+2026-01-22 03:48:48,344 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0114.pt
+2026-01-22 03:48:49,707 - INFO - Starting epoch 115/300
+2026-01-22 03:50:28,979 - INFO - Epoch 115 Step 30/30 | loss=0.2016 | swd=0.002610 | ssm=0.1990
+2026-01-22 03:50:28,980 - INFO - Epoch 115/300 completed in 0.0s | Loss: 0.1954 | SWD: 0.0028 | SSM: 0.1925 | LR: 6.40e-06
+2026-01-22 03:50:30,354 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0115.pt
+2026-01-22 03:50:31,710 - INFO - 
+================================================================================
+2026-01-22 03:50:31,710 - INFO - Running Inference Evaluation (Epoch 115)
+2026-01-22 03:50:31,710 - INFO - ================================================================================
+2026-01-22 03:50:31,713 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 03:50:31,713 - WARNING - No test images found. Skipping inference.
+2026-01-22 03:50:31,713 - INFO - Starting epoch 116/300
+2026-01-22 03:52:11,135 - INFO - Epoch 116 Step 30/30 | loss=0.1780 | swd=0.003353 | ssm=0.1746
+2026-01-22 03:52:11,137 - INFO - Epoch 116/300 completed in 0.0s | Loss: 0.1962 | SWD: 0.0032 | SSM: 0.1931 | LR: 7.12e-06
+2026-01-22 03:52:12,491 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0116.pt
+2026-01-22 03:52:13,834 - INFO - Starting epoch 117/300
+2026-01-22 03:53:51,013 - INFO - Epoch 117 Step 30/30 | loss=0.1810 | swd=0.002688 | ssm=0.1783
+2026-01-22 03:53:51,014 - INFO - Epoch 117/300 completed in 0.0s | Loss: 0.1948 | SWD: 0.0030 | SSM: 0.1918 | LR: 7.89e-06
+2026-01-22 03:53:52,463 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0117.pt
+2026-01-22 03:53:53,836 - INFO - Starting epoch 118/300
+2026-01-22 03:55:33,358 - INFO - Epoch 118 Step 30/30 | loss=0.2012 | swd=0.002956 | ssm=0.1982
+2026-01-22 03:55:33,359 - INFO - Epoch 118/300 completed in 0.0s | Loss: 0.1947 | SWD: 0.0030 | SSM: 0.1917 | LR: 8.71e-06
+2026-01-22 03:55:34,755 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0118.pt
+2026-01-22 03:55:36,133 - INFO - Starting epoch 119/300
+2026-01-22 03:57:15,530 - INFO - Epoch 119 Step 30/30 | loss=0.2102 | swd=0.003415 | ssm=0.2068
+2026-01-22 03:57:15,532 - INFO - Epoch 119/300 completed in 0.0s | Loss: 0.1962 | SWD: 0.0030 | SSM: 0.1932 | LR: 9.56e-06
+2026-01-22 03:57:16,896 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0119.pt
+2026-01-22 03:57:18,257 - INFO - Starting epoch 120/300
+2026-01-22 03:58:55,508 - INFO - Epoch 120 Step 30/30 | loss=0.1916 | swd=0.002706 | ssm=0.1889
+2026-01-22 03:58:55,509 - INFO - Epoch 120/300 completed in 0.0s | Loss: 0.2000 | SWD: 0.0031 | SSM: 0.1969 | LR: 1.05e-05
+2026-01-22 03:58:56,924 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0120.pt
+2026-01-22 03:58:58,318 - INFO - 
+================================================================================
+2026-01-22 03:58:58,318 - INFO - Running Inference Evaluation (Epoch 120)
+2026-01-22 03:58:58,318 - INFO - ================================================================================
+2026-01-22 03:58:58,322 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 03:58:58,322 - WARNING - No test images found. Skipping inference.
+2026-01-22 03:58:58,322 - INFO - Starting epoch 121/300
+2026-01-22 04:00:39,666 - INFO - Epoch 121 Step 30/30 | loss=0.1973 | swd=0.002615 | ssm=0.1947
+2026-01-22 04:00:39,668 - INFO - Epoch 121/300 completed in 0.0s | Loss: 0.1965 | SWD: 0.0029 | SSM: 0.1936 | LR: 1.14e-05
+2026-01-22 04:00:40,997 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0121.pt
+2026-01-22 04:00:42,340 - INFO - Starting epoch 122/300
+2026-01-22 04:02:18,559 - INFO - Epoch 122 Step 30/30 | loss=0.1986 | swd=0.003528 | ssm=0.1951
+2026-01-22 04:02:18,561 - INFO - Epoch 122/300 completed in 0.0s | Loss: 0.1989 | SWD: 0.0032 | SSM: 0.1957 | LR: 1.24e-05
+2026-01-22 04:02:19,984 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0122.pt
+2026-01-22 04:02:21,421 - INFO - Starting epoch 123/300
+2026-01-22 04:04:01,094 - INFO - Epoch 123 Step 30/30 | loss=0.2008 | swd=0.003975 | ssm=0.1968
+2026-01-22 04:04:01,096 - INFO - Epoch 123/300 completed in 0.0s | Loss: 0.1970 | SWD: 0.0031 | SSM: 0.1939 | LR: 1.34e-05
+2026-01-22 04:04:02,431 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0123.pt
+2026-01-22 04:04:03,765 - INFO - Starting epoch 124/300
+2026-01-22 04:05:41,443 - INFO - Epoch 124 Step 30/30 | loss=0.1963 | swd=0.003142 | ssm=0.1931
+2026-01-22 04:05:41,444 - INFO - Epoch 124/300 completed in 0.0s | Loss: 0.1961 | SWD: 0.0030 | SSM: 0.1931 | LR: 1.44e-05
+2026-01-22 04:05:42,777 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0124.pt
+2026-01-22 04:05:44,114 - INFO - Starting epoch 125/300
+2026-01-22 04:07:23,540 - INFO - Epoch 125 Step 30/30 | loss=0.2033 | swd=0.003330 | ssm=0.2000
+2026-01-22 04:07:23,541 - INFO - Epoch 125/300 completed in 0.0s | Loss: 0.1979 | SWD: 0.0033 | SSM: 0.1946 | LR: 1.55e-05
+2026-01-22 04:07:24,972 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0125.pt
+2026-01-22 04:07:26,319 - INFO - 
+================================================================================
+2026-01-22 04:07:26,319 - INFO - Running Inference Evaluation (Epoch 125)
+2026-01-22 04:07:26,319 - INFO - ================================================================================
+2026-01-22 04:07:26,322 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 04:07:26,322 - WARNING - No test images found. Skipping inference.
+2026-01-22 04:07:26,323 - INFO - Starting epoch 126/300
+2026-01-22 04:09:05,523 - INFO - Epoch 126 Step 30/30 | loss=0.2032 | swd=0.003341 | ssm=0.1999
+2026-01-22 04:09:05,525 - INFO - Epoch 126/300 completed in 0.0s | Loss: 0.1941 | SWD: 0.0031 | SSM: 0.1909 | LR: 1.66e-05
+2026-01-22 04:09:06,816 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0126.pt
+2026-01-22 04:09:08,103 - INFO - Starting epoch 127/300
+2026-01-22 04:10:47,489 - INFO - Epoch 127 Step 30/30 | loss=0.1950 | swd=0.004547 | ssm=0.1905
+2026-01-22 04:10:47,491 - INFO - Epoch 127/300 completed in 0.0s | Loss: 0.1965 | SWD: 0.0032 | SSM: 0.1933 | LR: 1.78e-05
+2026-01-22 04:10:48,829 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0127.pt
+2026-01-22 04:10:48,601 - INFO - Starting epoch 128/300
+2026-01-22 04:12:27,756 - INFO - Epoch 128 Step 30/30 | loss=0.1932 | swd=0.002899 | ssm=0.1903
+2026-01-22 04:12:27,758 - INFO - Epoch 128/300 completed in 0.0s | Loss: 0.1954 | SWD: 0.0031 | SSM: 0.1924 | LR: 1.89e-05
+2026-01-22 04:12:29,068 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0128.pt
+2026-01-22 04:12:30,437 - INFO - Starting epoch 129/300
+2026-01-22 04:14:09,526 - INFO - Epoch 129 Step 30/30 | loss=0.1891 | swd=0.002973 | ssm=0.1861
+2026-01-22 04:14:09,528 - INFO - Epoch 129/300 completed in 0.0s | Loss: 0.1982 | SWD: 0.0031 | SSM: 0.1950 | LR: 2.02e-05
+2026-01-22 04:14:10,939 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0129.pt
+2026-01-22 04:14:12,364 - INFO - Starting epoch 130/300
+2026-01-22 04:15:51,690 - INFO - Epoch 130 Step 30/30 | loss=0.2026 | swd=0.002797 | ssm=0.1998
+2026-01-22 04:15:51,692 - INFO - Epoch 130/300 completed in 0.0s | Loss: 0.1949 | SWD: 0.0032 | SSM: 0.1917 | LR: 2.14e-05
+2026-01-22 04:15:53,092 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0130.pt
+2026-01-22 04:15:54,464 - INFO - 
+================================================================================
+2026-01-22 04:15:54,464 - INFO - Running Inference Evaluation (Epoch 130)
+2026-01-22 04:15:54,464 - INFO - ================================================================================
+2026-01-22 04:15:54,468 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 04:15:54,468 - WARNING - No test images found. Skipping inference.
+2026-01-22 04:15:54,468 - INFO - Starting epoch 131/300
+2026-01-22 04:17:32,017 - INFO - Epoch 131 Step 30/30 | loss=0.1970 | swd=0.003075 | ssm=0.1939
+2026-01-22 04:17:32,018 - INFO - Epoch 131/300 completed in 0.0s | Loss: 0.1979 | SWD: 0.0032 | SSM: 0.1948 | LR: 2.27e-05
+2026-01-22 04:17:33,341 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0131.pt
+2026-01-22 04:17:34,619 - INFO - Starting epoch 132/300
+2026-01-22 04:19:13,985 - INFO - Epoch 132 Step 30/30 | loss=0.2071 | swd=0.003266 | ssm=0.2039
+2026-01-22 04:19:13,987 - INFO - Epoch 132/300 completed in 0.0s | Loss: 0.1954 | SWD: 0.0031 | SSM: 0.1923 | LR: 2.40e-05
+2026-01-22 04:19:15,249 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0132.pt
+2026-01-22 04:19:16,523 - INFO - Starting epoch 133/300
+2026-01-22 04:20:55,912 - INFO - Epoch 133 Step 30/30 | loss=0.2001 | swd=0.004254 | ssm=0.1959
+2026-01-22 04:20:55,913 - INFO - Epoch 133/300 completed in 0.0s | Loss: 0.1978 | SWD: 0.0034 | SSM: 0.1944 | LR: 2.53e-05
+2026-01-22 04:20:57,306 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0133.pt
+2026-01-22 04:20:58,719 - INFO - Starting epoch 134/300
+2026-01-22 04:22:37,776 - INFO - Epoch 134 Step 30/30 | loss=0.2035 | swd=0.003977 | ssm=0.1995
+2026-01-22 04:22:37,777 - INFO - Epoch 134/300 completed in 0.0s | Loss: 0.1929 | SWD: 0.0033 | SSM: 0.1896 | LR: 2.67e-05
+2026-01-22 04:22:39,164 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0134.pt
+2026-01-22 04:22:38,976 - INFO - Starting epoch 135/300
+2026-01-22 04:24:17,972 - INFO - Epoch 135 Step 30/30 | loss=0.1917 | swd=0.003420 | ssm=0.1882
+2026-01-22 04:24:17,973 - INFO - Epoch 135/300 completed in 0.0s | Loss: 0.1957 | SWD: 0.0032 | SSM: 0.1925 | LR: 2.80e-05
+2026-01-22 04:24:19,341 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0135.pt
+2026-01-22 04:24:20,657 - INFO - 
+================================================================================
+2026-01-22 04:24:20,657 - INFO - Running Inference Evaluation (Epoch 135)
+2026-01-22 04:24:20,657 - INFO - ================================================================================
+2026-01-22 04:24:20,660 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 04:24:20,660 - WARNING - No test images found. Skipping inference.
+2026-01-22 04:24:20,660 - INFO - Starting epoch 136/300
+2026-01-22 04:25:59,940 - INFO - Epoch 136 Step 30/30 | loss=0.1799 | swd=0.003253 | ssm=0.1766
+2026-01-22 04:25:59,941 - INFO - Epoch 136/300 completed in 0.0s | Loss: 0.1958 | SWD: 0.0035 | SSM: 0.1923 | LR: 2.94e-05
+2026-01-22 04:26:01,251 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0136.pt
+2026-01-22 04:26:02,540 - INFO - Starting epoch 137/300
+2026-01-22 04:27:41,930 - INFO - Epoch 137 Step 30/30 | loss=0.1826 | swd=0.004272 | ssm=0.1784
+2026-01-22 04:27:41,931 - INFO - Epoch 137/300 completed in 0.0s | Loss: 0.1988 | SWD: 0.0037 | SSM: 0.1952 | LR: 3.08e-05
+2026-01-22 04:27:43,242 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0137.pt
+2026-01-22 04:27:44,636 - INFO - Starting epoch 138/300
+2026-01-22 04:29:22,411 - INFO - Epoch 138 Step 30/30 | loss=0.1875 | swd=0.002921 | ssm=0.1846
+2026-01-22 04:29:22,412 - INFO - Epoch 138/300 completed in 0.0s | Loss: 0.1954 | SWD: 0.0033 | SSM: 0.1921 | LR: 3.23e-05
+2026-01-22 04:29:23,836 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0138.pt
+2026-01-22 04:29:25,262 - INFO - Starting epoch 139/300
+2026-01-22 04:31:04,781 - INFO - Epoch 139 Step 30/30 | loss=0.1953 | swd=0.003631 | ssm=0.1917
+2026-01-22 04:31:04,783 - INFO - Epoch 139/300 completed in 0.0s | Loss: 0.2000 | SWD: 0.0035 | SSM: 0.1965 | LR: 3.37e-05
+2026-01-22 04:31:06,177 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0139.pt
+2026-01-22 04:31:07,529 - INFO - Starting epoch 140/300
+2026-01-22 04:32:46,692 - INFO - Epoch 140 Step 30/30 | loss=0.1983 | swd=0.003172 | ssm=0.1951
+2026-01-22 04:32:46,693 - INFO - Epoch 140/300 completed in 0.0s | Loss: 0.1954 | SWD: 0.0032 | SSM: 0.1922 | LR: 3.52e-05
+2026-01-22 04:32:48,092 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0140.pt
+2026-01-22 04:32:49,376 - INFO - 
+================================================================================
+2026-01-22 04:32:49,377 - INFO - Running Inference Evaluation (Epoch 140)
+2026-01-22 04:32:49,377 - INFO - ================================================================================
+2026-01-22 04:32:49,380 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 04:32:49,380 - WARNING - No test images found. Skipping inference.
+2026-01-22 04:32:49,380 - INFO - Starting epoch 141/300
+2026-01-22 04:34:27,045 - INFO - Epoch 141 Step 30/30 | loss=0.2020 | swd=0.003513 | ssm=0.1985
+2026-01-22 04:34:27,046 - INFO - Epoch 141/300 completed in 0.0s | Loss: 0.1988 | SWD: 0.0036 | SSM: 0.1952 | LR: 3.67e-05
+2026-01-22 04:34:28,307 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0141.pt
+2026-01-22 04:34:29,600 - INFO - Starting epoch 142/300
+2026-01-22 04:36:08,839 - INFO - Epoch 142 Step 30/30 | loss=0.2033 | swd=0.003382 | ssm=0.1999
+2026-01-22 04:36:08,841 - INFO - Epoch 142/300 completed in 0.0s | Loss: 0.1953 | SWD: 0.0033 | SSM: 0.1920 | LR: 3.82e-05
+2026-01-22 04:36:10,188 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0142.pt
+2026-01-22 04:36:11,566 - INFO - Starting epoch 143/300
+2026-01-22 04:37:50,608 - INFO - Epoch 143 Step 30/30 | loss=0.2020 | swd=0.003240 | ssm=0.1988
+2026-01-22 04:37:50,609 - INFO - Epoch 143/300 completed in 0.0s | Loss: 0.1933 | SWD: 0.0032 | SSM: 0.1901 | LR: 3.97e-05
+2026-01-22 04:37:51,983 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0143.pt
+2026-01-22 04:37:53,388 - INFO - Starting epoch 144/300
+2026-01-22 04:39:32,672 - INFO - Epoch 144 Step 30/30 | loss=0.2083 | swd=0.003796 | ssm=0.2045
+2026-01-22 04:39:32,674 - INFO - Epoch 144/300 completed in 0.0s | Loss: 0.1961 | SWD: 0.0034 | SSM: 0.1927 | LR: 4.12e-05
+2026-01-22 04:39:34,069 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0144.pt
+2026-01-22 04:39:35,478 - INFO - Starting epoch 145/300
+2026-01-22 04:41:12,972 - INFO - Epoch 145 Step 30/30 | loss=0.2009 | swd=0.004358 | ssm=0.1965
+2026-01-22 04:41:12,974 - INFO - Epoch 145/300 completed in 0.0s | Loss: 0.1953 | SWD: 0.0032 | SSM: 0.1921 | LR: 4.28e-05
+2026-01-22 04:41:14,367 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0145.pt
+2026-01-22 04:41:15,733 - INFO - 
+================================================================================
+2026-01-22 04:41:15,733 - INFO - Running Inference Evaluation (Epoch 145)
+2026-01-22 04:41:15,733 - INFO - ================================================================================
+2026-01-22 04:41:15,737 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 04:41:15,737 - WARNING - No test images found. Skipping inference.
+2026-01-22 04:41:15,737 - INFO - Starting epoch 146/300
+2026-01-22 04:42:55,058 - INFO - Epoch 146 Step 30/30 | loss=0.1850 | swd=0.003583 | ssm=0.1815
+2026-01-22 04:42:55,060 - INFO - Epoch 146/300 completed in 0.0s | Loss: 0.1980 | SWD: 0.0037 | SSM: 0.1942 | LR: 4.43e-05
+2026-01-22 04:42:56,494 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0146.pt
+2026-01-22 04:42:57,851 - INFO - Starting epoch 147/300
+2026-01-22 04:44:37,404 - INFO - Epoch 147 Step 30/30 | loss=0.1870 | swd=0.002723 | ssm=0.1843
+2026-01-22 04:44:37,405 - INFO - Epoch 147/300 completed in 0.0s | Loss: 0.1938 | SWD: 0.0034 | SSM: 0.1904 | LR: 4.58e-05
+2026-01-22 04:44:38,673 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0147.pt
+2026-01-22 04:44:39,948 - INFO - Starting epoch 148/300
+2026-01-22 04:46:17,659 - INFO - Epoch 148 Step 30/30 | loss=0.2122 | swd=0.003128 | ssm=0.2091
+2026-01-22 04:46:17,661 - INFO - Epoch 148/300 completed in 0.0s | Loss: 0.1950 | SWD: 0.0034 | SSM: 0.1916 | LR: 4.74e-05
+2026-01-22 04:46:19,007 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0148.pt
+2026-01-22 04:46:20,269 - INFO - Starting epoch 149/300
+2026-01-22 04:47:59,590 - INFO - Epoch 149 Step 30/30 | loss=0.1718 | swd=0.004081 | ssm=0.1678
+2026-01-22 04:47:59,591 - INFO - Epoch 149/300 completed in 0.0s | Loss: 0.1970 | SWD: 0.0036 | SSM: 0.1933 | LR: 4.89e-05
+2026-01-22 04:48:00,920 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0149.pt
+2026-01-22 04:48:02,253 - INFO - Starting epoch 150/300
+2026-01-22 04:49:41,546 - INFO - Epoch 150 Step 30/30 | loss=0.2028 | swd=0.004250 | ssm=0.1986
+2026-01-22 04:49:41,548 - INFO - Epoch 150/300 completed in 0.0s | Loss: 0.1982 | SWD: 0.0035 | SSM: 0.1947 | LR: 5.05e-05
+2026-01-22 04:49:42,933 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0150.pt
+2026-01-22 04:49:44,326 - INFO - 
+================================================================================
+2026-01-22 04:49:44,326 - INFO - Running Inference Evaluation (Epoch 150)
+2026-01-22 04:49:44,326 - INFO - ================================================================================
+2026-01-22 04:49:44,330 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 04:49:44,330 - WARNING - No test images found. Skipping inference.
+2026-01-22 04:49:44,330 - INFO - Starting epoch 151/300
+2026-01-22 04:51:23,767 - INFO - Epoch 151 Step 30/30 | loss=0.1941 | swd=0.004460 | ssm=0.1896
+2026-01-22 04:51:23,768 - INFO - Epoch 151/300 completed in 0.0s | Loss: 0.1962 | SWD: 0.0034 | SSM: 0.1928 | LR: 5.21e-05
+2026-01-22 04:51:23,579 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0151.pt
+2026-01-22 04:51:24,929 - INFO - Starting epoch 152/300
+2026-01-22 04:53:04,147 - INFO - Epoch 152 Step 30/30 | loss=0.2036 | swd=0.003232 | ssm=0.2004
+2026-01-22 04:53:04,148 - INFO - Epoch 152/300 completed in 0.0s | Loss: 0.1968 | SWD: 0.0034 | SSM: 0.1934 | LR: 5.36e-05
+2026-01-22 04:53:05,501 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0152.pt
+2026-01-22 04:53:06,865 - INFO - Starting epoch 153/300
+2026-01-22 04:54:46,529 - INFO - Epoch 153 Step 30/30 | loss=0.2112 | swd=0.003827 | ssm=0.2074
+2026-01-22 04:54:46,531 - INFO - Epoch 153/300 completed in 0.0s | Loss: 0.1955 | SWD: 0.0032 | SSM: 0.1924 | LR: 5.52e-05
+2026-01-22 04:54:47,923 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0153.pt
+2026-01-22 04:54:49,359 - INFO - Starting epoch 154/300
+2026-01-22 04:56:28,662 - INFO - Epoch 154 Step 30/30 | loss=0.2056 | swd=0.003456 | ssm=0.2022
+2026-01-22 04:56:28,663 - INFO - Epoch 154/300 completed in 0.0s | Loss: 0.1963 | SWD: 0.0032 | SSM: 0.1930 | LR: 5.67e-05
+2026-01-22 04:56:30,010 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0154.pt
+2026-01-22 04:56:29,473 - INFO - Starting epoch 155/300
+2026-01-22 04:58:08,649 - INFO - Epoch 155 Step 30/30 | loss=0.1980 | swd=0.003777 | ssm=0.1942
+2026-01-22 04:58:08,651 - INFO - Epoch 155/300 completed in 0.0s | Loss: 0.1933 | SWD: 0.0033 | SSM: 0.1899 | LR: 5.82e-05
+2026-01-22 04:58:10,002 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0155.pt
+2026-01-22 04:58:11,363 - INFO - 
+================================================================================
+2026-01-22 04:58:11,363 - INFO - Running Inference Evaluation (Epoch 155)
+2026-01-22 04:58:11,363 - INFO - ================================================================================
+2026-01-22 04:58:11,366 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 04:58:11,366 - WARNING - No test images found. Skipping inference.
+2026-01-22 04:58:11,367 - INFO - Starting epoch 156/300
+2026-01-22 04:59:50,845 - INFO - Epoch 156 Step 30/30 | loss=0.1943 | swd=0.002719 | ssm=0.1916
+2026-01-22 04:59:50,846 - INFO - Epoch 156/300 completed in 0.0s | Loss: 0.1947 | SWD: 0.0032 | SSM: 0.1915 | LR: 5.98e-05
+2026-01-22 04:59:52,214 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0156.pt
+2026-01-22 04:59:53,566 - INFO - Starting epoch 157/300
+2026-01-22 05:01:32,677 - INFO - Epoch 157 Step 30/30 | loss=0.1952 | swd=0.004073 | ssm=0.1911
+2026-01-22 05:01:32,679 - INFO - Epoch 157/300 completed in 0.0s | Loss: 0.1970 | SWD: 0.0035 | SSM: 0.1935 | LR: 6.13e-05
+2026-01-22 05:01:34,043 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0157.pt
+2026-01-22 05:01:35,447 - INFO - Starting epoch 158/300
+2026-01-22 05:03:12,900 - INFO - Epoch 158 Step 30/30 | loss=0.1876 | swd=0.002439 | ssm=0.1852
+2026-01-22 05:03:12,901 - INFO - Epoch 158/300 completed in 0.0s | Loss: 0.1958 | SWD: 0.0036 | SSM: 0.1922 | LR: 6.28e-05
+2026-01-22 05:03:14,266 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0158.pt
+2026-01-22 05:03:15,703 - INFO - Starting epoch 159/300
+2026-01-22 05:04:55,291 - INFO - Epoch 159 Step 30/30 | loss=0.1759 | swd=0.003333 | ssm=0.1726
+2026-01-22 05:04:55,293 - INFO - Epoch 159/300 completed in 0.0s | Loss: 0.1949 | SWD: 0.0034 | SSM: 0.1915 | LR: 6.43e-05
+2026-01-22 05:04:56,664 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0159.pt
+2026-01-22 05:04:58,048 - INFO - Starting epoch 160/300
+2026-01-22 05:06:37,484 - INFO - Epoch 160 Step 30/30 | loss=0.2117 | swd=0.003758 | ssm=0.2079
+2026-01-22 05:06:37,486 - INFO - Epoch 160/300 completed in 0.0s | Loss: 0.1964 | SWD: 0.0037 | SSM: 0.1927 | LR: 6.58e-05
+2026-01-22 05:06:38,846 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0160.pt
+2026-01-22 05:06:40,178 - INFO - 
+================================================================================
+2026-01-22 05:06:40,179 - INFO - Running Inference Evaluation (Epoch 160)
+2026-01-22 05:06:40,179 - INFO - ================================================================================
+2026-01-22 05:06:40,182 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 05:06:40,182 - WARNING - No test images found. Skipping inference.
+2026-01-22 05:06:40,182 - INFO - Starting epoch 161/300
+2026-01-22 05:08:17,477 - INFO - Epoch 161 Step 30/30 | loss=0.1906 | swd=0.002653 | ssm=0.1879
+2026-01-22 05:08:17,478 - INFO - Epoch 161/300 completed in 0.0s | Loss: 0.1970 | SWD: 0.0035 | SSM: 0.1935 | LR: 6.73e-05
+2026-01-22 05:08:18,824 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0161.pt
+2026-01-22 05:08:20,175 - INFO - Starting epoch 162/300
+2026-01-22 05:09:59,461 - INFO - Epoch 162 Step 30/30 | loss=0.1932 | swd=0.004740 | ssm=0.1884
+2026-01-22 05:09:59,463 - INFO - Epoch 162/300 completed in 0.0s | Loss: 0.1974 | SWD: 0.0037 | SSM: 0.1937 | LR: 6.87e-05
+2026-01-22 05:10:00,860 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0162.pt
+2026-01-22 05:10:02,225 - INFO - Starting epoch 163/300
+2026-01-22 05:11:41,521 - INFO - Epoch 163 Step 30/30 | loss=0.2036 | swd=0.003618 | ssm=0.2000
+2026-01-22 05:11:41,522 - INFO - Epoch 163/300 completed in 0.0s | Loss: 0.1957 | SWD: 0.0036 | SSM: 0.1921 | LR: 7.02e-05
+2026-01-22 05:11:42,852 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0163.pt
+2026-01-22 05:11:44,182 - INFO - Starting epoch 164/300
+2026-01-22 05:13:21,397 - INFO - Epoch 164 Step 30/30 | loss=0.1965 | swd=0.003541 | ssm=0.1930
+2026-01-22 05:13:21,399 - INFO - Epoch 164/300 completed in 0.0s | Loss: 0.1983 | SWD: 0.0035 | SSM: 0.1948 | LR: 7.16e-05
+2026-01-22 05:13:22,742 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0164.pt
+2026-01-22 05:13:24,186 - INFO - Starting epoch 165/300
+2026-01-22 05:15:03,704 - INFO - Epoch 165 Step 30/30 | loss=0.1930 | swd=0.003277 | ssm=0.1898
+2026-01-22 05:15:03,705 - INFO - Epoch 165/300 completed in 0.0s | Loss: 0.1961 | SWD: 0.0034 | SSM: 0.1927 | LR: 7.30e-05
+2026-01-22 05:15:05,093 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0165.pt
+2026-01-22 05:15:06,465 - INFO - 
+================================================================================
+2026-01-22 05:15:06,465 - INFO - Running Inference Evaluation (Epoch 165)
+2026-01-22 05:15:06,465 - INFO - ================================================================================
+2026-01-22 05:15:06,468 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 05:15:06,469 - WARNING - No test images found. Skipping inference.
+2026-01-22 05:15:06,469 - INFO - Starting epoch 166/300
+2026-01-22 05:16:46,041 - INFO - Epoch 166 Step 30/30 | loss=0.1941 | swd=0.002914 | ssm=0.1912
+2026-01-22 05:16:46,043 - INFO - Epoch 166/300 completed in 0.0s | Loss: 0.1952 | SWD: 0.0036 | SSM: 0.1916 | LR: 7.43e-05
+2026-01-22 05:16:47,398 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0166.pt
+2026-01-22 05:16:48,792 - INFO - Starting epoch 167/300
+2026-01-22 05:18:26,251 - INFO - Epoch 167 Step 30/30 | loss=0.1853 | swd=0.002512 | ssm=0.1828
+2026-01-22 05:18:26,253 - INFO - Epoch 167/300 completed in 0.0s | Loss: 0.1951 | SWD: 0.0035 | SSM: 0.1916 | LR: 7.57e-05
+2026-01-22 05:18:27,618 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0167.pt
+2026-01-22 05:18:28,966 - INFO - Starting epoch 168/300
+2026-01-22 05:20:08,338 - INFO - Epoch 168 Step 30/30 | loss=0.1964 | swd=0.003123 | ssm=0.1932
+2026-01-22 05:20:08,340 - INFO - Epoch 168/300 completed in 0.0s | Loss: 0.1935 | SWD: 0.0033 | SSM: 0.1901 | LR: 7.70e-05
+2026-01-22 05:20:09,702 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0168.pt
+2026-01-22 05:20:11,097 - INFO - Starting epoch 169/300
+2026-01-22 05:21:50,373 - INFO - Epoch 169 Step 30/30 | loss=0.1946 | swd=0.002668 | ssm=0.1920
+2026-01-22 05:21:50,374 - INFO - Epoch 169/300 completed in 0.0s | Loss: 0.1972 | SWD: 0.0033 | SSM: 0.1940 | LR: 7.83e-05
+2026-01-22 05:21:51,746 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0169.pt
+2026-01-22 05:21:53,081 - INFO - Starting epoch 170/300
+2026-01-22 05:23:30,304 - INFO - Epoch 170 Step 30/30 | loss=0.1936 | swd=0.002780 | ssm=0.1908
+2026-01-22 05:23:30,306 - INFO - Epoch 170/300 completed in 0.0s | Loss: 0.1953 | SWD: 0.0033 | SSM: 0.1920 | LR: 7.96e-05
+2026-01-22 05:23:31,651 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0170.pt
+2026-01-22 05:23:33,003 - INFO - 
+================================================================================
+2026-01-22 05:23:33,004 - INFO - Running Inference Evaluation (Epoch 170)
+2026-01-22 05:23:33,004 - INFO - ================================================================================
+2026-01-22 05:23:33,007 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 05:23:33,007 - WARNING - No test images found. Skipping inference.
+2026-01-22 05:23:33,007 - INFO - Starting epoch 171/300
+2026-01-22 05:25:12,306 - INFO - Epoch 171 Step 30/30 | loss=0.1965 | swd=0.002747 | ssm=0.1938
+2026-01-22 05:25:12,307 - INFO - Epoch 171/300 completed in 0.0s | Loss: 0.1981 | SWD: 0.0040 | SSM: 0.1941 | LR: 8.08e-05
+2026-01-22 05:25:13,679 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0171.pt
+2026-01-22 05:25:15,041 - INFO - Starting epoch 172/300
+2026-01-22 05:26:54,567 - INFO - Epoch 172 Step 30/30 | loss=0.1855 | swd=0.003755 | ssm=0.1817
+2026-01-22 05:26:54,569 - INFO - Epoch 172/300 completed in 0.0s | Loss: 0.1988 | SWD: 0.0037 | SSM: 0.1952 | LR: 8.21e-05
+2026-01-22 05:26:55,966 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0172.pt
+2026-01-22 05:26:57,360 - INFO - Starting epoch 173/300
+2026-01-22 05:28:34,451 - INFO - Epoch 173 Step 30/30 | loss=0.1971 | swd=0.003597 | ssm=0.1935
+2026-01-22 05:28:34,453 - INFO - Epoch 173/300 completed in 0.0s | Loss: 0.1958 | SWD: 0.0036 | SSM: 0.1921 | LR: 8.32e-05
+2026-01-22 05:28:35,821 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0173.pt
+2026-01-22 05:28:37,180 - INFO - Starting epoch 174/300
+2026-01-22 05:30:16,713 - INFO - Epoch 174 Step 30/30 | loss=0.2031 | swd=0.003663 | ssm=0.1994
+2026-01-22 05:30:16,714 - INFO - Epoch 174/300 completed in 0.0s | Loss: 0.1954 | SWD: 0.0035 | SSM: 0.1918 | LR: 8.44e-05
+2026-01-22 05:30:18,085 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0174.pt
+2026-01-22 05:30:19,466 - INFO - Starting epoch 175/300
+2026-01-22 05:31:59,041 - INFO - Epoch 175 Step 30/30 | loss=0.2014 | swd=0.003609 | ssm=0.1978
+2026-01-22 05:31:59,042 - INFO - Epoch 175/300 completed in 0.0s | Loss: 0.1949 | SWD: 0.0037 | SSM: 0.1912 | LR: 8.55e-05
+2026-01-22 05:32:00,383 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0175.pt
+2026-01-22 05:32:01,745 - INFO - 
+================================================================================
+2026-01-22 05:32:01,745 - INFO - Running Inference Evaluation (Epoch 175)
+2026-01-22 05:32:01,746 - INFO - ================================================================================
+2026-01-22 05:32:01,748 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 05:32:01,749 - WARNING - No test images found. Skipping inference.
+2026-01-22 05:32:01,749 - INFO - Starting epoch 176/300
+2026-01-22 05:33:38,860 - INFO - Epoch 176 Step 30/30 | loss=0.1916 | swd=0.003378 | ssm=0.1882
+2026-01-22 05:33:38,861 - INFO - Epoch 176/300 completed in 0.0s | Loss: 0.1944 | SWD: 0.0034 | SSM: 0.1910 | LR: 8.66e-05
+2026-01-22 05:33:40,226 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0176.pt
+2026-01-22 05:33:41,627 - INFO - Starting epoch 177/300
+2026-01-22 05:35:21,038 - INFO - Epoch 177 Step 30/30 | loss=0.1854 | swd=0.003455 | ssm=0.1819
+2026-01-22 05:35:21,040 - INFO - Epoch 177/300 completed in 0.0s | Loss: 0.1971 | SWD: 0.0036 | SSM: 0.1935 | LR: 8.76e-05
+2026-01-22 05:35:22,429 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0177.pt
+2026-01-22 05:35:23,811 - INFO - Starting epoch 178/300
+2026-01-22 05:37:03,019 - INFO - Epoch 178 Step 30/30 | loss=0.1780 | swd=0.003322 | ssm=0.1747
+2026-01-22 05:37:03,020 - INFO - Epoch 178/300 completed in 0.0s | Loss: 0.1926 | SWD: 0.0034 | SSM: 0.1891 | LR: 8.86e-05
+2026-01-22 05:37:04,382 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0178.pt
+2026-01-22 05:37:05,757 - INFO - Starting epoch 179/300
+2026-01-22 05:38:43,399 - INFO - Epoch 179 Step 30/30 | loss=0.1973 | swd=0.003753 | ssm=0.1936
+2026-01-22 05:38:43,401 - INFO - Epoch 179/300 completed in 0.0s | Loss: 0.1945 | SWD: 0.0033 | SSM: 0.1912 | LR: 8.96e-05
+2026-01-22 05:38:44,776 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0179.pt
+2026-01-22 05:38:46,153 - INFO - Starting epoch 180/300
+2026-01-22 05:40:25,556 - INFO - Epoch 180 Step 30/30 | loss=0.2027 | swd=0.003129 | ssm=0.1996
+2026-01-22 05:40:25,558 - INFO - Epoch 180/300 completed in 0.0s | Loss: 0.1956 | SWD: 0.0035 | SSM: 0.1921 | LR: 9.05e-05
+2026-01-22 05:40:26,967 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0180.pt
+2026-01-22 05:40:28,355 - INFO - 
+================================================================================
+2026-01-22 05:40:28,355 - INFO - Running Inference Evaluation (Epoch 180)
+2026-01-22 05:40:28,355 - INFO - ================================================================================
+2026-01-22 05:40:28,359 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 05:40:28,359 - WARNING - No test images found. Skipping inference.
+2026-01-22 05:40:28,359 - INFO - Starting epoch 181/300
+2026-01-22 05:42:07,947 - INFO - Epoch 181 Step 30/30 | loss=0.1895 | swd=0.003318 | ssm=0.1861
+2026-01-22 05:42:07,949 - INFO - Epoch 181/300 completed in 0.0s | Loss: 0.1932 | SWD: 0.0033 | SSM: 0.1899 | LR: 9.14e-05
+2026-01-22 05:42:09,306 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0181.pt
+2026-01-22 05:42:08,578 - INFO - Starting epoch 182/300
+2026-01-22 05:43:47,788 - INFO - Epoch 182 Step 30/30 | loss=0.1932 | swd=0.003570 | ssm=0.1896
+2026-01-22 05:43:47,789 - INFO - Epoch 182/300 completed in 0.0s | Loss: 0.1963 | SWD: 0.0035 | SSM: 0.1928 | LR: 9.23e-05
+2026-01-22 05:43:49,140 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0182.pt
+2026-01-22 05:43:50,502 - INFO - Starting epoch 183/300
+2026-01-22 05:45:29,889 - INFO - Epoch 183 Step 30/30 | loss=0.1832 | swd=0.002766 | ssm=0.1804
+2026-01-22 05:45:29,890 - INFO - Epoch 183/300 completed in 0.0s | Loss: 0.1946 | SWD: 0.0036 | SSM: 0.1910 | LR: 9.31e-05
+2026-01-22 05:45:31,264 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0183.pt
+2026-01-22 05:45:32,638 - INFO - Starting epoch 184/300
+2026-01-22 05:47:12,022 - INFO - Epoch 184 Step 30/30 | loss=0.1823 | swd=0.003175 | ssm=0.1792
+2026-01-22 05:47:12,023 - INFO - Epoch 184/300 completed in 0.0s | Loss: 0.1924 | SWD: 0.0034 | SSM: 0.1890 | LR: 9.39e-05
+2026-01-22 05:47:13,389 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0184.pt
+2026-01-22 05:47:12,573 - INFO - Starting epoch 185/300
+2026-01-22 05:48:52,151 - INFO - Epoch 185 Step 30/30 | loss=0.2015 | swd=0.003472 | ssm=0.1980
+2026-01-22 05:48:52,153 - INFO - Epoch 185/300 completed in 0.0s | Loss: 0.1961 | SWD: 0.0035 | SSM: 0.1925 | LR: 9.46e-05
+2026-01-22 05:48:53,502 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0185.pt
+2026-01-22 05:48:54,887 - INFO - 
+================================================================================
+2026-01-22 05:48:54,888 - INFO - Running Inference Evaluation (Epoch 185)
+2026-01-22 05:48:54,888 - INFO - ================================================================================
+2026-01-22 05:48:54,892 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 05:48:54,892 - WARNING - No test images found. Skipping inference.
+2026-01-22 05:48:54,892 - INFO - Starting epoch 186/300
+2026-01-22 05:50:34,475 - INFO - Epoch 186 Step 30/30 | loss=0.1997 | swd=0.003171 | ssm=0.1965
+2026-01-22 05:50:34,477 - INFO - Epoch 186/300 completed in 0.0s | Loss: 0.1970 | SWD: 0.0036 | SSM: 0.1934 | LR: 9.53e-05
+2026-01-22 05:50:35,851 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0186.pt
+2026-01-22 05:50:37,250 - INFO - Starting epoch 187/300
+2026-01-22 05:52:16,900 - INFO - Epoch 187 Step 30/30 | loss=0.1983 | swd=0.004364 | ssm=0.1939
+2026-01-22 05:52:16,902 - INFO - Epoch 187/300 completed in 0.0s | Loss: 0.1955 | SWD: 0.0034 | SSM: 0.1920 | LR: 9.59e-05
+2026-01-22 05:52:16,034 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0187.pt
+2026-01-22 05:52:17,390 - INFO - Starting epoch 188/300
+2026-01-22 05:53:56,864 - INFO - Epoch 188 Step 30/30 | loss=0.1881 | swd=0.003186 | ssm=0.1850
+2026-01-22 05:53:56,866 - INFO - Epoch 188/300 completed in 0.0s | Loss: 0.1924 | SWD: 0.0034 | SSM: 0.1891 | LR: 9.65e-05
+2026-01-22 05:53:58,239 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0188.pt
+2026-01-22 05:53:59,630 - INFO - Starting epoch 189/300
+2026-01-22 05:55:38,831 - INFO - Epoch 189 Step 30/30 | loss=0.1802 | swd=0.002657 | ssm=0.1776
+2026-01-22 05:55:38,832 - INFO - Epoch 189/300 completed in 0.0s | Loss: 0.1957 | SWD: 0.0034 | SSM: 0.1923 | LR: 9.71e-05
+2026-01-22 05:55:40,177 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0189.pt
+2026-01-22 05:55:41,563 - INFO - Starting epoch 190/300
+2026-01-22 05:57:19,580 - INFO - Epoch 190 Step 30/30 | loss=0.1957 | swd=0.003869 | ssm=0.1918
+2026-01-22 05:57:19,581 - INFO - Epoch 190/300 completed in 0.0s | Loss: 0.1912 | SWD: 0.0037 | SSM: 0.1876 | LR: 9.76e-05
+2026-01-22 05:57:20,921 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0190.pt
+2026-01-22 05:57:22,291 - INFO - 
+================================================================================
+2026-01-22 05:57:22,291 - INFO - Running Inference Evaluation (Epoch 190)
+2026-01-22 05:57:22,291 - INFO - ================================================================================
+2026-01-22 05:57:22,294 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 05:57:22,295 - WARNING - No test images found. Skipping inference.
+2026-01-22 05:57:22,295 - INFO - Starting epoch 191/300
+2026-01-22 05:59:00,551 - INFO - Epoch 191 Step 30/30 | loss=0.1755 | swd=0.002997 | ssm=0.1725
+2026-01-22 05:59:00,553 - INFO - Epoch 191/300 completed in 0.0s | Loss: 0.1921 | SWD: 0.0033 | SSM: 0.1888 | LR: 9.80e-05
+2026-01-22 05:59:01,896 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0191.pt
+2026-01-22 05:59:03,175 - INFO - Starting epoch 192/300
+2026-01-22 06:00:41,877 - INFO - Epoch 192 Step 30/30 | loss=0.1998 | swd=0.003091 | ssm=0.1967
+2026-01-22 06:00:41,879 - INFO - Epoch 192/300 completed in 0.0s | Loss: 0.1969 | SWD: 0.0036 | SSM: 0.1932 | LR: 9.84e-05
+2026-01-22 06:00:43,113 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0192.pt
+2026-01-22 06:00:44,400 - INFO - Starting epoch 193/300
+2026-01-22 06:02:23,357 - INFO - Epoch 193 Step 30/30 | loss=0.1983 | swd=0.003394 | ssm=0.1949
+2026-01-22 06:02:23,359 - INFO - Epoch 193/300 completed in 0.0s | Loss: 0.1943 | SWD: 0.0034 | SSM: 0.1908 | LR: 9.88e-05
+2026-01-22 06:02:24,768 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0193.pt
+2026-01-22 06:02:26,131 - INFO - Starting epoch 194/300
+2026-01-22 06:04:05,375 - INFO - Epoch 194 Step 30/30 | loss=0.1948 | swd=0.002380 | ssm=0.1925
+2026-01-22 06:04:05,377 - INFO - Epoch 194/300 completed in 0.0s | Loss: 0.1944 | SWD: 0.0034 | SSM: 0.1910 | LR: 9.91e-05
+2026-01-22 06:04:06,721 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0194.pt
+2026-01-22 06:04:07,959 - INFO - Starting epoch 195/300
+2026-01-22 06:05:46,670 - INFO - Epoch 195 Step 30/30 | loss=0.2013 | swd=0.005397 | ssm=0.1959
+2026-01-22 06:05:46,672 - INFO - Epoch 195/300 completed in 0.0s | Loss: 0.1926 | SWD: 0.0035 | SSM: 0.1891 | LR: 9.94e-05
+2026-01-22 06:05:47,919 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0195.pt
+2026-01-22 06:05:49,224 - INFO - 
+================================================================================
+2026-01-22 06:05:49,225 - INFO - Running Inference Evaluation (Epoch 195)
+2026-01-22 06:05:49,225 - INFO - ================================================================================
+2026-01-22 06:05:49,235 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 06:05:49,236 - WARNING - No test images found. Skipping inference.
+2026-01-22 06:05:49,236 - INFO - Starting epoch 196/300
+2026-01-22 06:07:27,778 - INFO - Epoch 196 Step 30/30 | loss=0.1649 | swd=0.002864 | ssm=0.1621
+2026-01-22 06:07:27,780 - INFO - Epoch 196/300 completed in 0.0s | Loss: 0.1944 | SWD: 0.0036 | SSM: 0.1908 | LR: 9.96e-05
+2026-01-22 06:07:29,068 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0196.pt
+2026-01-22 06:07:30,318 - INFO - Starting epoch 197/300
+2026-01-22 06:09:09,030 - INFO - Epoch 197 Step 30/30 | loss=0.1987 | swd=0.002885 | ssm=0.1958
+2026-01-22 06:09:09,031 - INFO - Epoch 197/300 completed in 0.0s | Loss: 0.1906 | SWD: 0.0037 | SSM: 0.1870 | LR: 9.98e-05
+2026-01-22 06:09:10,298 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0197.pt
+2026-01-22 06:09:11,553 - INFO - Starting epoch 198/300
+2026-01-22 06:10:50,295 - INFO - Epoch 198 Step 30/30 | loss=0.1936 | swd=0.003797 | ssm=0.1898
+2026-01-22 06:10:50,297 - INFO - Epoch 198/300 completed in 0.0s | Loss: 0.1956 | SWD: 0.0034 | SSM: 0.1922 | LR: 9.99e-05
+2026-01-22 06:10:51,565 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0198.pt
+2026-01-22 06:10:52,838 - INFO - Starting epoch 199/300
+2026-01-22 06:12:31,727 - INFO - Epoch 199 Step 30/30 | loss=0.2084 | swd=0.004031 | ssm=0.2044
+2026-01-22 06:12:31,728 - INFO - Epoch 199/300 completed in 0.0s | Loss: 0.1921 | SWD: 0.0034 | SSM: 0.1888 | LR: 1.00e-04
+2026-01-22 06:12:33,012 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0199.pt
+2026-01-22 06:12:34,266 - INFO - Starting epoch 200/300
+2026-01-22 06:14:13,152 - INFO - Epoch 200 Step 30/30 | loss=0.1891 | swd=0.003861 | ssm=0.1853
+2026-01-22 06:14:13,153 - INFO - Epoch 200/300 completed in 0.0s | Loss: 0.1927 | SWD: 0.0034 | SSM: 0.1893 | LR: 1.00e-04
+2026-01-22 06:14:14,404 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0200.pt
+2026-01-22 06:14:15,664 - INFO - 
+================================================================================
+2026-01-22 06:14:15,664 - INFO - Running Inference Evaluation (Epoch 200)
+2026-01-22 06:14:15,664 - INFO - ================================================================================
+2026-01-22 06:14:15,673 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 06:14:15,673 - WARNING - No test images found. Skipping inference.
+2026-01-22 06:14:15,673 - INFO - Starting epoch 201/300
+2026-01-22 06:15:54,456 - INFO - Epoch 201 Step 30/30 | loss=0.1913 | swd=0.003132 | ssm=0.1882
+2026-01-22 06:15:54,457 - INFO - Epoch 201/300 completed in 0.0s | Loss: 0.1925 | SWD: 0.0034 | SSM: 0.1891 | LR: 1.00e-04
+2026-01-22 06:15:55,771 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0201.pt
+2026-01-22 06:15:57,062 - INFO - Starting epoch 202/300
+2026-01-22 06:17:35,907 - INFO - Epoch 202 Step 30/30 | loss=0.1989 | swd=0.003437 | ssm=0.1955
+2026-01-22 06:17:35,908 - INFO - Epoch 202/300 completed in 0.0s | Loss: 0.1933 | SWD: 0.0034 | SSM: 0.1900 | LR: 9.99e-05
+2026-01-22 06:17:37,180 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0202.pt
+2026-01-22 06:17:38,436 - INFO - Starting epoch 203/300
+2026-01-22 06:19:17,205 - INFO - Epoch 203 Step 30/30 | loss=0.2099 | swd=0.003848 | ssm=0.2061
+2026-01-22 06:19:17,207 - INFO - Epoch 203/300 completed in 0.0s | Loss: 0.1958 | SWD: 0.0035 | SSM: 0.1924 | LR: 9.98e-05
+2026-01-22 06:19:18,470 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0203.pt
+2026-01-22 06:19:19,743 - INFO - Starting epoch 204/300
+2026-01-22 06:20:58,506 - INFO - Epoch 204 Step 30/30 | loss=0.2018 | swd=0.002998 | ssm=0.1988
+2026-01-22 06:20:58,508 - INFO - Epoch 204/300 completed in 0.0s | Loss: 0.1928 | SWD: 0.0036 | SSM: 0.1891 | LR: 9.96e-05
+2026-01-22 06:20:59,820 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0204.pt
+2026-01-22 06:21:01,107 - INFO - Starting epoch 205/300
+2026-01-22 06:22:40,144 - INFO - Epoch 205 Step 30/30 | loss=0.1885 | swd=0.003281 | ssm=0.1852
+2026-01-22 06:22:40,145 - INFO - Epoch 205/300 completed in 0.0s | Loss: 0.1945 | SWD: 0.0034 | SSM: 0.1911 | LR: 9.94e-05
+2026-01-22 06:22:41,399 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0205.pt
+2026-01-22 06:22:42,703 - INFO - 
+================================================================================
+2026-01-22 06:22:42,703 - INFO - Running Inference Evaluation (Epoch 205)
+2026-01-22 06:22:42,703 - INFO - ================================================================================
+2026-01-22 06:22:42,706 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 06:22:42,706 - WARNING - No test images found. Skipping inference.
+2026-01-22 06:22:42,706 - INFO - Starting epoch 206/300
+2026-01-22 06:24:21,486 - INFO - Epoch 206 Step 30/30 | loss=0.1861 | swd=0.003295 | ssm=0.1828
+2026-01-22 06:24:21,487 - INFO - Epoch 206/300 completed in 0.0s | Loss: 0.1936 | SWD: 0.0036 | SSM: 0.1900 | LR: 9.91e-05
+2026-01-22 06:24:22,754 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0206.pt
+2026-01-22 06:24:24,023 - INFO - Starting epoch 207/300
+2026-01-22 06:26:03,084 - INFO - Epoch 207 Step 30/30 | loss=0.1905 | swd=0.004039 | ssm=0.1865
+2026-01-22 06:26:03,086 - INFO - Epoch 207/300 completed in 0.0s | Loss: 0.1929 | SWD: 0.0034 | SSM: 0.1895 | LR: 9.88e-05
+2026-01-22 06:26:04,341 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0207.pt
+2026-01-22 06:26:05,612 - INFO - Starting epoch 208/300
+2026-01-22 06:27:44,680 - INFO - Epoch 208 Step 30/30 | loss=0.1864 | swd=0.003201 | ssm=0.1832
+2026-01-22 06:27:44,681 - INFO - Epoch 208/300 completed in 0.0s | Loss: 0.1935 | SWD: 0.0036 | SSM: 0.1899 | LR: 9.84e-05
+2026-01-22 06:27:45,929 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0208.pt
+2026-01-22 06:27:47,185 - INFO - Starting epoch 209/300
+2026-01-22 06:29:26,283 - INFO - Epoch 209 Step 30/30 | loss=0.2041 | swd=0.003485 | ssm=0.2006
+2026-01-22 06:29:26,285 - INFO - Epoch 209/300 completed in 0.0s | Loss: 0.1932 | SWD: 0.0033 | SSM: 0.1899 | LR: 9.80e-05
+2026-01-22 06:29:27,538 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0209.pt
+2026-01-22 06:29:28,808 - INFO - Starting epoch 210/300
+2026-01-22 06:31:07,658 - INFO - Epoch 210 Step 30/30 | loss=0.1990 | swd=0.003873 | ssm=0.1951
+2026-01-22 06:31:07,659 - INFO - Epoch 210/300 completed in 0.0s | Loss: 0.1937 | SWD: 0.0034 | SSM: 0.1903 | LR: 9.76e-05
+2026-01-22 06:31:08,972 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0210.pt
+2026-01-22 06:31:10,248 - INFO - 
+================================================================================
+2026-01-22 06:31:10,248 - INFO - Running Inference Evaluation (Epoch 210)
+2026-01-22 06:31:10,249 - INFO - ================================================================================
+2026-01-22 06:31:10,252 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 06:31:10,252 - WARNING - No test images found. Skipping inference.
+2026-01-22 06:31:10,252 - INFO - Starting epoch 211/300
+2026-01-22 06:32:49,057 - INFO - Epoch 211 Step 30/30 | loss=0.1749 | swd=0.002990 | ssm=0.1719
+2026-01-22 06:32:49,058 - INFO - Epoch 211/300 completed in 0.0s | Loss: 0.1930 | SWD: 0.0034 | SSM: 0.1896 | LR: 9.71e-05
+2026-01-22 06:32:50,354 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0211.pt
+2026-01-22 06:32:51,669 - INFO - Starting epoch 212/300
+2026-01-22 06:34:30,442 - INFO - Epoch 212 Step 30/30 | loss=0.2039 | swd=0.003415 | ssm=0.2005
+2026-01-22 06:34:30,443 - INFO - Epoch 212/300 completed in 0.0s | Loss: 0.1960 | SWD: 0.0042 | SSM: 0.1918 | LR: 9.65e-05
+2026-01-22 06:34:31,714 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0212.pt
+2026-01-22 06:34:32,996 - INFO - Starting epoch 213/300
+2026-01-22 06:36:11,778 - INFO - Epoch 213 Step 30/30 | loss=0.1941 | swd=0.003350 | ssm=0.1907
+2026-01-22 06:36:11,779 - INFO - Epoch 213/300 completed in 0.0s | Loss: 0.1955 | SWD: 0.0037 | SSM: 0.1919 | LR: 9.59e-05
+2026-01-22 06:36:13,060 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0213.pt
+2026-01-22 06:36:14,324 - INFO - Starting epoch 214/300
+2026-01-22 06:37:53,271 - INFO - Epoch 214 Step 30/30 | loss=0.1975 | swd=0.002775 | ssm=0.1947
+2026-01-22 06:37:53,272 - INFO - Epoch 214/300 completed in 0.0s | Loss: 0.1938 | SWD: 0.0036 | SSM: 0.1901 | LR: 9.53e-05
+2026-01-22 06:37:54,544 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0214.pt
+2026-01-22 06:37:55,913 - INFO - Starting epoch 215/300
+2026-01-22 06:39:34,946 - INFO - Epoch 215 Step 30/30 | loss=0.1916 | swd=0.002728 | ssm=0.1889
+2026-01-22 06:39:34,948 - INFO - Epoch 215/300 completed in 0.0s | Loss: 0.1912 | SWD: 0.0033 | SSM: 0.1879 | LR: 9.46e-05
+2026-01-22 06:39:36,208 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0215.pt
+2026-01-22 06:39:37,491 - INFO - 
+================================================================================
+2026-01-22 06:39:37,491 - INFO - Running Inference Evaluation (Epoch 215)
+2026-01-22 06:39:37,492 - INFO - ================================================================================
+2026-01-22 06:39:37,494 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 06:39:37,494 - WARNING - No test images found. Skipping inference.
+2026-01-22 06:39:37,495 - INFO - Starting epoch 216/300
+2026-01-22 06:41:16,507 - INFO - Epoch 216 Step 30/30 | loss=0.1911 | swd=0.002270 | ssm=0.1888
+2026-01-22 06:41:16,508 - INFO - Epoch 216/300 completed in 0.0s | Loss: 0.1916 | SWD: 0.0031 | SSM: 0.1885 | LR: 9.39e-05
+2026-01-22 06:41:17,791 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0216.pt
+2026-01-22 06:41:19,063 - INFO - Starting epoch 217/300
+2026-01-22 06:42:57,863 - INFO - Epoch 217 Step 30/30 | loss=0.1965 | swd=0.003425 | ssm=0.1931
+2026-01-22 06:42:57,865 - INFO - Epoch 217/300 completed in 0.0s | Loss: 0.1923 | SWD: 0.0034 | SSM: 0.1888 | LR: 9.31e-05
+2026-01-22 06:42:59,168 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0217.pt
+2026-01-22 06:43:00,477 - INFO - Starting epoch 218/300
+2026-01-22 06:44:39,300 - INFO - Epoch 218 Step 30/30 | loss=0.1872 | swd=0.002685 | ssm=0.1845
+2026-01-22 06:44:39,301 - INFO - Epoch 218/300 completed in 0.0s | Loss: 0.1911 | SWD: 0.0033 | SSM: 0.1878 | LR: 9.23e-05
+2026-01-22 06:44:40,554 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0218.pt
+2026-01-22 06:44:41,827 - INFO - Starting epoch 219/300
+2026-01-22 06:46:20,723 - INFO - Epoch 219 Step 30/30 | loss=0.1962 | swd=0.005168 | ssm=0.1911
+2026-01-22 06:46:20,725 - INFO - Epoch 219/300 completed in 0.0s | Loss: 0.1928 | SWD: 0.0033 | SSM: 0.1895 | LR: 9.14e-05
+2026-01-22 06:46:21,980 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0219.pt
+2026-01-22 06:46:23,242 - INFO - Starting epoch 220/300
+2026-01-22 06:48:02,311 - INFO - Epoch 220 Step 30/30 | loss=0.2051 | swd=0.003321 | ssm=0.2018
+2026-01-22 06:48:02,312 - INFO - Epoch 220/300 completed in 0.0s | Loss: 0.1911 | SWD: 0.0032 | SSM: 0.1879 | LR: 9.05e-05
+2026-01-22 06:48:03,577 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0220.pt
+2026-01-22 06:48:04,836 - INFO - 
+================================================================================
+2026-01-22 06:48:04,836 - INFO - Running Inference Evaluation (Epoch 220)
+2026-01-22 06:48:04,836 - INFO - ================================================================================
+2026-01-22 06:48:04,839 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 06:48:04,840 - WARNING - No test images found. Skipping inference.
+2026-01-22 06:48:04,840 - INFO - Starting epoch 221/300
+2026-01-22 06:49:43,906 - INFO - Epoch 221 Step 30/30 | loss=0.1931 | swd=0.002940 | ssm=0.1902
+2026-01-22 06:49:43,908 - INFO - Epoch 221/300 completed in 0.0s | Loss: 0.1925 | SWD: 0.0031 | SSM: 0.1894 | LR: 8.96e-05
+2026-01-22 06:49:45,172 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0221.pt
+2026-01-22 06:49:46,437 - INFO - Starting epoch 222/300
+2026-01-22 06:51:25,265 - INFO - Epoch 222 Step 30/30 | loss=0.2068 | swd=0.004216 | ssm=0.2026
+2026-01-22 06:51:25,266 - INFO - Epoch 222/300 completed in 0.0s | Loss: 0.1921 | SWD: 0.0031 | SSM: 0.1889 | LR: 8.86e-05
+2026-01-22 06:51:26,628 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0222.pt
+2026-01-22 06:51:27,920 - INFO - Starting epoch 223/300
+2026-01-22 06:53:06,874 - INFO - Epoch 223 Step 30/30 | loss=0.2011 | swd=0.003915 | ssm=0.1972
+2026-01-22 06:53:06,876 - INFO - Epoch 223/300 completed in 0.0s | Loss: 0.1913 | SWD: 0.0030 | SSM: 0.1883 | LR: 8.76e-05
+2026-01-22 06:53:08,162 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0223.pt
+2026-01-22 06:53:09,494 - INFO - Starting epoch 224/300
+2026-01-22 06:54:48,577 - INFO - Epoch 224 Step 30/30 | loss=0.1942 | swd=0.002975 | ssm=0.1912
+2026-01-22 06:54:48,578 - INFO - Epoch 224/300 completed in 0.0s | Loss: 0.1908 | SWD: 0.0034 | SSM: 0.1874 | LR: 8.66e-05
+2026-01-22 06:54:49,883 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0224.pt
+2026-01-22 06:54:51,210 - INFO - Starting epoch 225/300
+2026-01-22 06:56:29,942 - INFO - Epoch 225 Step 30/30 | loss=0.2062 | swd=0.003315 | ssm=0.2029
+2026-01-22 06:56:29,943 - INFO - Epoch 225/300 completed in 0.0s | Loss: 0.1944 | SWD: 0.0033 | SSM: 0.1911 | LR: 8.55e-05
+2026-01-22 06:56:31,218 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0225.pt
+2026-01-22 06:56:32,487 - INFO - 
+================================================================================
+2026-01-22 06:56:32,488 - INFO - Running Inference Evaluation (Epoch 225)
+2026-01-22 06:56:32,488 - INFO - ================================================================================
+2026-01-22 06:56:32,491 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 06:56:32,491 - WARNING - No test images found. Skipping inference.
+2026-01-22 06:56:32,491 - INFO - Starting epoch 226/300
+2026-01-22 06:58:11,329 - INFO - Epoch 226 Step 30/30 | loss=0.1914 | swd=0.003652 | ssm=0.1877
+2026-01-22 06:58:11,330 - INFO - Epoch 226/300 completed in 0.0s | Loss: 0.1913 | SWD: 0.0033 | SSM: 0.1880 | LR: 8.44e-05
+2026-01-22 06:58:12,601 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0226.pt
+2026-01-22 06:58:13,878 - INFO - Starting epoch 227/300
+2026-01-22 06:59:52,728 - INFO - Epoch 227 Step 30/30 | loss=0.1940 | swd=0.003216 | ssm=0.1908
+2026-01-22 06:59:52,729 - INFO - Epoch 227/300 completed in 0.0s | Loss: 0.1913 | SWD: 0.0032 | SSM: 0.1882 | LR: 8.32e-05
+2026-01-22 06:59:53,979 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0227.pt
+2026-01-22 06:59:55,274 - INFO - Starting epoch 228/300
+2026-01-22 07:01:34,163 - INFO - Epoch 228 Step 30/30 | loss=0.1922 | swd=0.002623 | ssm=0.1896
+2026-01-22 07:01:34,164 - INFO - Epoch 228/300 completed in 0.0s | Loss: 0.1928 | SWD: 0.0034 | SSM: 0.1895 | LR: 8.21e-05
+2026-01-22 07:01:35,433 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0228.pt
+2026-01-22 07:01:36,707 - INFO - Starting epoch 229/300
+2026-01-22 07:03:15,372 - INFO - Epoch 229 Step 30/30 | loss=0.2078 | swd=0.003305 | ssm=0.2045
+2026-01-22 07:03:15,373 - INFO - Epoch 229/300 completed in 0.0s | Loss: 0.1915 | SWD: 0.0032 | SSM: 0.1883 | LR: 8.08e-05
+2026-01-22 07:03:16,648 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0229.pt
+2026-01-22 07:03:17,940 - INFO - Starting epoch 230/300
+2026-01-22 07:04:56,830 - INFO - Epoch 230 Step 30/30 | loss=0.2072 | swd=0.004304 | ssm=0.2029
+2026-01-22 07:04:56,831 - INFO - Epoch 230/300 completed in 0.0s | Loss: 0.1880 | SWD: 0.0031 | SSM: 0.1849 | LR: 7.96e-05
+2026-01-22 07:04:58,125 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0230.pt
+2026-01-22 07:04:59,389 - INFO - 
+================================================================================
+2026-01-22 07:04:59,389 - INFO - Running Inference Evaluation (Epoch 230)
+2026-01-22 07:04:59,389 - INFO - ================================================================================
+2026-01-22 07:04:59,392 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 07:04:59,392 - WARNING - No test images found. Skipping inference.
+2026-01-22 07:04:59,392 - INFO - Starting epoch 231/300
+2026-01-22 07:06:38,132 - INFO - Epoch 231 Step 30/30 | loss=0.1883 | swd=0.002402 | ssm=0.1859
+2026-01-22 07:06:38,133 - INFO - Epoch 231/300 completed in 0.0s | Loss: 0.1912 | SWD: 0.0031 | SSM: 0.1881 | LR: 7.83e-05
+2026-01-22 07:06:39,393 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0231.pt
+2026-01-22 07:06:40,661 - INFO - Starting epoch 232/300
+2026-01-22 07:08:19,482 - INFO - Epoch 232 Step 30/30 | loss=0.1861 | swd=0.004095 | ssm=0.1820
+2026-01-22 07:08:19,484 - INFO - Epoch 232/300 completed in 0.0s | Loss: 0.1907 | SWD: 0.0032 | SSM: 0.1875 | LR: 7.70e-05
+2026-01-22 07:08:20,731 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0232.pt
+2026-01-22 07:08:21,993 - INFO - Starting epoch 233/300
+2026-01-22 07:10:00,791 - INFO - Epoch 233 Step 30/30 | loss=0.1863 | swd=0.003891 | ssm=0.1824
+2026-01-22 07:10:00,792 - INFO - Epoch 233/300 completed in 0.0s | Loss: 0.1952 | SWD: 0.0033 | SSM: 0.1919 | LR: 7.57e-05
+2026-01-22 07:10:02,064 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0233.pt
+2026-01-22 07:10:03,379 - INFO - Starting epoch 234/300
+2026-01-22 07:11:42,168 - INFO - Epoch 234 Step 30/30 | loss=0.1833 | swd=0.002599 | ssm=0.1807
+2026-01-22 07:11:42,170 - INFO - Epoch 234/300 completed in 0.0s | Loss: 0.1907 | SWD: 0.0032 | SSM: 0.1874 | LR: 7.43e-05
+2026-01-22 07:11:43,455 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0234.pt
+2026-01-22 07:11:44,716 - INFO - Starting epoch 235/300
+2026-01-22 07:13:23,609 - INFO - Epoch 235 Step 30/30 | loss=0.1985 | swd=0.003247 | ssm=0.1952
+2026-01-22 07:13:23,610 - INFO - Epoch 235/300 completed in 0.0s | Loss: 0.1908 | SWD: 0.0030 | SSM: 0.1878 | LR: 7.30e-05
+2026-01-22 07:13:24,883 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0235.pt
+2026-01-22 07:13:26,188 - INFO - 
+================================================================================
+2026-01-22 07:13:26,189 - INFO - Running Inference Evaluation (Epoch 235)
+2026-01-22 07:13:26,189 - INFO - ================================================================================
+2026-01-22 07:13:26,192 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 07:13:26,192 - WARNING - No test images found. Skipping inference.
+2026-01-22 07:13:26,193 - INFO - Starting epoch 236/300
+2026-01-22 07:15:04,966 - INFO - Epoch 236 Step 30/30 | loss=0.1806 | swd=0.002642 | ssm=0.1779
+2026-01-22 07:15:04,967 - INFO - Epoch 236/300 completed in 0.0s | Loss: 0.1914 | SWD: 0.0033 | SSM: 0.1880 | LR: 7.16e-05
+2026-01-22 07:15:06,231 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0236.pt
+2026-01-22 07:15:07,534 - INFO - Starting epoch 237/300
+2026-01-22 07:16:46,496 - INFO - Epoch 237 Step 30/30 | loss=0.1922 | swd=0.003131 | ssm=0.1891
+2026-01-22 07:16:46,497 - INFO - Epoch 237/300 completed in 0.0s | Loss: 0.1934 | SWD: 0.0032 | SSM: 0.1902 | LR: 7.02e-05
+2026-01-22 07:16:47,750 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0237.pt
+2026-01-22 07:16:49,033 - INFO - Starting epoch 238/300
+2026-01-22 07:18:27,839 - INFO - Epoch 238 Step 30/30 | loss=0.1855 | swd=0.002766 | ssm=0.1827
+2026-01-22 07:18:27,840 - INFO - Epoch 238/300 completed in 0.0s | Loss: 0.1904 | SWD: 0.0032 | SSM: 0.1872 | LR: 6.87e-05
+2026-01-22 07:18:29,141 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0238.pt
+2026-01-22 07:18:30,441 - INFO - Starting epoch 239/300
+2026-01-22 07:20:09,241 - INFO - Epoch 239 Step 30/30 | loss=0.1760 | swd=0.003060 | ssm=0.1729
+2026-01-22 07:20:09,242 - INFO - Epoch 239/300 completed in 0.0s | Loss: 0.1920 | SWD: 0.0031 | SSM: 0.1888 | LR: 6.73e-05
+2026-01-22 07:20:10,504 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0239.pt
+2026-01-22 07:20:11,757 - INFO - Starting epoch 240/300
+2026-01-22 07:21:50,479 - INFO - Epoch 240 Step 30/30 | loss=0.1849 | swd=0.002280 | ssm=0.1826
+2026-01-22 07:21:50,481 - INFO - Epoch 240/300 completed in 0.0s | Loss: 0.1905 | SWD: 0.0032 | SSM: 0.1874 | LR: 6.58e-05
+2026-01-22 07:21:51,761 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0240.pt
+2026-01-22 07:21:53,016 - INFO - 
+================================================================================
+2026-01-22 07:21:53,017 - INFO - Running Inference Evaluation (Epoch 240)
+2026-01-22 07:21:53,017 - INFO - ================================================================================
+2026-01-22 07:21:53,020 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 07:21:53,020 - WARNING - No test images found. Skipping inference.
+2026-01-22 07:21:53,020 - INFO - Starting epoch 241/300
+2026-01-22 07:23:31,839 - INFO - Epoch 241 Step 30/30 | loss=0.1979 | swd=0.003943 | ssm=0.1940
+2026-01-22 07:23:31,840 - INFO - Epoch 241/300 completed in 0.0s | Loss: 0.1919 | SWD: 0.0033 | SSM: 0.1886 | LR: 6.43e-05
+2026-01-22 07:23:33,100 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0241.pt
+2026-01-22 07:23:34,386 - INFO - Starting epoch 242/300
+2026-01-22 07:25:13,335 - INFO - Epoch 242 Step 30/30 | loss=0.2000 | swd=0.003189 | ssm=0.1968
+2026-01-22 07:25:13,337 - INFO - Epoch 242/300 completed in 0.0s | Loss: 0.1911 | SWD: 0.0031 | SSM: 0.1880 | LR: 6.28e-05
+2026-01-22 07:25:14,619 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0242.pt
+2026-01-22 07:25:15,906 - INFO - Starting epoch 243/300
+2026-01-22 07:26:54,725 - INFO - Epoch 243 Step 30/30 | loss=0.1987 | swd=0.003267 | ssm=0.1955
+2026-01-22 07:26:54,726 - INFO - Epoch 243/300 completed in 0.0s | Loss: 0.1911 | SWD: 0.0031 | SSM: 0.1880 | LR: 6.13e-05
+2026-01-22 07:26:56,026 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0243.pt
+2026-01-22 07:26:57,392 - INFO - Starting epoch 244/300
+2026-01-22 07:28:36,480 - INFO - Epoch 244 Step 30/30 | loss=0.1902 | swd=0.004299 | ssm=0.1859
+2026-01-22 07:28:36,482 - INFO - Epoch 244/300 completed in 0.0s | Loss: 0.1925 | SWD: 0.0031 | SSM: 0.1894 | LR: 5.98e-05
+2026-01-22 07:28:37,762 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0244.pt
+2026-01-22 07:28:39,094 - INFO - Starting epoch 245/300
+2026-01-22 07:30:17,875 - INFO - Epoch 245 Step 30/30 | loss=0.2068 | swd=0.003262 | ssm=0.2036
+2026-01-22 07:30:17,876 - INFO - Epoch 245/300 completed in 0.0s | Loss: 0.1921 | SWD: 0.0031 | SSM: 0.1890 | LR: 5.82e-05
+2026-01-22 07:30:19,156 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0245.pt
+2026-01-22 07:30:20,453 - INFO - 
+================================================================================
+2026-01-22 07:30:20,453 - INFO - Running Inference Evaluation (Epoch 245)
+2026-01-22 07:30:20,453 - INFO - ================================================================================
+2026-01-22 07:30:20,456 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 07:30:20,456 - WARNING - No test images found. Skipping inference.
+2026-01-22 07:30:20,457 - INFO - Starting epoch 246/300
+2026-01-22 07:31:59,243 - INFO - Epoch 246 Step 30/30 | loss=0.1869 | swd=0.003437 | ssm=0.1835
+2026-01-22 07:31:59,245 - INFO - Epoch 246/300 completed in 0.0s | Loss: 0.1928 | SWD: 0.0031 | SSM: 0.1897 | LR: 5.67e-05
+2026-01-22 07:32:00,497 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0246.pt
+2026-01-22 07:32:01,802 - INFO - Starting epoch 247/300
+2026-01-22 07:33:40,608 - INFO - Epoch 247 Step 30/30 | loss=0.1993 | swd=0.003131 | ssm=0.1962
+2026-01-22 07:33:40,609 - INFO - Epoch 247/300 completed in 0.0s | Loss: 0.1918 | SWD: 0.0028 | SSM: 0.1890 | LR: 5.52e-05
+2026-01-22 07:33:41,856 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0247.pt
+2026-01-22 07:33:43,157 - INFO - Starting epoch 248/300
+2026-01-22 07:35:21,950 - INFO - Epoch 248 Step 30/30 | loss=0.1730 | swd=0.003233 | ssm=0.1698
+2026-01-22 07:35:21,951 - INFO - Epoch 248/300 completed in 0.0s | Loss: 0.1906 | SWD: 0.0029 | SSM: 0.1877 | LR: 5.36e-05
+2026-01-22 07:35:23,224 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0248.pt
+2026-01-22 07:35:24,499 - INFO - Starting epoch 249/300
+2026-01-22 07:37:03,407 - INFO - Epoch 249 Step 30/30 | loss=0.1937 | swd=0.003502 | ssm=0.1902
+2026-01-22 07:37:03,408 - INFO - Epoch 249/300 completed in 0.0s | Loss: 0.1901 | SWD: 0.0032 | SSM: 0.1869 | LR: 5.21e-05
+2026-01-22 07:37:04,664 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0249.pt
+2026-01-22 07:37:05,921 - INFO - Starting epoch 250/300
+2026-01-22 07:38:44,724 - INFO - Epoch 250 Step 30/30 | loss=0.1866 | swd=0.002505 | ssm=0.1841
+2026-01-22 07:38:44,725 - INFO - Epoch 250/300 completed in 0.0s | Loss: 0.1888 | SWD: 0.0029 | SSM: 0.1859 | LR: 5.05e-05
+2026-01-22 07:38:45,979 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0250.pt
+2026-01-22 07:38:47,276 - INFO - 
+================================================================================
+2026-01-22 07:38:47,276 - INFO - Running Inference Evaluation (Epoch 250)
+2026-01-22 07:38:47,276 - INFO - ================================================================================
+2026-01-22 07:38:47,279 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 07:38:47,279 - WARNING - No test images found. Skipping inference.
+2026-01-22 07:38:47,280 - INFO - Starting epoch 251/300
+2026-01-22 07:40:26,185 - INFO - Epoch 251 Step 30/30 | loss=0.1748 | swd=0.002205 | ssm=0.1726
+2026-01-22 07:40:26,187 - INFO - Epoch 251/300 completed in 0.0s | Loss: 0.1853 | SWD: 0.0028 | SSM: 0.1825 | LR: 4.89e-05
+2026-01-22 07:40:27,503 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0251.pt
+2026-01-22 07:40:28,769 - INFO - Starting epoch 252/300
+2026-01-22 07:42:07,526 - INFO - Epoch 252 Step 30/30 | loss=0.2016 | swd=0.002735 | ssm=0.1989
+2026-01-22 07:42:07,528 - INFO - Epoch 252/300 completed in 0.0s | Loss: 0.1908 | SWD: 0.0029 | SSM: 0.1879 | LR: 4.74e-05
+2026-01-22 07:42:08,780 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0252.pt
+2026-01-22 07:42:10,037 - INFO - Starting epoch 253/300
+2026-01-22 07:43:48,882 - INFO - Epoch 253 Step 30/30 | loss=0.1975 | swd=0.004519 | ssm=0.1930
+2026-01-22 07:43:48,884 - INFO - Epoch 253/300 completed in 0.0s | Loss: 0.1917 | SWD: 0.0030 | SSM: 0.1887 | LR: 4.58e-05
+2026-01-22 07:43:50,154 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0253.pt
+2026-01-22 07:43:51,423 - INFO - Starting epoch 254/300
+2026-01-22 07:45:30,274 - INFO - Epoch 254 Step 30/30 | loss=0.1839 | swd=0.002519 | ssm=0.1813
+2026-01-22 07:45:30,275 - INFO - Epoch 254/300 completed in 0.0s | Loss: 0.1911 | SWD: 0.0032 | SSM: 0.1879 | LR: 4.43e-05
+2026-01-22 07:45:31,556 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0254.pt
+2026-01-22 07:45:32,838 - INFO - Starting epoch 255/300
+2026-01-22 07:47:11,662 - INFO - Epoch 255 Step 30/30 | loss=0.1858 | swd=0.003718 | ssm=0.1821
+2026-01-22 07:47:11,664 - INFO - Epoch 255/300 completed in 0.0s | Loss: 0.1899 | SWD: 0.0030 | SSM: 0.1869 | LR: 4.28e-05
+2026-01-22 07:47:12,949 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0255.pt
+2026-01-22 07:47:14,223 - INFO - 
+================================================================================
+2026-01-22 07:47:14,223 - INFO - Running Inference Evaluation (Epoch 255)
+2026-01-22 07:47:14,223 - INFO - ================================================================================
+2026-01-22 07:47:14,226 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 07:47:14,227 - WARNING - No test images found. Skipping inference.
+2026-01-22 07:47:14,227 - INFO - Starting epoch 256/300
+2026-01-22 07:48:53,169 - INFO - Epoch 256 Step 30/30 | loss=0.2092 | swd=0.003197 | ssm=0.2060
+2026-01-22 07:48:53,170 - INFO - Epoch 256/300 completed in 0.0s | Loss: 0.1918 | SWD: 0.0030 | SSM: 0.1888 | LR: 4.12e-05
+2026-01-22 07:48:54,468 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0256.pt
+2026-01-22 07:48:55,802 - INFO - Starting epoch 257/300
+2026-01-22 07:50:34,775 - INFO - Epoch 257 Step 30/30 | loss=0.1856 | swd=0.002731 | ssm=0.1828
+2026-01-22 07:50:34,776 - INFO - Epoch 257/300 completed in 0.0s | Loss: 0.1902 | SWD: 0.0030 | SSM: 0.1872 | LR: 3.97e-05
+2026-01-22 07:50:36,049 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0257.pt
+2026-01-22 07:50:37,347 - INFO - Starting epoch 258/300
+2026-01-22 07:52:16,342 - INFO - Epoch 258 Step 30/30 | loss=0.1802 | swd=0.002329 | ssm=0.1779
+2026-01-22 07:52:16,343 - INFO - Epoch 258/300 completed in 0.0s | Loss: 0.1904 | SWD: 0.0029 | SSM: 0.1875 | LR: 3.82e-05
+2026-01-22 07:52:17,589 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0258.pt
+2026-01-22 07:52:18,850 - INFO - Starting epoch 259/300
+2026-01-22 07:53:57,681 - INFO - Epoch 259 Step 30/30 | loss=0.1912 | swd=0.003018 | ssm=0.1881
+2026-01-22 07:53:57,682 - INFO - Epoch 259/300 completed in 0.0s | Loss: 0.1875 | SWD: 0.0028 | SSM: 0.1846 | LR: 3.67e-05
+2026-01-22 07:53:58,971 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0259.pt
+2026-01-22 07:54:00,272 - INFO - Starting epoch 260/300
+2026-01-22 07:55:39,093 - INFO - Epoch 260 Step 30/30 | loss=0.1961 | swd=0.002843 | ssm=0.1933
+2026-01-22 07:55:39,094 - INFO - Epoch 260/300 completed in 0.0s | Loss: 0.1915 | SWD: 0.0030 | SSM: 0.1886 | LR: 3.52e-05
+2026-01-22 07:55:40,371 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0260.pt
+2026-01-22 07:55:41,677 - INFO - 
+================================================================================
+2026-01-22 07:55:41,677 - INFO - Running Inference Evaluation (Epoch 260)
+2026-01-22 07:55:41,677 - INFO - ================================================================================
+2026-01-22 07:55:41,680 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 07:55:41,680 - WARNING - No test images found. Skipping inference.
+2026-01-22 07:55:41,680 - INFO - Starting epoch 261/300
+2026-01-22 07:57:20,544 - INFO - Epoch 261 Step 30/30 | loss=0.1936 | swd=0.002276 | ssm=0.1913
+2026-01-22 07:57:20,546 - INFO - Epoch 261/300 completed in 0.0s | Loss: 0.1896 | SWD: 0.0028 | SSM: 0.1868 | LR: 3.37e-05
+2026-01-22 07:57:21,807 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0261.pt
+2026-01-22 07:57:23,065 - INFO - Starting epoch 262/300
+2026-01-22 07:59:01,889 - INFO - Epoch 262 Step 30/30 | loss=0.1687 | swd=0.002142 | ssm=0.1666
+2026-01-22 07:59:01,890 - INFO - Epoch 262/300 completed in 0.0s | Loss: 0.1887 | SWD: 0.0031 | SSM: 0.1857 | LR: 3.23e-05
+2026-01-22 07:59:03,149 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0262.pt
+2026-01-22 07:59:04,408 - INFO - Starting epoch 263/300
+2026-01-22 08:00:43,361 - INFO - Epoch 263 Step 30/30 | loss=0.1945 | swd=0.002658 | ssm=0.1918
+2026-01-22 08:00:43,362 - INFO - Epoch 263/300 completed in 0.0s | Loss: 0.1905 | SWD: 0.0028 | SSM: 0.1877 | LR: 3.08e-05
+2026-01-22 08:00:44,643 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0263.pt
+2026-01-22 08:00:45,915 - INFO - Starting epoch 264/300
+2026-01-22 08:02:24,987 - INFO - Epoch 264 Step 30/30 | loss=0.1900 | swd=0.001928 | ssm=0.1881
+2026-01-22 08:02:24,988 - INFO - Epoch 264/300 completed in 0.0s | Loss: 0.1908 | SWD: 0.0028 | SSM: 0.1879 | LR: 2.94e-05
+2026-01-22 08:02:26,242 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0264.pt
+2026-01-22 08:02:27,585 - INFO - Starting epoch 265/300
+2026-01-22 08:04:06,575 - INFO - Epoch 265 Step 30/30 | loss=0.1795 | swd=0.002599 | ssm=0.1769
+2026-01-22 08:04:06,577 - INFO - Epoch 265/300 completed in 0.0s | Loss: 0.1899 | SWD: 0.0028 | SSM: 0.1871 | LR: 2.80e-05
+2026-01-22 08:04:07,847 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0265.pt
+2026-01-22 08:04:09,132 - INFO - 
+================================================================================
+2026-01-22 08:04:09,132 - INFO - Running Inference Evaluation (Epoch 265)
+2026-01-22 08:04:09,132 - INFO - ================================================================================
+2026-01-22 08:04:09,135 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 08:04:09,136 - WARNING - No test images found. Skipping inference.
+2026-01-22 08:04:09,136 - INFO - Starting epoch 266/300
+2026-01-22 08:05:48,008 - INFO - Epoch 266 Step 30/30 | loss=0.1826 | swd=0.003272 | ssm=0.1794
+2026-01-22 08:05:48,009 - INFO - Epoch 266/300 completed in 0.0s | Loss: 0.1911 | SWD: 0.0029 | SSM: 0.1883 | LR: 2.67e-05
+2026-01-22 08:05:49,268 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0266.pt
+2026-01-22 08:05:50,533 - INFO - Starting epoch 267/300
+2026-01-22 08:07:29,470 - INFO - Epoch 267 Step 30/30 | loss=0.1893 | swd=0.002922 | ssm=0.1864
+2026-01-22 08:07:29,472 - INFO - Epoch 267/300 completed in 0.0s | Loss: 0.1913 | SWD: 0.0028 | SSM: 0.1885 | LR: 2.53e-05
+2026-01-22 08:07:30,747 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0267.pt
+2026-01-22 08:07:32,006 - INFO - Starting epoch 268/300
+2026-01-22 08:09:11,061 - INFO - Epoch 268 Step 30/30 | loss=0.1808 | swd=0.002684 | ssm=0.1781
+2026-01-22 08:09:11,062 - INFO - Epoch 268/300 completed in 0.0s | Loss: 0.1884 | SWD: 0.0030 | SSM: 0.1855 | LR: 2.40e-05
+2026-01-22 08:09:12,329 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0268.pt
+2026-01-22 08:09:13,591 - INFO - Starting epoch 269/300
+2026-01-22 08:10:52,390 - INFO - Epoch 269 Step 30/30 | loss=0.1816 | swd=0.002828 | ssm=0.1788
+2026-01-22 08:10:52,391 - INFO - Epoch 269/300 completed in 0.0s | Loss: 0.1887 | SWD: 0.0028 | SSM: 0.1859 | LR: 2.27e-05
+2026-01-22 08:10:53,649 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0269.pt
+2026-01-22 08:10:54,946 - INFO - Starting epoch 270/300
+2026-01-22 08:12:33,887 - INFO - Epoch 270 Step 30/30 | loss=0.1832 | swd=0.003157 | ssm=0.1800
+2026-01-22 08:12:33,889 - INFO - Epoch 270/300 completed in 0.0s | Loss: 0.1877 | SWD: 0.0029 | SSM: 0.1849 | LR: 2.14e-05
+2026-01-22 08:12:35,153 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0270.pt
+2026-01-22 08:12:36,419 - INFO - 
+================================================================================
+2026-01-22 08:12:36,420 - INFO - Running Inference Evaluation (Epoch 270)
+2026-01-22 08:12:36,420 - INFO - ================================================================================
+2026-01-22 08:12:36,422 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 08:12:36,422 - WARNING - No test images found. Skipping inference.
+2026-01-22 08:12:36,422 - INFO - Starting epoch 271/300
+2026-01-22 08:14:15,258 - INFO - Epoch 271 Step 30/30 | loss=0.1614 | swd=0.002206 | ssm=0.1592
+2026-01-22 08:14:15,259 - INFO - Epoch 271/300 completed in 0.0s | Loss: 0.1874 | SWD: 0.0028 | SSM: 0.1845 | LR: 2.02e-05
+2026-01-22 08:14:16,526 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0271.pt
+2026-01-22 08:14:17,798 - INFO - Starting epoch 272/300
+2026-01-22 08:15:56,788 - INFO - Epoch 272 Step 30/30 | loss=0.1863 | swd=0.003083 | ssm=0.1832
+2026-01-22 08:15:56,790 - INFO - Epoch 272/300 completed in 0.0s | Loss: 0.1922 | SWD: 0.0031 | SSM: 0.1891 | LR: 1.89e-05
+2026-01-22 08:15:58,094 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0272.pt
+2026-01-22 08:15:59,372 - INFO - Starting epoch 273/300
+2026-01-22 08:17:38,235 - INFO - Epoch 273 Step 30/30 | loss=0.2089 | swd=0.004002 | ssm=0.2049
+2026-01-22 08:17:38,237 - INFO - Epoch 273/300 completed in 0.0s | Loss: 0.1913 | SWD: 0.0029 | SSM: 0.1884 | LR: 1.78e-05
+2026-01-22 08:17:39,508 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0273.pt
+2026-01-22 08:17:40,769 - INFO - Starting epoch 274/300
+2026-01-22 08:19:19,925 - INFO - Epoch 274 Step 30/30 | loss=0.1865 | swd=0.002884 | ssm=0.1836
+2026-01-22 08:19:19,926 - INFO - Epoch 274/300 completed in 0.0s | Loss: 0.1888 | SWD: 0.0029 | SSM: 0.1860 | LR: 1.66e-05
+2026-01-22 08:19:21,301 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0274.pt
+2026-01-22 08:19:22,677 - INFO - Starting epoch 275/300
+2026-01-22 08:21:01,548 - INFO - Epoch 275 Step 30/30 | loss=0.2051 | swd=0.003662 | ssm=0.2014
+2026-01-22 08:21:01,549 - INFO - Epoch 275/300 completed in 0.0s | Loss: 0.1915 | SWD: 0.0029 | SSM: 0.1886 | LR: 1.55e-05
+2026-01-22 08:21:02,817 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0275.pt
+2026-01-22 08:21:04,105 - INFO - 
+================================================================================
+2026-01-22 08:21:04,105 - INFO - Running Inference Evaluation (Epoch 275)
+2026-01-22 08:21:04,105 - INFO - ================================================================================
+2026-01-22 08:21:04,108 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 08:21:04,108 - WARNING - No test images found. Skipping inference.
+2026-01-22 08:21:04,109 - INFO - Starting epoch 276/300
+2026-01-22 08:22:43,212 - INFO - Epoch 276 Step 30/30 | loss=0.1894 | swd=0.002551 | ssm=0.1869
+2026-01-22 08:22:43,213 - INFO - Epoch 276/300 completed in 0.0s | Loss: 0.1893 | SWD: 0.0027 | SSM: 0.1866 | LR: 1.44e-05
+2026-01-22 08:22:44,469 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0276.pt
+2026-01-22 08:22:45,771 - INFO - Starting epoch 277/300
+2026-01-22 08:24:24,777 - INFO - Epoch 277 Step 30/30 | loss=0.1990 | swd=0.002547 | ssm=0.1965
+2026-01-22 08:24:24,779 - INFO - Epoch 277/300 completed in 0.0s | Loss: 0.1876 | SWD: 0.0027 | SSM: 0.1849 | LR: 1.34e-05
+2026-01-22 08:24:26,044 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0277.pt
+2026-01-22 08:24:27,386 - INFO - Starting epoch 278/300
+2026-01-22 08:26:06,174 - INFO - Epoch 278 Step 30/30 | loss=0.1939 | swd=0.002954 | ssm=0.1910
+2026-01-22 08:26:06,175 - INFO - Epoch 278/300 completed in 0.0s | Loss: 0.1891 | SWD: 0.0027 | SSM: 0.1865 | LR: 1.24e-05
+2026-01-22 08:26:07,439 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0278.pt
+2026-01-22 08:26:08,698 - INFO - Starting epoch 279/300
+2026-01-22 08:27:47,727 - INFO - Epoch 279 Step 30/30 | loss=0.1921 | swd=0.002405 | ssm=0.1897
+2026-01-22 08:27:47,728 - INFO - Epoch 279/300 completed in 0.0s | Loss: 0.1877 | SWD: 0.0028 | SSM: 0.1850 | LR: 1.14e-05
+2026-01-22 08:27:49,011 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0279.pt
+2026-01-22 08:27:50,277 - INFO - Starting epoch 280/300
+2026-01-22 08:29:29,238 - INFO - Epoch 280 Step 30/30 | loss=0.1831 | swd=0.002519 | ssm=0.1806
+2026-01-22 08:29:29,240 - INFO - Epoch 280/300 completed in 0.0s | Loss: 0.1905 | SWD: 0.0027 | SSM: 0.1878 | LR: 1.05e-05
+2026-01-22 08:29:30,570 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0280.pt
+2026-01-22 08:29:31,859 - INFO - 
+================================================================================
+2026-01-22 08:29:31,860 - INFO - Running Inference Evaluation (Epoch 280)
+2026-01-22 08:29:31,860 - INFO - ================================================================================
+2026-01-22 08:29:31,863 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 08:29:31,863 - WARNING - No test images found. Skipping inference.
+2026-01-22 08:29:31,863 - INFO - Starting epoch 281/300
+2026-01-22 08:31:10,645 - INFO - Epoch 281 Step 30/30 | loss=0.1826 | swd=0.002624 | ssm=0.1800
+2026-01-22 08:31:10,646 - INFO - Epoch 281/300 completed in 0.0s | Loss: 0.1877 | SWD: 0.0029 | SSM: 0.1848 | LR: 9.56e-06
+2026-01-22 08:31:11,935 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0281.pt
+2026-01-22 08:31:13,239 - INFO - Starting epoch 282/300
+2026-01-22 08:32:52,032 - INFO - Epoch 282 Step 30/30 | loss=0.1857 | swd=0.002607 | ssm=0.1831
+2026-01-22 08:32:52,033 - INFO - Epoch 282/300 completed in 0.0s | Loss: 0.1862 | SWD: 0.0027 | SSM: 0.1835 | LR: 8.71e-06
+2026-01-22 08:32:53,299 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0282.pt
+2026-01-22 08:32:54,568 - INFO - Starting epoch 283/300
+2026-01-22 08:34:33,356 - INFO - Epoch 283 Step 30/30 | loss=0.1949 | swd=0.003039 | ssm=0.1918
+2026-01-22 08:34:33,358 - INFO - Epoch 283/300 completed in 0.0s | Loss: 0.1890 | SWD: 0.0027 | SSM: 0.1862 | LR: 7.89e-06
+2026-01-22 08:34:34,610 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0283.pt
+2026-01-22 08:34:35,866 - INFO - Starting epoch 284/300
+2026-01-22 08:36:14,775 - INFO - Epoch 284 Step 30/30 | loss=0.2012 | swd=0.002712 | ssm=0.1985
+2026-01-22 08:36:14,776 - INFO - Epoch 284/300 completed in 0.0s | Loss: 0.1883 | SWD: 0.0027 | SSM: 0.1855 | LR: 7.12e-06
+2026-01-22 08:36:16,038 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0284.pt
+2026-01-22 08:36:17,361 - INFO - Starting epoch 285/300
+2026-01-22 08:37:56,272 - INFO - Epoch 285 Step 30/30 | loss=0.1839 | swd=0.002324 | ssm=0.1816
+2026-01-22 08:37:56,273 - INFO - Epoch 285/300 completed in 0.0s | Loss: 0.1865 | SWD: 0.0027 | SSM: 0.1838 | LR: 6.40e-06
+2026-01-22 08:37:57,545 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0285.pt
+2026-01-22 08:37:58,889 - INFO - 
+================================================================================
+2026-01-22 08:37:58,890 - INFO - Running Inference Evaluation (Epoch 285)
+2026-01-22 08:37:58,890 - INFO - ================================================================================
+2026-01-22 08:37:58,893 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 08:37:58,893 - WARNING - No test images found. Skipping inference.
+2026-01-22 08:37:58,893 - INFO - Starting epoch 286/300
+2026-01-22 08:39:37,907 - INFO - Epoch 286 Step 30/30 | loss=0.1931 | swd=0.002305 | ssm=0.1908
+2026-01-22 08:39:37,909 - INFO - Epoch 286/300 completed in 0.0s | Loss: 0.1894 | SWD: 0.0027 | SSM: 0.1867 | LR: 5.71e-06
+2026-01-22 08:39:39,178 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0286.pt
+2026-01-22 08:39:40,453 - INFO - Starting epoch 287/300
+2026-01-22 08:41:19,456 - INFO - Epoch 287 Step 30/30 | loss=0.2049 | swd=0.003358 | ssm=0.2015
+2026-01-22 08:41:19,457 - INFO - Epoch 287/300 completed in 0.0s | Loss: 0.1902 | SWD: 0.0028 | SSM: 0.1873 | LR: 5.07e-06
+2026-01-22 08:41:20,683 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0287.pt
+2026-01-22 08:41:21,933 - INFO - Starting epoch 288/300
+2026-01-22 08:43:00,790 - INFO - Epoch 288 Step 30/30 | loss=0.1876 | swd=0.002200 | ssm=0.1854
+2026-01-22 08:43:00,791 - INFO - Epoch 288/300 completed in 0.0s | Loss: 0.1876 | SWD: 0.0027 | SSM: 0.1849 | LR: 4.48e-06
+2026-01-22 08:43:02,038 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0288.pt
+2026-01-22 08:43:03,286 - INFO - Starting epoch 289/300
+2026-01-22 08:44:42,175 - INFO - Epoch 289 Step 30/30 | loss=0.1962 | swd=0.002354 | ssm=0.1939
+2026-01-22 08:44:42,176 - INFO - Epoch 289/300 completed in 0.0s | Loss: 0.1909 | SWD: 0.0027 | SSM: 0.1882 | LR: 3.93e-06
+2026-01-22 08:44:43,436 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0289.pt
+2026-01-22 08:44:44,717 - INFO - Starting epoch 290/300
+2026-01-22 08:46:23,496 - INFO - Epoch 290 Step 30/30 | loss=0.2039 | swd=0.002610 | ssm=0.2013
+2026-01-22 08:46:23,498 - INFO - Epoch 290/300 completed in 0.0s | Loss: 0.1883 | SWD: 0.0026 | SSM: 0.1857 | LR: 3.42e-06
+2026-01-22 08:46:24,798 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0290.pt
+2026-01-22 08:46:26,139 - INFO - 
+================================================================================
+2026-01-22 08:46:26,140 - INFO - Running Inference Evaluation (Epoch 290)
+2026-01-22 08:46:26,140 - INFO - ================================================================================
+2026-01-22 08:46:26,144 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 08:46:26,144 - WARNING - No test images found. Skipping inference.
+2026-01-22 08:46:26,144 - INFO - Starting epoch 291/300
+2026-01-22 08:48:05,035 - INFO - Epoch 291 Step 30/30 | loss=0.1975 | swd=0.002732 | ssm=0.1948
+2026-01-22 08:48:05,037 - INFO - Epoch 291/300 completed in 0.0s | Loss: 0.1913 | SWD: 0.0027 | SSM: 0.1886 | LR: 2.97e-06
+2026-01-22 08:48:06,305 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0291.pt
+2026-01-22 08:48:07,570 - INFO - Starting epoch 292/300
+2026-01-22 08:49:46,502 - INFO - Epoch 292 Step 30/30 | loss=0.1895 | swd=0.002843 | ssm=0.1866
+2026-01-22 08:49:46,503 - INFO - Epoch 292/300 completed in 0.0s | Loss: 0.1907 | SWD: 0.0028 | SSM: 0.1879 | LR: 2.56e-06
+2026-01-22 08:49:47,763 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0292.pt
+2026-01-22 08:49:49,063 - INFO - Starting epoch 293/300
+2026-01-22 08:51:28,031 - INFO - Epoch 293 Step 30/30 | loss=0.1905 | swd=0.003736 | ssm=0.1868
+2026-01-22 08:51:28,033 - INFO - Epoch 293/300 completed in 0.0s | Loss: 0.1900 | SWD: 0.0027 | SSM: 0.1872 | LR: 2.19e-06
+2026-01-22 08:51:29,381 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0293.pt
+2026-01-22 08:51:30,810 - INFO - Starting epoch 294/300
+2026-01-22 08:53:09,762 - INFO - Epoch 294 Step 30/30 | loss=0.1754 | swd=0.002490 | ssm=0.1729
+2026-01-22 08:53:09,763 - INFO - Epoch 294/300 completed in 0.0s | Loss: 0.1884 | SWD: 0.0028 | SSM: 0.1856 | LR: 1.88e-06
+2026-01-22 08:53:11,082 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0294.pt
+2026-01-22 08:53:12,396 - INFO - Starting epoch 295/300
+2026-01-22 08:54:51,242 - INFO - Epoch 295 Step 30/30 | loss=0.1704 | swd=0.001933 | ssm=0.1685
+2026-01-22 08:54:51,244 - INFO - Epoch 295/300 completed in 0.0s | Loss: 0.1891 | SWD: 0.0029 | SSM: 0.1862 | LR: 1.61e-06
+2026-01-22 08:54:52,535 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0295.pt
+2026-01-22 08:54:53,815 - INFO - 
+================================================================================
+2026-01-22 08:54:53,815 - INFO - Running Inference Evaluation (Epoch 295)
+2026-01-22 08:54:53,815 - INFO - ================================================================================
+2026-01-22 08:54:53,818 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 08:54:53,819 - WARNING - No test images found. Skipping inference.
+2026-01-22 08:54:53,819 - INFO - Starting epoch 296/300
+2026-01-22 08:56:32,733 - INFO - Epoch 296 Step 30/30 | loss=0.1811 | swd=0.002338 | ssm=0.1788
+2026-01-22 08:56:32,735 - INFO - Epoch 296/300 completed in 0.0s | Loss: 0.1860 | SWD: 0.0026 | SSM: 0.1834 | LR: 1.39e-06
+2026-01-22 08:56:33,991 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0296.pt
+2026-01-22 08:56:35,330 - INFO - Starting epoch 297/300
+2026-01-22 08:58:14,251 - INFO - Epoch 297 Step 30/30 | loss=0.1905 | swd=0.003085 | ssm=0.1874
+2026-01-22 08:58:14,253 - INFO - Epoch 297/300 completed in 0.0s | Loss: 0.1907 | SWD: 0.0028 | SSM: 0.1879 | LR: 1.22e-06
+2026-01-22 08:58:15,553 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0297.pt
+2026-01-22 08:58:16,867 - INFO - Starting epoch 298/300
+2026-01-22 08:59:55,854 - INFO - Epoch 298 Step 30/30 | loss=0.1791 | swd=0.002810 | ssm=0.1762
+2026-01-22 08:59:55,855 - INFO - Epoch 298/300 completed in 0.0s | Loss: 0.1892 | SWD: 0.0027 | SSM: 0.1865 | LR: 1.10e-06
+2026-01-22 08:59:57,172 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0298.pt
+2026-01-22 08:59:58,466 - INFO - Starting epoch 299/300
+2026-01-22 09:01:37,648 - INFO - Epoch 299 Step 30/30 | loss=0.1964 | swd=0.002614 | ssm=0.1938
+2026-01-22 09:01:37,649 - INFO - Epoch 299/300 completed in 0.0s | Loss: 0.1886 | SWD: 0.0027 | SSM: 0.1859 | LR: 1.02e-06
+2026-01-22 09:01:38,945 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0299.pt
+2026-01-22 09:01:40,281 - INFO - Starting epoch 300/300
+2026-01-22 09:03:19,272 - INFO - Epoch 300 Step 30/30 | loss=0.1884 | swd=0.002350 | ssm=0.1860
+2026-01-22 09:03:19,273 - INFO - Epoch 300/300 completed in 0.0s | Loss: 0.1880 | SWD: 0.0027 | SSM: 0.1853 | LR: 1.00e-06
+2026-01-22 09:03:20,601 - INFO - ✓ Saved checkpoint: checkpoints/lgt_baseline/epoch_0300.pt
+2026-01-22 09:03:21,944 - INFO - 
+================================================================================
+2026-01-22 09:03:21,945 - INFO - Running Inference Evaluation (Epoch 300)
+2026-01-22 09:03:21,945 - INFO - ================================================================================
+2026-01-22 09:03:21,956 - WARNING - Test image directory not found: /mnt/f/monet/monet2photo
+2026-01-22 09:03:21,956 - WARNING - No test images found. Skipping inference.
+2026-01-22 09:03:21,956 - INFO - ================================================================================
+2026-01-22 09:03:21,956 - INFO - ✓ Training completed!
+2026-01-22 09:03:21,957 - INFO - ================================================================================

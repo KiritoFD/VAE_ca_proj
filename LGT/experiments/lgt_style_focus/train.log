@@ -1,0 +1,53 @@
+2026-01-22 09:03:43,741 - INFO - Using device: cuda
+2026-01-22 09:03:43,742 - INFO - Loading latents into memory...
+2026-01-22 09:03:43,751 - INFO -   Style 0 (style0): 1072 files
+2026-01-22 09:03:49,560 - INFO -   Style 1 (style1): 6287 files
+2026-01-22 09:04:22,991 - INFO - ✓ Loaded 7359 latents into memory
+2026-01-22 09:04:22,991 - INFO -   Shape: torch.Size([7359, 4, 32, 32])
+2026-01-22 09:04:22,992 - INFO -   Memory: 0.12 GB
+2026-01-22 09:04:23,321 - INFO - Model parameters: 20,337,668
+/mnt/g/GitHub/VAE_ca_proj/LGT/train.py:176: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  self.scaler = torch.cuda.amp.GradScaler(enabled=self.use_amp)
+2026-01-22 09:04:27,133 - INFO - ================================================================================
+2026-01-22 09:04:27,134 - INFO - Starting LGT Training
+2026-01-22 09:04:27,134 - INFO - ================================================================================
+2026-01-22 09:04:27,134 - INFO - Starting epoch 1/300
+2026-01-22 09:06:10,369 - INFO - Epoch 1 Step 30/30 | loss=0.3101 | swd=0.004715 | ssm=0.2630
+2026-01-22 09:06:10,370 - INFO - Epoch 1/300 completed in 0.0s | Loss: 0.3774 | SWD: 0.0073 | SSM: 0.3041 | LR: 5.00e-04
+2026-01-22 09:06:10,377 - INFO - Starting epoch 2/300
+2026-01-22 09:07:52,377 - INFO - Epoch 2 Step 30/30 | loss=0.3194 | swd=0.004441 | ssm=0.2750
+2026-01-22 09:07:52,378 - INFO - Epoch 2/300 completed in 0.0s | Loss: 0.3361 | SWD: 0.0054 | SSM: 0.2826 | LR: 5.00e-04
+2026-01-22 09:07:52,383 - INFO - Starting epoch 3/300
+2026-01-22 09:09:34,538 - INFO - Epoch 3 Step 30/30 | loss=0.3545 | swd=0.007309 | ssm=0.2814
+2026-01-22 09:09:34,539 - INFO - Epoch 3/300 completed in 0.0s | Loss: 0.3318 | SWD: 0.0054 | SSM: 0.2782 | LR: 5.00e-04
+2026-01-22 09:09:34,550 - INFO - Starting epoch 4/300
+2026-01-22 09:11:16,530 - INFO - Epoch 4 Step 30/30 | loss=0.3179 | swd=0.004362 | ssm=0.2742
+2026-01-22 09:11:16,532 - INFO - Epoch 4/300 completed in 0.0s | Loss: 0.3434 | SWD: 0.0059 | SSM: 0.2842 | LR: 5.00e-04
+2026-01-22 09:11:16,536 - INFO - Starting epoch 5/300
+2026-01-22 09:12:58,376 - INFO - Epoch 5 Step 30/30 | loss=0.3160 | swd=0.004184 | ssm=0.2741
+2026-01-22 09:12:58,377 - INFO - Epoch 5/300 completed in 0.0s | Loss: 0.3188 | SWD: 0.0047 | SSM: 0.2716 | LR: 5.00e-04
+2026-01-22 09:12:58,382 - INFO - Starting epoch 6/300
+2026-01-22 09:14:40,406 - INFO - Epoch 6 Step 30/30 | loss=0.2852 | swd=0.003455 | ssm=0.2506
+2026-01-22 09:14:40,407 - INFO - Epoch 6/300 completed in 0.0s | Loss: 0.3139 | SWD: 0.0046 | SSM: 0.2682 | LR: 5.00e-04
+2026-01-22 09:14:40,412 - INFO - Starting epoch 7/300
+2026-01-22 09:16:22,464 - INFO - Epoch 7 Step 30/30 | loss=0.3038 | swd=0.005785 | ssm=0.2459
+2026-01-22 09:16:22,466 - INFO - Epoch 7/300 completed in 0.0s | Loss: 0.2957 | SWD: 0.0038 | SSM: 0.2578 | LR: 4.99e-04
+2026-01-22 09:16:22,471 - INFO - Starting epoch 8/300
+Traceback (most recent call last):
+  File "/mnt/g/GitHub/VAE_ca_proj/LGT/train.py", line 781, in <module>
+    main()
+  File "/mnt/g/GitHub/VAE_ca_proj/LGT/train.py", line 777, in main
+    trainer.train(dataloader)
+  File "/mnt/g/GitHub/VAE_ca_proj/LGT/train.py", line 476, in train
+    metrics = self.train_epoch(dataloader, epoch)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/g/GitHub/VAE_ca_proj/LGT/train.py", line 378, in train_epoch
+    self.scaler.scale(loss).backward()
+  File "/home/xy/miniconda3/envs/cu128/lib/python3.12/site-packages/torch/_tensor.py", line 625, in backward
+    torch.autograd.backward(
+  File "/home/xy/miniconda3/envs/cu128/lib/python3.12/site-packages/torch/autograd/__init__.py", line 354, in backward
+    _engine_run_backward(
+  File "/home/xy/miniconda3/envs/cu128/lib/python3.12/site-packages/torch/autograd/graph.py", line 841, in _engine_run_backward
+    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt

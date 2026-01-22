@@ -116,7 +116,14 @@ class LGTTrainer:
         self.config = config
         self.device = device
         
-        # Create model
+        # Noise configuration
+        self.style_embedding_noise = config['training'].get('style_embedding_noise', 0.05)
+        self.latent_input_noise = config['training'].get('latent_input_noise', 0.02)
+        self.adaptive_noise = config['training'].get('adaptive_noise', False)
+        self.batch_size_ref = config['training'].get('batch_size_ref', 240)
+        self.batch_size = config['training']['batch_size']
+        
+        # Create model with configurable noise
         self.model = LGTUNet(
             latent_channels=config['model']['latent_channels'],
             base_channels=config['model']['base_channels'],
@@ -124,7 +131,10 @@ class LGTTrainer:
             time_dim=config['model']['time_dim'],
             num_styles=config['model']['num_styles'],
             num_encoder_blocks=config['model']['num_encoder_blocks'],
-            num_decoder_blocks=config['model']['num_decoder_blocks']
+            num_decoder_blocks=config['model']['num_decoder_blocks'],
+            style_embedding_noise=self._get_adaptive_noise(
+                self.style_embedding_noise, 'embedding'
+            )
         ).to(device)
         
         # Compute average style embedding before training
@@ -144,6 +154,7 @@ class LGTTrainer:
         self.energy_loss = GeometricFreeEnergyLoss(
             w_style=config['loss']['w_style'],
             w_content=config['loss']['w_content'],
+            w_freq=config['loss'].get('w_freq', 10.0),
             patch_size=config['loss']['patch_size'],
             num_projections=config['loss']['num_projections'],
             max_samples=config['loss']['max_samples']
@@ -164,11 +175,19 @@ class LGTTrainer:
             betas=(0.9, 0.999)
         )
         
-        # Learning rate scheduler
-        self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+        # Learning rate scheduler: OneCycleLR for large batch training
+        # Large Batch (240) requires aggressive learning rate and warmup to avoid plateau
+        from torch.optim.lr_scheduler import OneCycleLR
+        
+        self.scheduler = OneCycleLR(
             self.optimizer,
-            T_max=config['training']['num_epochs'],
-            eta_min=config['training'].get('min_learning_rate', 1e-6)
+            max_lr=8e-4,  # Aggressive LR for high-precision gradients from BS=240
+            epochs=config['training']['num_epochs'],
+            steps_per_epoch=1,  # We step once per epoch
+            pct_start=0.1,  # 10% warmup
+            anneal_strategy='cos',
+            div_factor=8.0,  # Initial LR = max_LR / 8
+            final_div_factor=10000.0  # Final LR = max_LR / final_div_factor
         )
         
         # AMP scaler for mixed precision
@@ -215,6 +234,28 @@ class LGTTrainer:
         if resume_ckpt:
             self.load_checkpoint(resume_ckpt)
     
+    def _get_adaptive_noise(self, base_noise, noise_type):
+        """
+        Compute adaptive noise based on batch size.
+        
+        Larger batch sizes can tolerate stronger noise due to gradient averaging.
+        Smaller batch sizes need weaker noise to maintain stability.
+        
+        Formula: noise = base_noise * sqrt(batch_size_ref / batch_size)
+        """
+        if not self.adaptive_noise:
+            return base_noise
+        
+        ratio = self.batch_size_ref / self.batch_size
+        adaptive = base_noise * np.sqrt(ratio)
+        
+        logger.info(
+            f"Adaptive noise ({noise_type}): {base_noise:.4f} → {adaptive:.4f} "
+            f"(batch_size: {self.batch_size}, ref: {self.batch_size_ref})"
+        )
+        
+        return adaptive
+    
     def get_dynamic_epsilon(self, epoch):
         """
         Dynamic epsilon warmup to avoid t=0 singularity.
@@ -251,21 +292,17 @@ class LGTTrainer:
         x = x_t.clone()
         t = t_start.clone()
         
-        # Number of integration steps
         num_steps = self.ode_steps
         use_checkpoint = self.config['training'].get('use_gradient_checkpointing', True)
         
-        # Define single-step function for checkpointing
         def step_func(x_in, t_in, style_id_in):
             with torch.amp.autocast('cuda', enabled=self.use_amp, dtype=torch.bfloat16):
                 return self.model(x_in, t_in, style_id_in, use_avg_style=use_avg_style)
         
         for _ in range(num_steps):
-            # Compute remaining time
             t_remaining = 1.0 - t
             dt = t_remaining / num_steps
             
-            # Velocity at current state (with or without checkpointing)
             if use_checkpoint and self.model.training:
                 # Gradient checkpointing: trade compute for memory
                 # Reduces activation memory from O(steps) to O(1)
@@ -273,7 +310,6 @@ class LGTTrainer:
             else:
                 v = step_func(x, t, style_id)
             
-            # Euler step
             x = x + v * dt.view(-1, 1, 1, 1)
             t = t + dt
         
@@ -281,7 +317,7 @@ class LGTTrainer:
     
     def compute_energy_loss(self, x_src, style_id_src, style_id_tgt, epoch):
         """
-        Compute geometric free energy loss.
+        Compute geometric free energy loss with optional latent noise injection.
         
         Training procedure:
         1. Sample x0 ~ N(0, I), t ~ U(ε, 1)
@@ -313,6 +349,12 @@ class LGTTrainer:
         t_expand = t.view(-1, 1, 1, 1)
         x_t = (1 - t_expand) * x0 + t_expand * x_src
         
+        # Add latent input noise for data augmentation
+        # This helps the model be robust to small perturbations
+        if self.model.training and self.latent_input_noise > 0:
+            latent_noise = torch.randn_like(x_t) * self.latent_input_noise
+            x_t = x_t + latent_noise
+        
         # Label dropping for CFG training
         use_avg_style = torch.rand(1).item() < self.label_drop_prob
         
@@ -323,15 +365,11 @@ class LGTTrainer:
         # In practice, we can use a different sample from the batch or same sample
         # Here we use the same x_src but with target style as reference
         # (This assumes x_src will be transformed to match target style distribution)
-        x_style_ref = x_src  # Placeholder - in real training, sample from target style
+        x_style_ref = x_src
         
-        # Compute geometric free energy
-        # E(x_1) = w_style*SWD(x_1, x_style) + w_content*SSM(x_1, x_src)
         loss_dict = self.energy_loss(x_1, x_style_ref, x_src)
         
-        # Optional: Add velocity regularization
         if self.use_vel_reg:
-            # Compute velocity at intermediate point for regularization
             with torch.amp.autocast('cuda', enabled=self.use_amp, dtype=torch.bfloat16):
                 v_mid = self.model(x_t, t, style_id_tgt, use_avg_style=False)
             vel_reg_loss = self.vel_reg(v_mid)

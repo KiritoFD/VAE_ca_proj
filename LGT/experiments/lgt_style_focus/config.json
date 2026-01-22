@@ -9,9 +9,8 @@
     "num_decoder_blocks": 3
   },
   "loss": {
-    "w_style":3.0,
+    "w_style": 10.0,
     "w_content": 1.0,
-    "w_freq": 30.0,
     "patch_size": 3,
     "num_projections": 64,
     "max_samples": 4096,
@@ -20,9 +19,9 @@
   },
   "training": {
     "batch_size": 240,
-    "learning_rate": 5e-4,
-    "min_learning_rate": 1e-6,
-    "weight_decay": 1e-5,
+    "learning_rate": 0.0005,
+    "min_learning_rate": 1e-06,
+    "weight_decay": 1e-05,
     "num_epochs": 300,
     "label_drop_prob": 0.1,
     "use_avg_style_for_uncond": true,
@@ -31,28 +30,27 @@
     "ode_integration_steps": 5,
     "use_amp": true,
     "use_compile": false,
-    "save_interval":1,
-    "eval_interval": 5,
+    "save_interval": 10,
+    "eval_interval": 10,
     "test_image_dir": "/mnt/f/monet2photo/test",
-    "resume_checkpoint": null,
-    "style_embedding_noise": 0.05,
-    "latent_input_noise": 0.02,
-    "adaptive_noise": true,
-    "batch_size_ref": 240
+    "resume_checkpoint": null
   },
   "data": {
     "data_root": "data/latents",
-    "style_subdirs": ["style0", "style1"],
+    "style_subdirs": [
+      "style0",
+      "style1"
+    ],
     "style_prompts": [
       "a photorealistic photograph",
       "a Monet-style painting"
     ]
   },
   "checkpoint": {
-    "save_dir": "checkpoints"
+    "save_dir": "checkpoints/lgt_style_focus"
   },
   "inference": {
-    "num_steps": 50,
+    "num_steps": 20,
     "temperature_lambda": 0.1,
     "temperature_threshold": 0.5,
     "use_cfg": true,

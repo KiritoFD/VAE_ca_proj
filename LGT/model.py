@@ -46,25 +46,19 @@ class TimestepEmbedding(nn.Module):
 
 
 class StyleEmbedding(nn.Module):
-    """Learnable style embeddings with average embedding for CFG."""
+    """Learnable style embeddings with configurable noise."""
     
-    def __init__(self, num_styles, style_dim=256):
+    def __init__(self, num_styles, style_dim, noise_scale=0.05):
         super().__init__()
         self.num_styles = num_styles
         self.style_dim = style_dim
+        self.noise_scale = noise_scale  # Make configurable
         
         # Learnable embeddings for each style
-        self.embeddings = nn.Embedding(num_styles, style_dim)
+        self.style_embeddings = nn.Embedding(num_styles, style_dim)
         
         # Average embedding for unconditional generation (CFG)
-        self.register_buffer('avg_embedding', torch.zeros(style_dim))
-        self.avg_computed = False
-    
-    def compute_avg_embedding(self):
-        """Compute average of all style embeddings (call before training)."""
-        with torch.no_grad():
-            self.avg_embedding.copy_(self.embeddings.weight.mean(dim=0))
-        self.avg_computed = True
+        self.avg_embedding = nn.Parameter(torch.zeros(style_dim))
     
     def forward(self, style_id, use_avg=False):
         """
@@ -73,13 +67,22 @@ class StyleEmbedding(nn.Module):
             use_avg: bool, use average embedding for unconditional
         Returns:
             emb: [B, style_dim] style embeddings
+        
+        Large-Batch Optimization: Inject noise to prevent over-smoothing
+        When BS is large, gradients are very stable but lose exploration.
+        Adding noise forces the model to be robust to style perturbations.
         """
         if use_avg:
-            if not self.avg_computed:
-                self.compute_avg_embedding()
-            return self.avg_embedding.unsqueeze(0).expand(style_id.shape[0], -1)
+            emb = self.avg_embedding.unsqueeze(0).expand(style_id.shape[0], -1)
         else:
-            return self.embeddings(style_id)
+            emb = self.style_embeddings(style_id)
+        
+        # Add configurable noise during training
+        if self.training and self.noise_scale > 0:
+            noise = torch.randn_like(emb) * self.noise_scale
+            emb = emb + noise
+        
+        return emb
 
 
 class StyleDynamicConv(nn.Module):

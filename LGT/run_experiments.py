@@ -101,7 +101,7 @@ PRESETS = {
                 "max_samples": 8192     # default 4096
             },
             "training": {
-                "batch_size": 12 # 降低BS以补偿显存
+                "batch_size": 120 # 降低BS以补偿显存
             }
         }
     },
@@ -117,7 +117,7 @@ PRESETS = {
                 "num_decoder_blocks": 5 # default 3
             },
             "training": {
-                "batch_size": 12
+                "batch_size": 120
             }
         }
     },
@@ -130,7 +130,7 @@ PRESETS = {
         "desc": "⏳ Long Run: 200 epochs for thorough annealing",
         "overrides": {
             "training": {
-                "num_epochs": 200,
+                "num_epochs": 500,
                 "save_interval": 20,
                 "eval_interval": 20,
                 "learning_rate": 5e-5 # 稍低的学习率防止震荡

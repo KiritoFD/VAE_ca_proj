@@ -1,0 +1,1 @@
+experiment,n_pairs,content_lpips_mean,style_lpips_mean,content_vgg_mean,style_vgg_mean,clip_content_mean,clip_style_mean,clip_text_mean
