@@ -1,0 +1,68 @@
+{
+  "model": {
+    "latent_channels": 4,
+    "base_channels": 128,
+    "style_dim": 256,
+    "time_dim": 256,
+    "num_styles": 2,
+    "num_encoder_blocks": 2,
+    "num_decoder_blocks": 5
+  },
+  "loss": {
+    "w_style": 60.0,
+    "w_content": 0.5,
+    "w_freq": 0.0,
+    "patch_size": 3,
+    "num_projections": 64,
+    "max_samples": 8192,
+    "max_spatial_samples": 256,
+    "use_velocity_reg": true,
+    "vel_reg_weight": 0.01,
+    "use_multiscale_swd": true,
+    "swd_scales": [2, 4, 8],
+    "swd_scale_weights": [0.1, 5.0, 10.0],
+    "style_weights": [10.0, 1.0]
+  },
+  "training": {
+    "batch_size": 160,
+    "accumulation_steps": 1,
+    "learning_rate": 5e-4,
+    "min_learning_rate": 1e-6,
+    "weight_decay": 1e-5,
+    "num_epochs": 300,
+    "label_drop_prob": 0.15,
+    "use_avg_style_for_uncond": true,
+    "epsilon": 0.01,
+    "epsilon_warmup_epochs": 10,
+    "ode_integration_steps": 4,
+    "use_amp": true,
+    "use_compile": true,
+    "use_gradient_checkpointing": true,
+    "save_interval":1,
+    "eval_interval": 5,
+    "full_eval_interval": 50,
+    "test_image_dir": "/mnt/f/monet/monet2photo/test",
+    "resume_checkpoint": null
+  },
+  "data": {
+    "data_root": "../../data/latents",
+    "style_subdirs": ["style0", "style1"],
+    "style_prompts": [
+      "a photorealistic photograph",
+      "a Monet-style painting"
+    ]
+  },
+  "checkpoint": {
+    "save_dir": "../checkpoints-1_0.1-3_5-5_3_style_10_1"
+  },
+  "inference": {
+    "num_steps": 20,
+    "temperature_lambda": 0.1,
+    "temperature_threshold": 0.5,
+    "use_cfg": true,
+    "cfg_scale": 2.0,
+    "cfg_decay": true,
+    "use_source_repulsion": true,
+    "repulsion_strength": 0.7
+  }
+}

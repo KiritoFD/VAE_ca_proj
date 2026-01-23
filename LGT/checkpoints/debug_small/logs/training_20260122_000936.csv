@@ -1,2 +1,0 @@
-epoch,loss_total,loss_style_swd,loss_content_ssm,learning_rate,epoch_time
-1,0.287431,0.009274,0.278158,1.00e-06,0.00

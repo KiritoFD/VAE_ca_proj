@@ -1,2 +1,0 @@
-epoch,stage,avg_loss,learning_rate,epsilon,inference_time,checkpoint_saved,notes
-100,stage1,0.823161,1.00e-06,0.1000,—,✓,
