@@ -191,6 +191,88 @@ class CosineSSMLoss(nn.Module):
         return loss
 
 
+class NeighborhoodMatchingLoss(nn.Module):
+    """
+    Relaxed structural loss that allows geometric deformation.
+    Instead of comparing pixel (i,j) to pixel (i,j), it searches for the
+    best match in a local neighborhood window.
+    
+    This acts like a 'Differentiable Optical Flow' constraint, allowing
+    non-rigid deformations while preserving local structure.
+    
+    Mathematical formulation:
+    For each pixel p in x_pred, find the best matching pixel in a K×K
+    neighborhood around p in x_src:
+    
+    Loss = 1 - mean(max_{q ∈ N(p)} cosine_similarity(p, q))
+    
+    This grants the model "mathematical privilege" to deform lines and strokes.
+    """
+    def __init__(self, kernel_size=3, dilation=1, use_fp32=True):
+        super().__init__()
+        self.kernel_size = kernel_size
+        self.dilation = dilation  # dilation > 1 allows capturing larger deformations
+        self.use_fp32 = use_fp32
+        
+        # Calculate padding to keep dimensions same
+        # Effective kernel size = (kernel_size - 1) * dilation + 1
+        eff_k = (kernel_size - 1) * dilation + 1
+        self.padding = eff_k // 2
+
+    def forward(self, x_pred, x_src):
+        """
+        Args:
+            x_pred: [B, C, H, W] - The generated image (deformed)
+            x_src:  [B, C, H, W] - The structural anchor (original)
+        
+        Returns:
+            loss: scalar neighborhood matching loss
+        """
+        with torch.amp.autocast('cuda', enabled=False):
+            if self.use_fp32:
+                x_pred = x_pred.float()
+                x_src = x_src.float()
+
+            B, C, H, W = x_pred.shape
+
+            # 1. Normalize vectors for Cosine Similarity
+            x_pred_norm = F.normalize(x_pred, dim=1)
+            x_src_norm = F.normalize(x_src, dim=1)
+
+            # 2. Extract local neighborhoods from x_src
+            # We want to compare each pixel in x_pred to a KxK window in x_src
+            # src_patches: [B, C * K * K, H * W]
+            src_patches = F.unfold(
+                x_src_norm, 
+                kernel_size=self.kernel_size, 
+                padding=self.padding, 
+                dilation=self.dilation
+            )
+            
+            # Reshape to [B, C, K*K, H*W] -> [B, H*W, K*K, C]
+            # This organizes the neighborhood for each pixel
+            src_patches = src_patches.view(B, C, -1, H * W)
+            src_patches = src_patches.permute(0, 3, 2, 1)  # [B, N_pixels, N_neighbors, C]
+
+            # 3. Prepare x_pred
+            # pred_flat: [B, H*W, C] -> [B, H*W, 1, C]
+            pred_flat = x_pred_norm.permute(0, 2, 3, 1).reshape(B, H * W, 1, C)
+
+            # 4. Compute Cosine Similarity between pixel and its neighbors
+            # [B, HW, 1, C] * [B, HW, Neighbors, C] -> sum over C -> [B, HW, Neighbors]
+            # This computes dot product (cosine sim since normalized)
+            sim_matrix = (pred_flat * src_patches).sum(dim=-1)
+
+            # 5. Find the BEST match in the neighborhood (Hard Max)
+            # "I don't care WHICH neighbor matches, as long as ONE matches"
+            best_match_sim, _ = sim_matrix.max(dim=2)  # [B, H*W]
+
+            # 6. Loss is 1 - similarity
+            loss = 1.0 - best_match_sim.mean()
+
+            return loss
+
+
 class MultiScaleSWDLoss(nn.Module):
     """
     Multi-Scale Sliced Wasserstein Distance for unified annealing/quenching.
@@ -279,7 +361,11 @@ class GeometricFreeEnergyLoss(nn.Module):
         max_spatial_samples=None,
         use_multiscale_swd=True,  # LGT++ enhancement
         swd_scales=[1, 3, 7],
-        swd_scale_weights=[1.0, 1.0, 1.0]
+        swd_scale_weights=[1.0, 1.0, 1.0],
+        # New parameters for neighborhood matching
+        use_neighborhood_matching=False,
+        neighbor_kernel_size=5,
+        neighbor_dilation=1
     ):
         super().__init__()
         
@@ -305,11 +391,23 @@ class GeometricFreeEnergyLoss(nn.Module):
                 use_fp32=True
             )
         
-        # Content potential: Cosine-SSM with optional spatial sampling
-        self.ssm_loss = CosineSSMLoss(
-            use_fp32=True,
-            max_spatial_samples=max_spatial_samples
-        )
+        # Content loss: Structural topology preservation
+        self.use_neighborhood_matching = use_neighborhood_matching
+        
+        if use_neighborhood_matching:
+            # Use relaxed neighborhood matching for geometric flexibility
+            self.ssm_loss = NeighborhoodMatchingLoss(
+                kernel_size=neighbor_kernel_size,
+                dilation=neighbor_dilation,
+                use_fp32=True
+            )
+        else:
+            # Use traditional rigid SSM
+            self.ssm_loss = CosineSSMLoss(
+                use_fp32=True,
+                normalize_by_num_elements=True,
+                max_spatial_samples=max_spatial_samples
+            )
     
     def forward(self, x_pred, x_style, x_src):
         """

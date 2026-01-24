@@ -42,6 +42,62 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+def elastic_deform(x, alpha=10, sigma=3):
+    """
+    Apply random elastic deformation to the latent.
+    Differentiable augmentation for structure breaking.
+    
+    This allows the model to learn non-rigid transformations by providing
+    warped training targets. The deformation is smooth (via averaging) and
+    bounded (via alpha parameter).
+    
+    Args:
+        x: [B, C, H, W] input latent tensor
+        alpha: displacement magnitude (pixels)
+        sigma: smoothness parameter (simulated via avg pooling iterations)
+    
+    Returns:
+        x_deformed: [B, C, H, W] warped latent
+    """
+    B, C, H, W = x.shape
+    device = x.device
+    
+    # Create random displacement fields
+    dx = torch.rand(B, 1, H, W, device=device) * 2 - 1
+    dy = torch.rand(B, 1, H, W, device=device) * 2 - 1
+    
+    # Smooth the displacement field (Gaussian Blur simulation via AvgPool)
+    # Using AvgPool repeatedly to approximate Gaussian smoothing efficiently
+    for _ in range(3):
+        dx = F.avg_pool2d(dx, kernel_size=3, stride=1, padding=1)
+        dy = F.avg_pool2d(dy, kernel_size=3, stride=1, padding=1)
+        
+    # Scale the displacement
+    flow = torch.cat([dx, dy], dim=1) * alpha
+    
+    # Create normalized grid [-1, 1]
+    y_grid, x_grid = torch.meshgrid(torch.arange(H, device=device), torch.arange(W, device=device), indexing='ij')
+    grid = torch.stack([x_grid, y_grid], dim=-1).float()  # [H, W, 2]
+    grid = grid.unsqueeze(0).repeat(B, 1, 1, 1)  # [B, H, W, 2]
+    
+    # Normalize grid to [-1, 1] for grid_sample
+    grid_norm = grid.clone()
+    grid_norm[..., 0] = 2.0 * grid_norm[..., 0] / (W - 1) - 1.0
+    grid_norm[..., 1] = 2.0 * grid_norm[..., 1] / (H - 1) - 1.0
+    
+    # Add flow (normalized)
+    # flow values are in pixels, need to normalize to [-1, 1] range
+    flow_norm = flow.permute(0, 2, 3, 1)  # [B, H, W, 2]
+    flow_norm[..., 0] = 2.0 * flow_norm[..., 0] / (W - 1)
+    flow_norm[..., 1] = 2.0 * flow_norm[..., 1] / (H - 1)
+    
+    sample_grid = grid_norm + flow_norm
+    
+    # Warp
+    x_deformed = F.grid_sample(x, sample_grid, mode='bilinear', padding_mode='reflection', align_corners=True)
+    return x_deformed
+
+
 class InMemoryLatentDataset(Dataset):
     """
     In-memory dataset for VAE latents.
@@ -159,7 +215,10 @@ class LGTTrainer:
             max_spatial_samples=config['loss'].get('max_spatial_samples', None),
             use_multiscale_swd=config['loss'].get('use_multiscale_swd', True),
             swd_scales=config['loss'].get('swd_scales', [1, 3, 7]),
-            swd_scale_weights=config['loss'].get('swd_scale_weights', [1.0, 1.0, 1.0])
+            swd_scale_weights=config['loss'].get('swd_scale_weights', [1.0, 1.0, 1.0]),
+            use_neighborhood_matching=config['loss'].get('use_neighborhood_matching', False),
+            neighbor_kernel_size=config['loss'].get('neighbor_kernel_size', 5),
+            neighbor_dilation=config['loss'].get('neighbor_dilation', 1)
         ).to(device)
         
         # Optional velocity regularization
@@ -398,13 +457,24 @@ class LGTTrainer:
         # Sample noise x0 ~ N(0, I)
         x0 = torch.randn_like(x_src)
         
+        # Apply elastic deformation to source for non-rigid training targets
+        # This teaches the model that "deformation is allowed"
+        use_elastic = self.config['training'].get('use_elastic_deform', False)
+        elastic_alpha = self.config['training'].get('elastic_alpha', 1.0)
+        
+        if use_elastic and self.model.training:
+            # Only apply during training, not during eval
+            x_src_target = elastic_deform(x_src, alpha=elastic_alpha)
+        else:
+            x_src_target = x_src
+        
         # Sample time t ~ U(ε, 1)
         epsilon = self.get_dynamic_epsilon(epoch)
         t = torch.rand(B, device=device) * (1 - epsilon) + epsilon
         
-        # Construct path x_t = (1-t)*x0 + t*x_src
+        # Construct path x_t = (1-t)*x0 + t*x_src_target (anchored to potentially deformed content)
         t_expand = t.view(-1, 1, 1, 1)
-        x_t = (1 - t_expand) * x0 + t_expand * x_src
+        x_t = (1 - t_expand) * x0 + t_expand * x_src_target
         
         # Label dropping for CFG training
         use_avg_style = torch.rand(1).item() < self.label_drop_prob
