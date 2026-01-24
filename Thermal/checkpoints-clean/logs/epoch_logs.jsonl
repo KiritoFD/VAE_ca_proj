@@ -1,0 +1,2 @@
+{"epoch": 1, "timestamp": "2026-01-24T22:16:52.464563", "loss": 66.60479199258904, "style_swd": 0.11584304802511868, "mse": 7.9610962177577775, "learning_rate": 0.000499996579915733, "epoch_time": 0.0, "num_batches": null}
+{"epoch": 2, "timestamp": "2026-01-24T22:18:26.936374", "loss": 59.06860035344174, "style_swd": 0.09061309033514638, "mse": 7.63375228957126, "learning_rate": 0.0004999863197566953, "epoch_time": 0.0, "num_batches": null}

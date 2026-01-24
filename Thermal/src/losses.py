@@ -18,6 +18,50 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
+class VelocityRegularizationLoss(nn.Module):
+    """
+    Velocity Magnitude Regularization for Flow Matching.
+    
+    Purpose: Prevent model from learning excessively large velocity vectors,
+    which causes brightness explosion and instability during inference (especially with CFG).
+    
+    Physics: Flow Matching assumes the velocity field v(x,t,c) is bounded in magnitude.
+    If training data has small variance (e.g., VAE latents with std=0.18) but noise has std=1.0,
+    the model learns to output huge velocities to bridge this gap. This causes:
+    - Large gradient magnitudes → training instability
+    - CFG amplifies these huge vectors → color saturation/clipping
+    - Batch-wise brightness variance due to different energy scales
+    
+    Solution: Regularize L2 norm of velocity vectors during training.
+    Loss = weight * mean(v_pred²) across spatial and batch dimensions.
+    
+    Trade-off: Too large regularization → slower learning, washed-out images.
+    Recommended: weight ∈ [0.05, 0.2] for typical latent-space diffusion.
+    """
+    
+    def __init__(self, weight=0.1):
+        """
+        Args:
+            weight: Regularization strength (default 0.1 = 5-10% of total loss)
+        """
+        super().__init__()
+        self.weight = weight
+    
+    def forward(self, v_pred):
+        """
+        Compute velocity regularization loss.
+        
+        Args:
+            v_pred: [B, C, H, W] Predicted velocity field from model
+        
+        Returns:
+            loss: scalar regularization penalty
+        """
+        # L2 norm squared: sum across channel and spatial dims, mean over batch
+        # This penalizes all velocity pixels equally regardless of position/channel
+        return self.weight * torch.mean(v_pred ** 2)
+
+
 class PatchSlicedWassersteinLoss(nn.Module):
     """
     Patch-Sliced Wasserstein Distance for style distribution matching.

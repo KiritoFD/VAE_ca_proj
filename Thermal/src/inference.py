@@ -117,12 +117,17 @@ class LangevinSampler:
         Standard CFG:
             v_guided = v_uncond + w * (v_cond - v_uncond)
         
+        Rescale CFG (Paper: Common Diffusion Noise Schedules and Sample Steps are Flawed):
+            - Prevents oversaturation by rescaling predicted vector magnitude
+            - back to target vector magnitude level
+        
         Ternary Guidance (LGT++):
             v_guided = v_uncond + w_target*(v_target - v_uncond) - w_repel*(v_source - v_uncond)
         
         Physics:
         - Attractive force toward target distribution
         - Repulsive force away from source artifacts (critical for painting→photo)
+        - Rescale prevents guidance-induced color/brightness drift
         
         Args:
             model: LGT model
@@ -150,7 +155,25 @@ class LangevinSampler:
         w = self.get_cfg_scale(step, total_steps)
         
         # Standard CFG
-        v_guided = v_uncond + w * (v_target - v_uncond)
+        v_pred = v_uncond + w * (v_target - v_uncond)
+        
+        # ==========================================
+        # 🔥 Rescale CFG: Prevent oversaturation
+        # ==========================================
+        # Compute correction factor to prevent magnitude drift
+        
+        # 1. Calculate standard deviations (signal magnitude)
+        std_target = v_target.std(dim=(1, 2, 3), keepdim=True)
+        std_pred = v_pred.std(dim=(1, 2, 3), keepdim=True)
+        
+        # 2. Rescale to match target magnitude
+        rescale_factor = std_target / (std_pred + 1e-8)
+        v_pred_rescaled = v_pred * rescale_factor
+        
+        # 3. Blend rescaled and original (retain some CFG impact)
+        # rescale_weight typically 0.7 balances quality and guidance strength
+        rescale_weight = 0.7
+        v_guided = v_pred_rescaled * rescale_weight + v_pred * (1 - rescale_weight)
         
         # Ternary Guidance (LGT++ enhancement)
         if self.use_source_repulsion and source_style_id is not None:

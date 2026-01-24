@@ -27,7 +27,7 @@ import numpy as np
 from PIL import Image
 
 from model import LGTUNet, count_parameters
-from losses import GeometricFreeEnergyLoss, TrajectoryMSELoss
+from losses import GeometricFreeEnergyLoss, TrajectoryMSELoss, VelocityRegularizationLoss
 from inference import LGTInference, load_vae, encode_image, decode_latent
 
 import subprocess
@@ -152,6 +152,36 @@ class InMemoryLatentDataset(Dataset):
         logger.info(f"✓ Loaded {len(self)} latents into GPU memory")
         logger.info(f"  Shape: {self.latents_tensor.shape}")
         logger.info(f"  Memory: {self.latents_tensor.nbytes / 1e9:.2f} GB")
+        
+        # ==========================================
+        # 🔥 Critical: Check and rescale latents
+        # ==========================================
+        # If latents have small variance (raw VAE output), rescale to match noise distribution
+        # SD VAE scaling factor applied: latent_rescaled = latent / 0.18215
+        # This ensures training dynamics match Flow Matching assumptions (x0 ~ N(0,I))
+        
+        std_original = self.latents_tensor.std().item()
+        scaling_factor = 0.18215
+        
+        logger.info(f"🔍 Latent statistics before scaling:")
+        logger.info(f"   STD: {std_original:.6f}")
+        logger.info(f"   MIN: {self.latents_tensor.min().item():.6f}")
+        logger.info(f"   MAX: {self.latents_tensor.max().item():.6f}")
+        
+        # If raw latents detected (std < 0.5), rescale by dividing by scaling_factor
+        if std_original < 0.5:
+            logger.info(f"⚠️  Detected raw VAE latents (std={std_original:.4f} < 0.5)")
+            logger.info(f"   Rescaling by 1/{scaling_factor} ...")
+            self.latents_tensor = self.latents_tensor / scaling_factor
+            
+            std_rescaled = self.latents_tensor.std().item()
+            logger.info(f"✅ Latent rescaling applied:")
+            logger.info(f"   NEW STD: {std_rescaled:.6f}")
+            logger.info(f"   NEW MIN: {self.latents_tensor.min().item():.6f}")
+            logger.info(f"   NEW MAX: {self.latents_tensor.max().item():.6f}")
+            logger.info(f"   (now compatible with noise distribution ~ N(0,1))")
+        else:
+            logger.info(f"✓ Latents appear pre-scaled (std={std_original:.4f} >= 0.5). Skipping rescaling.")
     
     def __len__(self):
         return len(self.latents_tensor)
@@ -216,6 +246,17 @@ class LGTTrainer:
         # Loss 2: Supervisor (MSE for structure + brightness)
         self.w_mse = config['loss'].get('w_mse', 5.0)
         self.traj_mse_loss = TrajectoryMSELoss(weight=self.w_mse).to(device)
+        
+        # Loss 3: Velocity Regularization (prevent large velocity magnitudes)
+        # 🔥 Critical for training-end stability: keeps v_pred bounded
+        self.use_velocity_reg = config['loss'].get('use_velocity_reg', False)
+        self.vel_reg_loss = None
+        if self.use_velocity_reg:
+            vel_reg_weight = config['loss'].get('vel_reg_weight', 0.1)
+            self.vel_reg_loss = VelocityRegularizationLoss(weight=vel_reg_weight).to(device)
+            logger.info(f"✓ Velocity Regularization enabled (weight={vel_reg_weight})")
+        else:
+            logger.info("Velocity Regularization disabled")
         
         # Optimizer
         self.optimizer = torch.optim.AdamW(
@@ -512,6 +553,16 @@ class LGTTrainer:
             loss_mse  # ✅ loss_mse already includes w_mse scaling internally
         )
         
+        # ==========================================
+        # 🔥 Velocity Regularization (Training-End Stability)
+        # ==========================================
+        # Prevent model from learning excessively large velocity vectors
+        # which would cause brightness explosion during inference with CFG
+        if self.use_velocity_reg and self.vel_reg_loss is not None:
+            loss_reg = self.vel_reg_loss(v_pred)
+            loss_dict['velocity_reg'] = loss_reg
+            loss_dict['total'] = loss_dict['total'] + loss_reg
+        
         # Log MSE separately for monitoring
         loss_dict['mse'] = loss_mse
         
@@ -524,6 +575,7 @@ class LGTTrainer:
         total_loss = 0.0
         total_style_swd = 0.0
         total_mse = 0.0
+        total_vel_reg = 0.0
         num_batches = 0
         accum_counter = 0
         
@@ -581,35 +633,48 @@ class LGTTrainer:
             total_loss += loss.item() * self.accumulation_steps
             total_style_swd += loss_dict['style_swd'].item()
             total_mse += loss_dict['mse'].item()
+            if 'velocity_reg' in loss_dict:
+                total_vel_reg += loss_dict['velocity_reg'].item()
             num_batches += 1
             
             # Update progress bar or log periodically if disabled
             if use_tqdm:
-                pbar.set_postfix({
+                postfix_dict = {
                     'loss': f"{loss.item():.4f}",
                     'swd': f"{loss_dict['style_swd'].item():.4f}",
                     'mse': f"{loss_dict['mse'].item():.4f}"
-                })
+                }
+                if 'velocity_reg' in loss_dict:
+                    postfix_dict['v_reg'] = f"{loss_dict['velocity_reg'].item():.4f}"
+                pbar.set_postfix(postfix_dict)
             else:
                 # Log structured progress every N steps to keep logs readable
                 if step_idx % 100 == 0 or step_idx == len(dataloader):
-                    logger.info(
+                    log_msg = (
                         f"Epoch {epoch} Step {step_idx}/{len(dataloader)} | "
                         f"loss={loss.item():.4f} | "
                         f"swd={loss_dict['style_swd'].item():.6f} | "
                         f"mse={loss_dict['mse'].item():.4f}"
                     )
+                    if 'velocity_reg' in loss_dict:
+                        log_msg += f" | v_reg={loss_dict['velocity_reg'].item():.6f}"
+                    logger.info(log_msg)
         
         # Compute epoch averages
         avg_loss = total_loss / num_batches
         avg_style_swd = total_style_swd / num_batches
         avg_mse = total_mse / num_batches
+        avg_vel_reg = total_vel_reg / num_batches if self.use_velocity_reg else 0.0
         
-        return {
+        metrics = {
             'loss': avg_loss,
             'style_swd': avg_style_swd,
             'mse': avg_mse
         }
+        if self.use_velocity_reg:
+            metrics['velocity_reg'] = avg_vel_reg
+        
+        return metrics
     
     def save_checkpoint(self, epoch, metrics):
         """Save model checkpoint."""
