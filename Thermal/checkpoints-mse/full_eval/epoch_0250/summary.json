@@ -1,0 +1,10 @@
+{
+  "n_pairs": 10640,
+  "content_lpips_mean": 0.45373202789210737,
+  "style_lpips_mean": 0.7513565422728994,
+  "content_vgg_mean": 6.41719899860988,
+  "style_vgg_mean": 10.477047286339497,
+  "clip_content_mean": 0.7502804653088849,
+  "clip_style_mean": 0.5460469461865443,
+  "clip_text_mean": 0.2627610656327771
+}

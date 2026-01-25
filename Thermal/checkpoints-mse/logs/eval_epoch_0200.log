@@ -1,0 +1,328 @@
+STDOUT
+Setting up [LPIPS] perceptual loss: trunk [vgg], v[0.1], spatial [off]
+Loading model from: /home/xy/miniconda3/envs/cu128/lib/python3.12/site-packages/lpips/weights/v0.1/vgg.pth
+Pre-computing CLIP embeddings for all reference images...
+CLIP embeddings cached.
+Pre-computing CLIP text embeddings...
+Source: style0 -> 00010.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00040.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00050.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00060.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00070.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00080.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00090.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00100.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00140.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00150.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00160.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00170.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00180.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00190.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00200.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00210.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00220.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00240.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00250.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00260.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00270.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00280.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00290.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00310.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00320.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00330.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00350.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00380.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00400.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00410.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00430.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00440.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00450.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00460.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00470.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00480.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00500.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00520.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00540.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00550.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00590.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00600.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00610.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00640.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00650.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00670.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00680.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00690.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00710.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00730.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00740.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00750.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00760.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00780.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00790.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style0 -> 00800.jpg
+  -> Target style: style1 (evaluating against 95 references)
+Source: style1 -> 2014-08-02 00_36_32.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-08-03 09_47_19.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-08-04 11_06_56.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-08-05 21_54_30.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-08-06 15_33_46.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-08-07 22_18_53.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-08-08 13_12_18.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-08-08 17_06_41.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-08-09 00_16_45.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-08-12 16_56_23.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-08-13 09_33_33.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-08-13 13_38_43.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-08-13 13_56_45.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-08-13 17_01_58.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-08-13 21_38_57.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-08-15 17_41_16.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-08-15 19_04_35.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-08-16 06_30_29.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-08-19 04_08_24.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-08-19 15_06_53.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-08-20 08_13_24.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-08-23 06_52_05.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-08-23 22_47_17.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-08-24 01_43_47.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-08-24 18_23_47.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-08-26 11_21_11.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-08-26 13_45_19.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-08-27 00_11_53.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-08-27 19_16_38.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-08-28 23_31_26.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-08-30 04_58_18.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-08-31 07_26_58.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-08-31 19_51_31.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-09-01 09_56_58.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-09-01 17_13_18.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-09-01 20_21_27.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-09-02 17_31_05.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-09-03 05_09_44.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-09-04 17_59_03.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-09-04 23_48_01.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-09-05 16_57_06.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-09-05 18_37_41.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-09-05 19_58_36.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-09-07 11_35_03.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-09-07 19_24_36.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-09-08 18_32_43.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-09-09 01_33_01.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-09-09 05_36_32.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-09-11 06_54_09.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-09-14 04_12_06.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-09-14 17_52_24.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-09-15 04_13_27.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-09-15 20_24_00.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-09-16 03_14_52.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-09-18 14_23_57.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-09-20 13_29_35.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-09-20 13_36_47.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-09-20 16_18_07.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-09-20 16_19_16.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-09-21 11_13_34.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-09-21 11_28_36.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-09-23 17_25_38.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-09-24 10_19_42.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-09-24 22_57_57.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-09-26 20_00_32.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-09-28 02_16_51.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-09-28 19_28_24.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-09-29 14_26_48.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-09-30 10_38_24.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-09-30 20_23_36.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-10-01 14_01_23.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-10-02 10_51_04.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-10-02 19_48_29.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-10-02 20_30_35.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-10-04 05_39_50.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-10-05 16_40_18.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-10-05 19_17_59.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-10-06 09_23_57.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-10-09 01_58_08.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-10-09 15_45_48.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-10-12 11_25_09.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-10-12 15_29_24.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-10-13 11_51_19.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-10-14 01_24_38.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-10-14 01_49_08.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-10-14 21_57_09.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-10-15 10_38_50.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-10-15 18_08_35.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-10-16 21_02_28.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-10-17 15_57_00.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-10-17 17_19_18.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-10-18 21_37_58.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-10-19 00_51_42.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-10-20 03_38_37.jpg
+  -> Target style: style0 (evaluating against 56 references)
+Source: style1 -> 2014-10-20 11_13_30.jpg
+  -> Target style: style0 (evaluating against 56 references)
+
+Evaluation finished. Summary:
+{
+  "n_pairs": 10640,
+  "content_lpips_mean": 0.47448573276624645,
+  "style_lpips_mean": 0.7484358117936697,
+  "content_vgg_mean": 6.852128112276918,
+  "style_vgg_mean": 10.513705749316772,
+  "clip_content_mean": 0.7347816695284126,
+  "clip_style_mean": 0.5477901586436463,
+  "clip_text_mean": 0.26263641408063415
+}
+
+
+STDERR
+/home/xy/miniconda3/envs/cu128/lib/python3.12/site-packages/torchvision/models/_utils.py:208: UserWarning: The parameter 'pretrained' is deprecated since 0.13 and may be removed in the future, please use 'weights' instead.
+  warnings.warn(
+/home/xy/miniconda3/envs/cu128/lib/python3.12/site-packages/torchvision/models/_utils.py:223: UserWarning: Arguments other than a weight enum or `None` for 'weights' are deprecated since 0.13 and may be removed in the future. The current behavior is equivalent to passing `weights=VGG16_Weights.IMAGENET1K_V1`. You can also use `weights=VGG16_Weights.DEFAULT` to get the most up-to-date weights.
+  warnings.warn(msg)
+Using a slow image processor as `use_fast` is unset and a slow processor was saved with this model. `use_fast=True` will be the default behavior in v4.52, even if the model was saved with a slow processor. This will result in minor differences in outputs. You'll still be able to use a slow processor with `use_fast=False`.
