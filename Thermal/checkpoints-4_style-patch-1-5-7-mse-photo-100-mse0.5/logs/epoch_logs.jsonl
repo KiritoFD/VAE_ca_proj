@@ -58,3 +58,4 @@
 {"epoch": 58, "timestamp": "2026-01-26T18:36:47.746743", "loss": 10.51267763505499, "style_swd": 0.05797546145966254, "mse": 0.26518340839678983, "learning_rate": 9.773489626155569e-05, "epoch_time": 0.0, "num_batches": null}
 {"epoch": 59, "timestamp": "2026-01-26T18:40:10.920871", "loss": 10.3599283264344, "style_swd": 0.05746888723897647, "mse": 0.2600878548909383, "learning_rate": 9.76567433220525e-05, "epoch_time": 0.0, "num_batches": null}
 {"epoch": 60, "timestamp": "2026-01-26T18:43:33.946177", "loss": 10.429282630782529, "style_swd": 0.0575806894844555, "mse": 0.26655172727194176, "learning_rate": 9.757729755661008e-05, "epoch_time": 0.0, "num_batches": null}
+{"epoch": 61, "timestamp": "2026-01-26T19:00:20.884367", "loss": 9.971429416932255, "style_swd": 0.055042389510984883, "mse": 0.2723813949220152, "learning_rate": 9.749656114327422e-05, "epoch_time": 0.0, "num_batches": null}

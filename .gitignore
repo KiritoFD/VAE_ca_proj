@@ -7,3 +7,4 @@
 *.onnx
 !/src/checkpoints-lsfm/
 !/src/checkpoints-lsfm/**
+data/*

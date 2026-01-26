@@ -9,10 +9,10 @@ __version__ = "1.0.0"
 from .model import LGTUNet, TimestepEmbedding, StyleEmbedding, count_parameters
 from .losses import (
     PatchSlicedWassersteinLoss,
-    CosineSSMLoss,
+    MultiScaleSWDLoss,
+    TrajectoryMSELoss,
     GeometricFreeEnergyLoss,
-    VelocityRegularizationLoss,
-    DivergenceRegularizationLoss
+    VelocityRegularizationLoss
 )
 from .inference import (
     LangevinSampler,
@@ -32,10 +32,10 @@ __all__ = [
     
     # Losses
     "PatchSlicedWassersteinLoss",
-    "CosineSSMLoss",
+    "MultiScaleSWDLoss",
+    "TrajectoryMSELoss",
     "GeometricFreeEnergyLoss",
     "VelocityRegularizationLoss",
-    "DivergenceRegularizationLoss",
     
     # Inference
     "LangevinSampler",
