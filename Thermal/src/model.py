@@ -341,11 +341,17 @@ class StyleGate(nn.Module):
             nn.Sigmoid()  # Output in [0, 1]
         )
         
-        # CRITICAL: Initialize final layer bias to 0
-        # Sigmoid(0) = 0.5 → half-open gate at initialization
+        # 🔥 CRITICAL: Initialize final layer bias to -3.0 (CLOSED state)
+        # OLD: Sigmoid(0) = 0.5 → half-open gate at initialization
+        #      This leaked 50% of encoder features (photo texture) into decoder early,
+        #      causing model to rely on skip connections instead of learning to generate.
+        # NEW: Sigmoid(-3.0) ≈ 0.05 → nearly-closed gate at initialization
+        #      Forces model to learn texture generation in decoder via AdaGN,
+        #      only gradually opening the gate to integrate structure from encoder.
+        # Physics: Maxwell's Demon starts asleep - must learn to control entropy flow.
         with torch.no_grad():
             self.gate_mlp[-2].weight.zero_()
-            self.gate_mlp[-2].bias.zero_()
+            nn.init.constant_(self.gate_mlp[-2].bias, -3.0)  # Changed from 0.0
     
     def forward(self, x, style_emb):
         """

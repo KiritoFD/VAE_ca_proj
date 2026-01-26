@@ -1,144 +1,181 @@
 import torch
-import torch.nn as nn
-from torch.utils.data import DataLoader
-import numpy as np
+import torch.nn.functional as F
 import json
-import argparse
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 from pathlib import Path
-from tqdm import tqdm
 
-# Import project modules
-from model import LGTUNet
-from losses import PatchSlicedWassersteinLoss, CosineSSMLoss
+# 引入你的数据集类
 from train import InMemoryLatentDataset
 
-def calibrate_ode(config_path='config.json', num_batches=10):
-    # 1. Load Configuration
+def setup_plot_style():
+    """配置科研级绘图风格"""
+    plt.style.use('seaborn-v0_8-paper')
+    sns.set_context("paper", font_scale=1.4)
+    sns.set_style("whitegrid")
+    # 使用高对比度色板，确保 4 种风格一眼能分清
+    sns.set_palette("husl", 4)
+
+def get_random_batch(dataset, style_id, batch_size=128, device='cuda'):
+    """高效获取指定风格的随机 Batch"""
+    # 直接操作 GPU Tensor 索引，避免 CPU-GPU 同步开销
+    indices = (dataset.styles_tensor == style_id).nonzero(as_tuple=True)[0]
+    if len(indices) == 0: return None
+    
+    # 如果数据不够，允许重复采样 (Replacement)
+    cnt = len(indices)
+    if cnt < batch_size:
+        rand_idx = indices[torch.randint(cnt, (batch_size,), device=device)]
+    else:
+        rand_idx = indices[torch.randint(cnt, (batch_size,), device=device)]
+        
+    return dataset.latents_tensor[rand_idx]
+
+def project_and_sort(batch, patch_size, theta, device='cuda'):
+    """
+    SWD 核心机理的可视化实现：
+    1. Unfold (提取 Patch)
+    2. Normalize (去均值/去亮度，只留纹理)
+    3. Project (投影到随机方向)
+    4. Sort (计算 CDF)
+    """
+    with torch.no_grad():
+        B, C, H, W = batch.shape
+        
+        # --- 1. Unfold (提取局部特征) ---
+        if patch_size == 1:
+            # 1x1 Patch 特殊优化：不需要 unfold，直接 reshape
+            # [B, C, H, W] -> [B*H*W, C]
+            flat = batch.permute(0, 2, 3, 1).reshape(-1, C)
+        else:
+            # [B, C, H, W] -> [B, C*K*K, N_patches]
+            patches = F.unfold(batch.float(), kernel_size=patch_size, padding=patch_size//2)
+            # [B, N, Feat]
+            patches = patches.transpose(1, 2)
+            
+            # --- 2. Mean Removal (关键步骤) ---
+            # 对于 Patch > 1，我们减去 Patch 均值。
+            # 物理意义：我们不关心"这个Patch有多亮"，只关心"这个Patch内部的纹理对比度"。
+            # 这让 SWD 专注于纹理结构，而不是被亮度带偏。
+            patches = patches - patches.mean(dim=2, keepdim=True)
+            flat = patches.reshape(-1, patches.shape[2])
+
+        # --- 3. Project (Radon Transform 采样) ---
+        # 投影到共享的随机向量 theta 上
+        # flat: [N_total, FeatDim], theta: [FeatDim, 1] -> proj: [N_total, 1]
+        proj = flat @ theta 
+
+        # --- 4. Sort (计算经验分布函数 CDF) ---
+        sorted_proj, _ = torch.sort(proj.view(-1))
+        
+        # 下采样以方便绘图 (保留 2000 个点足够画出平滑曲线)
+        if len(sorted_proj) > 2000:
+            idx = torch.linspace(0, len(sorted_proj)-1, 2000, device=device).long()
+            sorted_proj = sorted_proj[idx]
+            
+        return sorted_proj.cpu().numpy()
+
+def plot_multiscale_mechanism(dataset, style_names, save_path, device='cuda'):
+    """
+    绘制 4 合 1 的多尺度分析图
+    """
+    print("Generating Multi-Scale SWD Mechanism Plot...")
+    
+    # 定义我们要分析的 4 个物理尺度
+    scales_config = [
+        (1, "Patch 1x1 (Color/Tone)", "Focus: Pixel Colors"),
+        (3, "Patch 3x3 (Micro-Texture)", "Focus: Brush Strokes / Noise"),
+        (5, "Patch 5x5 (Mid-Structure)", "Focus: Patterns"),
+        (7, "Patch 7x7 (Macro-Geometry)", "Focus: Shapes / Warping")
+    ]
+    
+    fig, axes = plt.subplots(2, 2, figsize=(16, 12))
+    axes = axes.flatten()
+    
+    latent_channels = 4 # SD VAE Latent Channels
+    
+    for ax, (p_size, title, subtitle) in zip(axes, scales_config):
+        print(f"  Analyzing {title}...")
+        
+        # 1. 生成【共享】投影向量
+        # 控制变量法：所有风格必须投影到同一个随机方向，比较才有意义
+        feature_dim = latent_channels * p_size * p_size
+        theta = torch.randn(feature_dim, 1, device=device)
+        theta = theta / theta.norm()
+        
+        # 2. 遍历所有风格
+        for i, name in enumerate(style_names):
+            # 显存优化：Patch 越大，Unfold 膨胀越厉害，Batch Size 必须减小
+            # Patch 7x7 会把数据膨胀 49 倍！
+            bs = 256 if p_size <= 3 else (128 if p_size == 5 else 64)
+            
+            batch = get_random_batch(dataset, i, batch_size=bs, device=device)
+            if batch is not None:
+                y = project_and_sort(batch, p_size, theta, device)
+                # X 轴归一化为 0~1 (Quantile)
+                x = np.linspace(0, 1, len(y))
+                
+                # 绘制 CDF 曲线
+                ax.plot(x, y, label=name, linewidth=2.5, alpha=0.85)
+        
+        # 图表美化
+        ax.set_title(title, fontsize=14, fontweight='bold')
+        ax.set_xlabel("Quantile (Probability)", fontsize=10)
+        ax.set_ylabel("Projected Value", fontsize=10)
+        ax.grid(True, linestyle='--', alpha=0.5)
+        
+        # 在图内添加说明
+        ax.text(0.05, 0.95, subtitle, transform=ax.transAxes, 
+                fontsize=11, verticalalignment='top', 
+                bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
+
+        # 只在第一个子图显示图例，避免遮挡
+        if p_size == 1:
+            ax.legend(loc='lower right', frameon=True, fontsize=12)
+
+    plt.suptitle(f"LGT Multi-Scale Texture Separation Analysis\n(Why different patch sizes matter)", fontsize=18, y=0.96)
+    plt.tight_layout(rect=[0, 0.03, 1, 0.94])
+    
+    save_file = save_path / "swd_multiscale_analysis.png"
+    plt.savefig(save_file, dpi=300)
+    print(f"✓ Analysis saved to {save_file}")
+    plt.close()
+
+def main():
+    config_path = 'config.json'
+    if not Path(config_path).exists():
+        print("Config not found.")
+        return
+
     with open(config_path, 'r') as f:
         config = json.load(f)
     
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Device: {device}")
     
-    # 2. Initialize Model (Untrained, Random Weights)
-    # This simulates the gradient landscape at the very beginning of training
-    print("Initializing LGT Model...")
-    model = LGTUNet(
-        latent_channels=config['model']['latent_channels'],
-        base_channels=config['model']['base_channels'],
-        style_dim=config['model']['style_dim'],
-        time_dim=config['model']['time_dim'],
-        num_styles=config['model']['num_styles'],
-        num_encoder_blocks=config['model']['num_encoder_blocks'],
-        num_decoder_blocks=config['model']['num_decoder_blocks']
-    ).to(device)
-    model.eval() # We calculate gradients w.r.t input/latent, not weights for now
-    
-    # 3. Setup Dataset
-    print("Loading dataset...")
+    # 加载数据集
     dataset = InMemoryLatentDataset(
         data_root=config['data']['data_root'],
         num_styles=config['model']['num_styles'],
-        style_subdirs=config['data']['style_subdirs']
+        style_subdirs=config['data']['style_subdirs'],
+        device=device
     )
-    dataloader = DataLoader(dataset, batch_size=config['training']['batch_size'], shuffle=True, drop_last=True)
     
-    # 4. Setup Losses
-    patch_size = config['loss'].get('patch_size', 5)
-    print(f"Calibration Config: Batch={config['training']['batch_size']}, Patch={patch_size}, ODE Steps=10")
+    # 简单的 Cache 补丁 (如果类定义没有 Cache)
+    if not hasattr(dataset, 'style_indices_cache'):
+        pass # Helper 函数直接用 tensor 索引，不需要 Python dict cache
+
+    output_dir = Path("analysis_plots")
+    output_dir.mkdir(exist_ok=True)
+    setup_plot_style()
     
-    loss_swd = PatchSlicedWassersteinLoss(
-        patch_size=patch_size, 
-        num_projections=128, 
-        max_samples=8192,
-        use_fp32=True
-    ).to(device)
-    
-    loss_ssm = CosineSSMLoss(use_fp32=True).to(device)
-    
-    # 5. Dynamic Calibration Loop
-    ratios = []
-    
-    print(f"\n🚀 Running ODE-aware Calibration on {num_batches} batches...")
-    print("-" * 75)
-    print(f"{'Batch':<6} | {'Content Grad':<12} | {'Style Grad':<12} | {'Ratio (C/S)':<10}")
-    print("-" * 75)
-    
-    for i, batch in enumerate(dataloader):
-        if i >= num_batches: break
-        
-        # Prepare Inputs
-        x_src = batch['latent'].to(device)
-        B = x_src.shape[0]
-        style_id = batch['style_id'].to(device)
-        
-        # Target Style Reference
-        rand_idx = torch.randperm(len(dataset))[:B]
-        x_style = dataset.latents_tensor[rand_idx].to(device)
-        
-        # --- ODE Integration Simulation ---
-        # We must simulate the forward pass to get x_1
-        # Initial condition
-        x0 = torch.randn_like(x_src)
-        t_val = torch.rand(B, device=device) # Random t ~ [0,1]
-        
-        # Construct path x_t (Linear interpolation anchored to content)
-        # This is what the model sees as input
-        t_expand = t_val.view(-1, 1, 1, 1)
-        x_t = (1 - t_expand) * x0 + t_expand * x_src
-        
-        # Integrate ODE (Simplified Euler for 10 steps to get x_1)
-        # Note: We don't need gradients for the integration steps themselves for this calibration,
-        # we only need gradients AT x_1. So we can use torch.no_grad() for the loop to save memory,
-        # then enable grad for the final calculation.
-        
-        # Wait! To measure the force "at the end", we just need to know WHERE the end is.
-        # With an untrained model, the velocity v is random.
-        # Let's compute a "hypothetical" x_1 based on current random model.
-        
-        curr_x = x_t.clone()
-        dt = 1.0 / 10.0
-        with torch.no_grad():
-            for step in range(10):
-                # Simple Euler
-                curr_t = t_val + step * dt
-                # Clamp t to [0,1]
-                curr_t = torch.clamp(curr_t, 0.0, 1.0)
-                v = model(curr_x, curr_t, style_id)
-                curr_x = curr_x + v * dt
-        
-        # Now curr_x is our x_1 (Terminal State).
-        # We attach gradient requirement HERE.
-        x_1 = curr_x.detach().requires_grad_(True)
-        
-        # --- Measure Forces at Terminal State ---
-        
-        # Force 1: Style Pull
-        l_style = loss_swd(x_1, x_style)
-        l_style.backward()
-        g_style = x_1.grad.norm().item()
-        
-        # Force 2: Content Pull
-        x_1.grad = None
-        l_content = loss_ssm(x_1, x_src)
-        l_content.backward()
-        g_content = x_1.grad.norm().item()
-        
-        # Ratio
-        if g_style > 1e-9:
-            ratio = g_content / g_style
-            ratios.append(ratio)
-            print(f"{i:<6} | {g_content:.6f}      | {g_style:.6f}      | {ratio:.2f}")
-            
-    # 6. Conclusion
-    avg_ratio = np.mean(ratios)
-    std_ratio = np.std(ratios)
-    
-    print("-" * 75)
-    print(f"✅ Final Ratio (Content Force / Style Force): {avg_ratio:.2f} (±{std_ratio:.2f})")
-    print(f"💡 This means SSM gradient is {avg_ratio:.1f}x stronger than SWD gradient.")
-    print(f"👉 Recommended w_style: {avg_ratio:.1f}")
-    print("-" * 75)
+    plot_multiscale_mechanism(
+        dataset, 
+        config['data']['style_subdirs'], 
+        output_dir, 
+        device
+    )
 
 if __name__ == "__main__":
-    calibrate_ode()
+    main()

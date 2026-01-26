@@ -1,0 +1,10 @@
+{
+  "checkpoint": "../checkpoints-4_styles-mse-photo5/epoch_0150.pt",
+  "n_pairs": 1200,
+  "content_vgg_mean": 9.339378542800745,
+  "style_vgg_mean": 14.51294658987721,
+  "clip_content_mean": 0.7143123158315817,
+  "clip_style_mean": 0.5868621427526076,
+  "content_lpips_mean": 0.5033863008519014,
+  "style_lpips_mean": 0.7624864321341117
+}

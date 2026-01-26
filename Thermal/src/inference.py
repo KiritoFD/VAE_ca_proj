@@ -46,10 +46,10 @@ class LangevinSampler:
         temperature_lambda=0.1,
         temperature_threshold=0.5,
         use_cfg=True,
-        cfg_scale=2.0,
+        cfg_scale=12.0,
         cfg_decay=True,
         use_source_repulsion=False,
-        repulsion_strength=0.7
+        repulsion_strength=3.7
     ):
         """
         Args:

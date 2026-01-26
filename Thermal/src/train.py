@@ -13,7 +13,7 @@ Training process:
 4. Compute energy E(x_1) = w_style*SWD(x_1, x_style) + w_content*SSM(x_1, x_src)
 5. Backprop through ODE trajectory
 """
-
+import random
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -100,98 +100,84 @@ def elastic_deform(x, alpha=10, sigma=3):
 
 class InMemoryLatentDataset(Dataset):
     """
-    In-memory dataset for VAE latents.
-    Loads all latents into GPU memory for maximum training speed.
+    Balanced In-memory dataset.
+    Loads all latents, but samples styles uniformly (1/N probability) regardless of image count.
     """
     
     def __init__(self, data_root, num_styles, style_subdirs=None, device='cuda'):
-        """
-        Args:
-            data_root: Path to latent files
-            num_styles: Number of style classes
-            style_subdirs: List of subdirectory names for each style
-            device: Device to load data onto (default: 'cuda')
-        """
         self.data_root = Path(data_root)
         self.num_styles = num_styles
         self.device = device
+        self.style_subdirs = style_subdirs or [f"style{i}" for i in range(num_styles)]
 
-        if style_subdirs is None:
-            style_subdirs = [f"style{i}" for i in range(num_styles)]
-
-        self.style_subdirs = style_subdirs
-
-        # Load all latents into memory
+        # 1. Load data separated by style
+        self.style_indices = {} # {style_id: [tensor_idx_1, tensor_idx_2, ...]}
         self.latents_list = []
         self.styles_list = []
-
-        logger.info("Loading latents into memory...")
-        for style_id, subdir in enumerate(style_subdirs):
+        
+        current_idx = 0
+        logger.info("Loading latents with Balanced Sampling strategy...")
+        
+        for style_id, subdir in enumerate(self.style_subdirs):
             style_path = self.data_root / subdir
             if not style_path.exists():
-                logger.warning(f"Style directory not found: {style_path}")
+                logger.warning(f"Style dir not found: {style_path}")
                 continue
 
             latent_files = sorted(style_path.glob("*.pt"))
-            logger.info(f"  Style {style_id} ({subdir}): {len(latent_files)} files")
-
-            for latent_file in latent_files:
-                latent = torch.load(latent_file, map_location='cpu')
-
-                # Ensure correct shape [4, H, W]
-                if latent.ndim == 4:
-                    latent = latent.squeeze(0)
-
+            count = len(latent_files)
+            logger.info(f"  Style {style_id} ({subdir}): {count} images")
+            
+            # Record indices for this style
+            # indices [current, current+count) belong to this style
+            self.style_indices[style_id] = list(range(current_idx, current_idx + count))
+            
+            # Load files
+            for lf in latent_files:
+                latent = torch.load(lf, map_location='cpu')
+                if latent.ndim == 4: latent = latent.squeeze(0)
                 self.latents_list.append(latent)
                 self.styles_list.append(style_id)
+                current_idx += 1
 
-        # Stack into tensors and move to GPU
+        # 2. Stack to GPU
         self.latents_tensor = torch.stack(self.latents_list).to(self.device)
         self.styles_tensor = torch.tensor(self.styles_list, dtype=torch.long).to(self.device)
-
-        logger.info(f"✓ Loaded {len(self)} latents into GPU memory")
-        logger.info(f"  Shape: {self.latents_tensor.shape}")
-        logger.info(f"  Memory: {self.latents_tensor.nbytes / 1e9:.2f} GB")
         
-        # ==========================================
-        # 🔥 Critical: Check and rescale latents
-        # ==========================================
-        # If latents have small variance (raw VAE output), rescale to match noise distribution
-        # SD VAE scaling factor applied: latent_rescaled = latent / 0.18215
-        # This ensures training dynamics match Flow Matching assumptions (x0 ~ N(0,I))
-        
+        # 3. Handle Scaling (Check only once globally)
         std_original = self.latents_tensor.std().item()
         scaling_factor = 0.18215
-        
-        logger.info(f"🔍 Latent statistics before scaling:")
-        logger.info(f"   STD: {std_original:.6f}")
-        logger.info(f"   MIN: {self.latents_tensor.min().item():.6f}")
-        logger.info(f"   MAX: {self.latents_tensor.max().item():.6f}")
-        
-        # If raw latents detected (std < 0.5), rescale by dividing by scaling_factor
         if std_original < 0.5:
-            logger.info(f"⚠️  Detected raw VAE latents (std={std_original:.4f} < 0.5)")
-            logger.info(f"   Rescaling by 1/{scaling_factor} ...")
+            logger.info(f"⚠️ Raw VAE latents detected (std={std_original:.4f}). Rescaling...")
             self.latents_tensor = self.latents_tensor / scaling_factor
-            
-            std_rescaled = self.latents_tensor.std().item()
-            logger.info(f"✅ Latent rescaling applied:")
-            logger.info(f"   NEW STD: {std_rescaled:.6f}")
-            logger.info(f"   NEW MIN: {self.latents_tensor.min().item():.6f}")
-            logger.info(f"   NEW MAX: {self.latents_tensor.max().item():.6f}")
-            logger.info(f"   (now compatible with noise distribution ~ N(0,1))")
-        else:
-            logger.info(f"✓ Latents appear pre-scaled (std={std_original:.4f} >= 0.5). Skipping rescaling.")
-    
+        
+        # 4. Set virtual length (make epoch long enough to cover the largest class)
+        max_count = max([len(idxs) for idxs in self.style_indices.values()])
+        self.virtual_length = max_count * num_styles * num_styles
+        
     def __len__(self):
-        return len(self.latents_tensor)
+        return self.virtual_length
     
-    def __getitem__(self, idx):
+    def __getitem__(self, _):
+        # 🔥 Magic happens here: IGNORE the input index (_)
+        
+        # 1. Randomly pick a style (Uniform probability 1/4)
+        style_id = torch.randint(0, self.num_styles, (1,)).item()
+        
+        # 2. Randomly pick an image from THAT style
+        # (Even if Style A has 100 images and Style B has 6000, 
+        #  we pick Style A 25% of the time, just reusing its images more often)
+        if style_id in self.style_indices and len(self.style_indices[style_id]) > 0:
+            idx = random.choice(self.style_indices[style_id])
+        else:
+            # Fallback if a style folder is empty
+            idx = random.randint(0, len(self.latents_tensor)-1)
+            style_id = self.styles_tensor[idx].item()
+            
         return {
             'latent': self.latents_tensor[idx],
-            'style_id': self.styles_tensor[idx]
+            'style_id': self.styles_tensor[idx] # Should match style_id above
         }
-
 
 class LGTTrainer:
     """
@@ -226,7 +212,7 @@ class LGTTrainer:
             try:
                 self.model = torch.compile(
                     self.model,
-                    mode='dufault',
+                    mode='default',
                     fullgraph=False
                 )
                 logger.info("✓ Model compiled with torch.compile (reduce-overhead mode)")
@@ -500,34 +486,62 @@ class LGTTrainer:
         else:
             x_src_target = x_src
         
+        # 🔥 2.5 Noise Injection (NEW: Prevent Identity Mapping)
+        # ==========================================
+        # Without noise: x_t at t≈1 is already very clean (almost x_src).
+        # Model learns "identity mapping" - just output zero velocity.
+        # This makes MSE happy but SWD has no effect.
+        # 
+        # With noise: x_t at t≈1 is slightly noisy (x_src + noise).
+        # Model must learn to denoise → generate → style-match.
+        # This forces SWD to guide the generation process effectively.
+        # 
+        # Physics: Add Gaussian perturbation to break determinism.
+        # The noisy target is still close to x_src (recoverable with MSE),
+        # but different enough to require actual generation (enabled by SWD).
+        sigma_noise = 0.1  # Noise strength on latent space
+        noise_injection = torch.randn_like(x_src_target) * sigma_noise
+        x_target_noisy = x_src_target + noise_injection
+        
         # 3. Time sampling
         epsilon = self.get_dynamic_epsilon(epoch)
         t = torch.rand(B, device=device) * (1 - epsilon) + epsilon
         t_expand = t.view(-1, 1, 1, 1)
         
-        # 4. Trajectory construction: x_t = (1-t)*x0 + t*x_src_target
-        x_t = (1 - t_expand) * x0 + t_expand * x_src_target
+        # 4. Trajectory construction: x_t = (1-t)*x0 + t*x_target_noisy
+        # Use NOISY target to force model to learn generation instead of identity mapping
+        x_t = (1 - t_expand) * x0 + t_expand * x_target_noisy
         
         # 5. Label Dropping (For CFG Training)
-        use_avg_style = False
+        # 🔥 CRITICAL: This flag only applies to MSE path (content reconstruction)
+        # SWD path MUST always use conditional style (use_avg_style=False)
+        drop_label = False
         if self.model.training and torch.rand(1).item() < self.label_drop_prob:
-            use_avg_style = True
+            drop_label = True
         
         # ==========================================
         # Task A: Supervisor (MSE - Teacher Forcing)
         # ==========================================
-        # Predict velocity field towards x_src_target
+        # MSE path: Apply label dropping for CFG training
+        # Even without style condition, model learns to denoise and restore content structure.
+        # This trains the unconditional branch v_uncond to be content-faithful.
         with torch.amp.autocast('cuda', enabled=self.use_amp, dtype=torch.bfloat16):
-            v_pred = self.model(x_t, t, style_id_tgt, use_avg_style=use_avg_style)
+            v_pred = self.model(x_t, t, style_id_tgt, use_avg_style=drop_label)  # ✅ Use drop_label
         
-        # MSE loss: force v_pred to match optimal transport direction
-        loss_mse = self.traj_mse_loss(v_pred, x0, x_src_target)
+        # MSE loss: force v_pred to match optimal transport direction (to NOISY target)
+        # By targeting a noisy intermediate state, model learns to denoise/generate
+        # rather than memorizing identity mapping. Combined with low-pass filtering
+        # in TrajectoryMSELoss, this gives SWD full control over high-frequency styling.
+        loss_mse = self.traj_mse_loss(v_pred, x0, x_target_noisy)
         
         # ==========================================
         # Task B: Artist (Energy - SWD Texture Loss)
         # ==========================================
-        # Integrate ODE to terminal state
-        x_1 = self.integrate_ode(x_t, t, style_id_tgt, use_avg_style=use_avg_style)
+        # SWD path: 🔥 NEVER apply label dropping!
+        # Style generation must be ALWAYS conditioned (use_avg_style=False).
+        # We want the CONDITIONAL branch v_cond to learn style matching perfectly.
+        # The unconditional branch should NOT be confused by style supervision.
+        x_1 = self.integrate_ode(x_t, t, style_id_tgt, use_avg_style=False)  # ✅ Force False
         
         # Compute style SWD loss (Content Loss removed completely)
         loss_dict = self.energy_loss(x_1, real_style_latents)

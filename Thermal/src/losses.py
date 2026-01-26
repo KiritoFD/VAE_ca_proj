@@ -266,19 +266,29 @@ class TrajectoryMSELoss(nn.Module):
     """
     Trajectory Matching Loss (Flow Matching Objective).
     
-    Standard Flow Matching objective: || v_theta(x_t) - (x_1 - x_0) ||^2
+    🔥 UPDATED: Low-Pass MSE for structure-only supervision
+    
+    Previously: Standard Flow Matching supervised all frequencies equally.
+    This caused MSE to directly fight SWD by forcing high-freq preservation.
+    
+    Now: Only supervise LOW frequencies (structure/outline).
+    HIGH frequencies are left free for SWD to control (texture/style).
     
     Physics Interpretation:
-    Acts as a 'Teacher Forcing' signal. It forces the vector field to 
-    point precisely towards the target geometry (x_1), locking the 
-    phase spectrum (edges/high-freqs) that SWD often misses.
+    Acts as a 'Teacher Forcing' signal for STRUCTURE only. 
+    It forces the vector field to point towards the target geometry
+    at LOW frequencies (blurred/coarse), ensuring edges and color blocks
+    are preserved. High-frequency details are unsupervised, allowing
+    SWD to paint free brushstrokes on top of the solid structure.
     
-    This is the 'Supervisor' component in Hybrid Dynamics, ensuring
-    high-frequency clarity and geometric fidelity (plus source brightness).
+    This is the 'Sculptor' component in Hybrid Dynamics:
+    - Sculpture (MSE, low-freq): Rough form, outlines, large color regions
+    - Painting (SWD, high-freq): Texture, brushstrokes, fine details
     """
-    def __init__(self, weight=5.0):
+    def __init__(self, weight=5.0, low_pass_kernel_size=5):
         super().__init__()
         self.weight = weight
+        self.kernel_size = low_pass_kernel_size  # Size of avg_pool kernel
     
     def forward(self, v_pred, x_0, x_1):
         """
@@ -288,14 +298,24 @@ class TrajectoryMSELoss(nn.Module):
             x_1:    [B, C, H, W] Target data (deformed source or style target)
         
         Returns:
-            loss: scalar MSE trajectory loss
+            loss: scalar MSE trajectory loss (low-frequency only)
         """
         # Optimal transport path has constant velocity: v = x_1 - x_0
         v_target = x_1 - x_0
         
-        # Simple MSE is extremely efficient and memory-friendly
-        # Backward pass is O(N) complexity
-        return self.weight * F.mse_loss(v_pred, v_target)
+        # ==========================================
+        # 🔥 Low-Pass Filtering (NEW)
+        # ==========================================
+        # Apply average pooling to extract low-frequency components.
+        # This makes MSE supervision "blurry" - it only cares about structure,
+        # not texture details. High-frequency components (|k| > k_cutoff) are
+        # left unconstrained, giving SWD room to add artistic details.
+        k = self.kernel_size
+        v_pred_blur = F.avg_pool2d(v_pred, k, stride=1, padding=k//2)
+        v_target_blur = F.avg_pool2d(v_target, k, stride=1, padding=k//2)
+        
+        # MSE only on blurred (low-frequency) signals
+        return self.weight * F.mse_loss(v_pred_blur, v_target_blur)
 
 
 class GeometricFreeEnergyLoss(nn.Module):
