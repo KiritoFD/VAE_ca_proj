@@ -487,9 +487,28 @@ class LGTTrainer:
     
     def compute_energy_loss(self, x_src, style_id_src, style_id_tgt, epoch, real_style_latents, noise_scheduler):
         """
-        Compute hybrid loss with adaptive SWD weighting.
+        Compute hybrid loss: MSE (Supervisor) + Energy (Artist).
         
-        🔥 CRITICAL: SWD weight follows schedule to avoid interfering with MSE convergence
+        🔥 CRITICAL CHANGE: Now receives noise_scheduler to compute correct targets.
+        
+        Clean version: Content Loss completely removed.
+        
+        This implements Hybrid Dynamics with Classifier-Free Guidance training:
+        1. Supervisor Task (MSE): High-freq clarity + source brightness preservation
+        2. Artist Task (Energy/SWD): Texture/brushstroke matching
+        3. CFG Training (Label Dropping): Learn unconditional distribution for inference
+        4. Conditional Deformation: Only deform painting (Style 1), keep photos (Style 0) intact
+        
+        Args:
+            x_src: [B, 4, H, W] source content latents
+            style_id_src: [B] source style IDs
+            style_id_tgt: [B] target style IDs
+            epoch: current epoch for epsilon scheduling
+            real_style_latents: [B, 4, H, W] real latents from target style distribution
+            noise_scheduler: 🔥 NEW: DDPMScheduler or equivalent for computing targets
+        
+        Returns:
+            loss_dict: dictionary with total loss and components
         """
         B = x_src.shape[0]
         device = x_src.device
@@ -555,9 +574,9 @@ class LGTTrainer:
                 # Fallback: assume epsilon prediction
                 v_target = x0
         
-        # Use StructureAnchoredLoss with current_epoch for adaptive gating
-        # 🔥 NEW PARAMETER: Pass epoch for dynamic gate control
-        loss_mse = self.struc_loss(v_pred, v_target, x_src, current_epoch=epoch, total_warmup_epochs=20)
+        # Use StructureAnchoredLoss with scheduler-provided target
+        # 🔥 NEW SIGNATURE: (pred, target, clean_latents)
+        loss_mse = self.struc_loss(v_pred, v_target, x_src)
         
         # ==========================================
         # Task B: Artist (Energy - SWD Texture Loss)
@@ -589,7 +608,7 @@ class LGTTrainer:
         return loss_dict
     
     def train_epoch(self, dataloader, epoch, noise_scheduler):
-        """Train for one epoch with gradient accumulation and diagnostic monitoring."""
+        """Train for one epoch with gradient accumulation support."""
         self.model.train()
         
         total_loss = 0.0
@@ -615,27 +634,12 @@ class LGTTrainer:
             B = latent.shape[0]
             indices = torch.randperm(B, device=self.device)
             style_id_tgt = style_id[indices]
+            
             style_latents = self.sample_style_batch(style_id_tgt)
-            
-            # 🔥 DEBUG: Enable diagnostics every 50 steps during early training
-            # ================================================================
-            # This helps identify whether MSE plateau is due to:
-            # 1. LoRA contribution collapse (dead HyperNet)
-            # 2. Physical lock being too aggressive
-            # 3. Gradient scale mismatch (precision loss in FP16)
-            do_debug = (step_idx % 50 == 0) and (epoch <= 5)
-            
-            if do_debug:
-                # Temporarily enable debug mode in all submodules
-                for module in self.model.modules():
-                    if hasattr(module, 'debug_trigger'):
-                        module.debug_trigger = True
-                for module in self.struc_loss.modules():
-                    if hasattr(module, 'debug_trigger'):
-                        module.debug_trigger = True
             
             # Forward pass with mixed precision
             with torch.amp.autocast('cuda', enabled=self.use_amp, dtype=torch.bfloat16):
+                # 🔥 NEW: Pass noise_scheduler to compute_energy_loss
                 loss_dict = self.compute_energy_loss(
                     latent, style_id, style_id_tgt, epoch, style_latents, noise_scheduler
                 )
@@ -645,27 +649,14 @@ class LGTTrainer:
             accum_counter += 1
             
             if accum_counter >= self.accumulation_steps:
-                # 🔥 CRITICAL: Gradient diagnostics before clipping
+                # 🔥🔥🔥 CRITICAL FIX: Gradient Clipping (Essential for training from scratch)
                 # ================================================================
-                # If MSE is stuck at 10, check:
-                # 1. CosSim(pred, target): should be > 0.3 (direction aligned)
-                # 2. Pred/Target Std ratio: should be close to 1.0
-                # 3. Gradient norm: should be reasonable after clipping
-                if do_debug:
-                    with torch.no_grad():
-                        # 这里需要重新计算 pred，因为它已经被释放
-                        # 或者我们只能检查 loss 的梯度范数
-                        if hasattr(self.model, 'parameters'):
-                            grad_norm = 0.0
-                            for p in self.model.parameters():
-                                if p.grad is not None:
-                                    grad_norm += p.grad.norm().item() ** 2
-                            grad_norm = grad_norm ** 0.5
-                            print(f"\n[Step {step_idx}] Grad norm (before clip): {grad_norm:.4f}")
-                            if grad_norm > 100:
-                                print(f"⚠️  CRITICAL: Gradient explosion detected!")
-                
-                # 🔥 FIX: Gradient clipping
+                # When model starts with random weights (output ≈ 0) and target is
+                # noise (Std ≈ 1.0), gradients can be huge. Clipping bounds them.
+                # This is standard practice for Transformer/Diffusion models.
+                # 
+                # Effect: Prevents single outlier loss from dominating gradient update.
+                # Typical max_norm: 1.0 for stable training, 0.5 for very aggressive regularization.
                 self.scaler.unscale_(self.optimizer)
                 torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
                 

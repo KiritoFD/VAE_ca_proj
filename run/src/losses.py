@@ -23,15 +23,31 @@ from structure_net import LearnableStructureExtractor  # 🔥 New import for Str
 
 class StructureAnchoredLoss(nn.Module):
     """
-    Laplacian Structural Lock with Adaptive Gating - WITH DIAGNOSTIC MONITORING.
+    Laplacian Structural Lock (RTX 4070 Optimized) - SOFT START VERSION.
     
-    🔥 CRITICAL IMPROVEMENTS for training from scratch:
-    1. Dynamic Gating: Gradually increase constraint over epochs
-    2. Huber Loss: Robust to outliers (prevents gradient explosion at MSE=10)
-    3. Smooth L1 transition: Behaves like MSE for small errors, L1 for large
-    4. Built-in diagnostics: Monitor edge detection hardness
+    🔥 CRITICAL: Weights reduced for training from scratch (random initialization).
+    
+    For models starting from random weights:
+    - weight: 1.0 (not 5.0) - base supervision strength
+    - edge_boost: 2.0 (not 9.0) - moderate edge emphasis
+    
+    This prevents gradient explosion from random model (output ≈ 0)
+    trying to match target (Std ≈ 1.0) with 45x amplification.
+    
+    Physics: Uses discrete Laplacian (2nd derivative) as edge detector.
+    This is mathematically equivalent to high-pass filtering and captures
+    structural edges without requiring a learned proxy network.
+    
+    Optimization: 
+    - Static kernel registered as buffer (no gradient, no allocation)
+    - Depthwise conv for minimal memory bandwidth
+    - Robust Z-Score normalization + Sigmoid soft-clipping
+    - Tanh boundary clipping to prevent single-point gradient explosion
+    
+    Effect: Locks structure at detected edges while leaving flat regions
+    free for SWD to control texture, with bounded gradients.
     """
-    def __init__(self, weight=2.0, edge_boost=3.0):
+    def __init__(self, weight=1.0, edge_boost=2.0):  # 🔥 SOFT START: 5.0→1.0, 9.0→2.0
         super().__init__()
         self.weight = weight
         self.edge_boost = edge_boost
@@ -40,21 +56,18 @@ class StructureAnchoredLoss(nn.Module):
         # Shape: [4, 1, 3, 3] for group conv (one kernel per channel)
         k = torch.tensor([[0, 1, 0], [1, -4, 1], [0, 1, 0]], dtype=torch.float32)
         self.register_buffer('kernel', k.view(1, 1, 3, 3).repeat(4, 1, 1, 1))
-        
-        # 🔥 Debug flag
-        self.debug_trigger = False
 
-    def forward(self, v_pred, v_target, clean_latents, current_epoch=0, total_warmup_epochs=20):
+    def forward(self, v_pred, v_target, clean_latents):
         """
         Args:
-            v_pred: [B, C, H, W] Model predicted velocity
-            v_target: [B, C, H, W] Ground truth target from scheduler
+            v_pred: [B, C, H, W] Model predicted velocity/noise/v_pred (from model forward)
+            v_target: [B, C, H, W] Ground truth target (computed by noise scheduler)
+                      🔥 CRITICAL: This MUST come from noise_scheduler.get_*(),
+                      NOT computed locally as x_target - x0!
             clean_latents: [B, C, H, W] Original clean latents (for structure extraction)
-            current_epoch: Current training epoch (for adaptive gating)
-            total_warmup_epochs: Number of epochs to warm up gate (default 20)
         
         Returns:
-            loss: scalar weighted Smooth L1 loss with gradient safety bounds
+            loss: scalar weighted MSE loss with gradient safety bounds
         """
         # 1. Physical Edge Extraction (on clean latents, no gradients)
         with torch.no_grad():
@@ -74,58 +87,21 @@ class StructureAnchoredLoss(nn.Module):
             # Sigmoid: Maps (-∞, +∞) → (0, 1), matching CNN Proxy output range
             mask_norm = torch.sigmoid(mask_zscore)  # [B, 1, H, W] in [0, 1]
             
-            # 🔥 FIX 1: Dynamic Gating (Adaptive Warmup)
-            # ================================================================
-            # Gradually increase constraint from 0 to 1 over warmup_epochs.
-            # Early epochs: gate ≈ 0 → light supervision, model learns basic patterns
-            # Late epochs: gate → 1 → full structure lock, model refines edges
-            gate = min(current_epoch / max(total_warmup_epochs, 1), 1.0)
-            
-            # weight_map now interpolates between:
-            # Early (gate=0): weight_map = 1.0 (uniform MSE)
-            # Late (gate=1):  weight_map = 1.0 + mask_norm * edge_boost (structure lock)
-            weight_map = 1.0 + (mask_norm * self.edge_boost * gate)  # [B, 1, H, W]
-            
-            # 🔥 DEBUG: Monitor edge detection hardness
-            # ================================================================
-            # Healthy range for weight_map:
-            # - Min should be ≈ 1.0 (flat regions, no constraint)
-            # - Max should be ≈ (1.0 + edge_boost) (edge regions, full constraint)
-            # - Gate interpolates from 0→1 as epochs progress
-            #
-            # If weight_map.max() is already 4.0 but gate is still 0.1,
-            # the constraint is too aggressive for early training.
-            if self.debug_trigger:
-                w_min, w_max = weight_map.min().item(), weight_map.max().item()
-                w_mean = weight_map.mean().item()
-                print(
-                    f"[Loss Debug] Epoch {current_epoch}/{total_warmup_epochs} | "
-                    f"Weight: min={w_min:.3f} max={w_max:.3f} mean={w_mean:.3f} | "
-                    f"Gate={gate:.3f} | "
-                    f"Mask Range=[{mask.min().item():.4f}, {mask.max().item():.4f}]"
-                )
-
-        # 2. Weighted Loss Computation
-        # ================================================================
-        # 🔥 FIX 2: Use Smooth L1 (Huber) Loss instead of MSE
-        # 
-        # Problem: At MSE=10, gradient is huge (2*10=20 per pixel).
-        # When multiplied by weight_map (up to 4.0), gradient norm becomes 80.
-        # Even with clipping, the loss surface is sharp and optimization is unstable.
-        #
-        # Solution: Smooth L1 Loss (Huber Loss)
-        # - For |error| < β: acts like MSE (smooth, adaptive step size)
-        # - For |error| > β: acts like L1 (constant gradient, robustness to outliers)
-        # - Smooth transition at boundary ensures gradient continuity
-        #
-        # β=0.1 means:
-        # - Errors < 0.1: Use quadratic (steep early learning)
-        # - Errors > 0.1: Use linear (steady descent from plateau)
-        weighted_diff = weight_map * (v_pred - v_target)
+            # 🔥 SOFT START: Moderate Edge Boost (reduced from 9.0 to 2.0)
+            # With Sigmoid clipping, the maximum weight is now:
+            # weight_map_max = 1.0 + 1.0 * 2.0 = 3.0 (was: 1.0 + huge * 9.0)
+            weight_map = 1.0 + mask_norm * self.edge_boost  # [B, 1, H, W]
         
-        # Smooth L1 Loss: more robust to outliers than MSE at MSE=10
-        loss = F.smooth_l1_loss(weighted_diff, torch.zeros_like(weighted_diff), beta=0.1, reduction='mean')
+        # 2. Weighted MSE (using scheduler-provided target)
+        # 🔥 CRITICAL: Use v_target from scheduler, not local computation
+        weighted_diff = weight_map * (v_pred - v_target) ** 2
+        loss_unreduced = weighted_diff.mean()
         
+        # Loss clamp to prevent extreme outliers
+        loss = torch.clamp(loss_unreduced, min=0.0, max=10.0)
+        
+        # 🔥 SOFT START: Reduce base weight for training from scratch
+        # From 5.0 to 1.0, allowing model to stabilize before ramping up structure lock
         return self.weight * loss
 
 

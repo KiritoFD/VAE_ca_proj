@@ -1,0 +1,31 @@
+# Installation: pip install -r requirements.txt  OR  pip install torch torchvision diffusers numpy Pillow tqdm transformers accelerate safetensors scipy
+
+# Core Deep Learning Framework
+torch>=2.0.0
+torchvision>=0.15.0
+torchaudio>=2.0.0
+
+# Diffusers (Stable Diffusion & Schedulers)Diffusion & Schedulers)
+diffusers>=0.21.0
+transformers>=4.30.0.0
+accelerate>=0.20.0accelerate>=0.20.0
+safetensors>=0.3.1
+
+# Numerical Computing# Numerical Computing
+numpy>=1.24.0
+
+# Image Processing# Image Processing
+Pillow>=9.0.0
+
+# Progress Bars# Progress Bars
+tqdm>=4.65.0
+
+# Optional: For VAE and model inference
+xformers>=0.0.20  # Memory-efficient attention (optional but recommended)xformers>=0.0.20  # Memory-efficient attention (optional but recommended)
+scipy>=1.10.0     # For advanced numerical operationsed numerical operations
+
+# Development Tools (optional)
+# tensorboard>=2.13.0  # For training visualization# tensorboard>=2.13.0  # For training visualization
+
+
+# wandb>=0.15.0        # For experiment tracking# wandb>=0.15.0        # For experiment tracking
