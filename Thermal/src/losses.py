@@ -16,9 +16,7 @@ All losses operate in FP32 for numerical stability.
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import os
-
-from structure_net import LearnableStructureExtractor  # 🔥 New import for Structure Lock
+import os# 🔥 New import for Structure Lock
 
 
 class StructureAnchoredLoss(nn.Module):
