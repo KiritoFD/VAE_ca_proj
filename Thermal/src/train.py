@@ -27,7 +27,7 @@ import numpy as np
 from PIL import Image
 
 from model import LGTUNet, count_parameters
-from losses import GeometricFreeEnergyLoss, TrajectoryMSELoss, VelocityRegularizationLoss
+from losses import GeometricFreeEnergyLoss, TrajectoryMSELoss, VelocityRegularizationLoss, VelocitySmoothnessLoss, DistilledStructureLoss
 from inference import LGTInference, load_vae, encode_image, decode_latent
 
 import subprocess
@@ -229,9 +229,24 @@ class LGTTrainer:
             swd_scale_weights=config['loss'].get('swd_scale_weights', [2.0, 5.0, 5.0])
         ).to(device)
         
-        # Loss 2: Supervisor (MSE for structure + brightness)
-        self.w_mse = config['loss'].get('w_mse', 5.0)
-        self.traj_mse_loss = TrajectoryMSELoss(weight=self.w_mse).to(device)
+        # Loss 2: Supervisor (Distilled Structure Lock)
+        # 🔥 [UPDATED] Use Distilled Structure Loss instead of TrajectoryMSELoss
+        # This focuses MSE constraint to structural regions only, allowing SWD
+        # full freedom to paint in flat areas without conflict
+        self.struc_loss = DistilledStructureLoss(
+            proxy_path="structure_proxy.pt",  # Ensure this file exists
+            base_weight=config['loss'].get('structure_base_weight', 1.0),       # Base constraint for flat areas
+            structure_weight=config['loss'].get('structure_weight', 15.0),      # Strong lock for edges
+            device=device
+        ).to(device)
+        logger.info(f"✓ Distilled Structure Loss enabled")
+        
+        # Loss 2.5: Velocity Smoothness (The Anti-Flicker)
+        # 🔥 [ADDED] Velocity Smoothness (Total Variation)
+        # Prevents tile boundary artifacts by smoothing the velocity field
+        vel_smooth_weight = config['loss'].get('vel_smooth_weight', 0.2)
+        self.vel_smooth_loss = VelocitySmoothnessLoss(weight=vel_smooth_weight).to(device)
+        logger.info(f"✓ Velocity Smoothness Loss enabled (weight={vel_smooth_weight})")
         
         # Loss 3: Velocity Regularization (prevent large velocity magnitudes)
         # 🔥 Critical for training-end stability: keeps v_pred bounded
@@ -520,19 +535,18 @@ class LGTTrainer:
             drop_label = True
         
         # ==========================================
-        # Task A: Supervisor (MSE - Teacher Forcing)
+        # Task A: Supervisor (Distilled Structure Lock)
         # ==========================================
-        # MSE path: Apply label dropping for CFG training
-        # Even without style condition, model learns to denoise and restore content structure.
-        # This trains the unconditional branch v_uncond to be content-faithful.
+        # Structure path: Apply label dropping for CFG training
+        # 🔥 [UPDATED] Use Distilled Structure Loss
+        # x_target_noisy is the target state (content source)
         with torch.amp.autocast('cuda', enabled=self.use_amp, dtype=torch.bfloat16):
             v_pred = self.model(x_t, t, style_id_tgt, use_avg_style=drop_label)  # ✅ Use drop_label
         
-        # MSE loss: force v_pred to match optimal transport direction (to NOISY target)
-        # By targeting a noisy intermediate state, model learns to denoise/generate
-        # rather than memorizing identity mapping. Combined with low-pass filtering
-        # in TrajectoryMSELoss, this gives SWD full control over high-frequency styling.
-        loss_mse = self.traj_mse_loss(v_pred, x0, x_target_noisy)
+        # 🔥 [UPDATED] Use Distilled Loss (frequency-split weight map)
+        # This applies high MSE constraint at edges (structure regions)
+        # and low MSE constraint at flat regions (allowing SWD to paint freely)
+        loss_mse = self.struc_loss(v_pred, x0, x_target_noisy)
         
         # ==========================================
         # Task B: Artist (Energy - SWD Texture Loss)
@@ -547,25 +561,24 @@ class LGTTrainer:
         loss_dict = self.energy_loss(x_1, real_style_latents)
         
         # ==========================================
-        # Total Loss Fusion (Clean Hybrid Dynamics)
+        # Total Loss Fusion (Enhanced with Smoothness)
         # ==========================================
         # 🔥 CRITICAL FIX: Avoid Double Weighting Bug
-        # loss_mse is ALREADY weighted by self.w_mse inside TrajectoryMSELoss.forward()
-        # DO NOT multiply again here
+        # loss_mse is already weighted by DistilledStructureLoss
         style_weight_batch = self.style_weights[style_id_tgt].mean()
         
-        # Fuse two forces:
-        # 1. Style force (texture/brush strokes, weight=60.0, unscaled raw SWD)
-        # 2. Supervision force (trajectory/clarity + brightness, weight=5.0, already in loss_mse)
-        #
-        # Effective balance: 60.0 * raw_swd vs 5.0 * raw_mse
-        # This is numerically balanced since:
-        # - raw_mse >> raw_swd (MSE is per-pixel hard constraint vs SWD is distribution soft match)
-        # - 5.0 vs 60.0 ratio accounts for this magnitude difference
+        # 🔥 [UPDATED] Add Smoothness Loss
+        # Prevents tile boundary artifacts by smoothing the velocity field
+        loss_smooth = self.vel_smooth_loss(v_pred)
+        
         loss_dict['total'] = (
             style_weight_batch * self.energy_loss.w_style * loss_dict['style_swd'] +
-            loss_mse  # ✅ loss_mse already includes w_mse scaling internally
+            loss_mse + 
+            loss_smooth  # Add smoothness term
         )
+        
+        loss_dict['mse'] = loss_mse
+        loss_dict['smooth'] = loss_smooth  # Log it for monitoring
         
         # ==========================================
         # 🔥 Velocity Regularization (Training-End Stability)
@@ -577,9 +590,6 @@ class LGTTrainer:
             loss_dict['velocity_reg'] = loss_reg
             loss_dict['total'] = loss_dict['total'] + loss_reg
         
-        # Log MSE separately for monitoring
-        loss_dict['mse'] = loss_mse
-        
         return loss_dict
     
     def train_epoch(self, dataloader, epoch):
@@ -589,6 +599,7 @@ class LGTTrainer:
         total_loss = 0.0
         total_style_swd = 0.0
         total_mse = 0.0
+        total_smooth = 0.0
         total_vel_reg = 0.0
         num_batches = 0
         accum_counter = 0
@@ -647,6 +658,8 @@ class LGTTrainer:
             total_loss += loss.item() * self.accumulation_steps
             total_style_swd += loss_dict['style_swd'].item()
             total_mse += loss_dict['mse'].item()
+            if 'smooth' in loss_dict:
+                total_smooth += loss_dict['smooth'].item()
             if 'velocity_reg' in loss_dict:
                 total_vel_reg += loss_dict['velocity_reg'].item()
             num_batches += 1
@@ -658,6 +671,8 @@ class LGTTrainer:
                     'swd': f"{loss_dict['style_swd'].item():.4f}",
                     'mse': f"{loss_dict['mse'].item():.4f}"
                 }
+                if 'smooth' in loss_dict:
+                    postfix_dict['smooth'] = f"{loss_dict['smooth'].item():.4f}"
                 if 'velocity_reg' in loss_dict:
                     postfix_dict['v_reg'] = f"{loss_dict['velocity_reg'].item():.4f}"
                 pbar.set_postfix(postfix_dict)
@@ -670,6 +685,8 @@ class LGTTrainer:
                         f"swd={loss_dict['style_swd'].item():.6f} | "
                         f"mse={loss_dict['mse'].item():.4f}"
                     )
+                    if 'smooth' in loss_dict:
+                        log_msg += f" | smooth={loss_dict['smooth'].item():.6f}"
                     if 'velocity_reg' in loss_dict:
                         log_msg += f" | v_reg={loss_dict['velocity_reg'].item():.6f}"
                     logger.info(log_msg)
@@ -678,12 +695,14 @@ class LGTTrainer:
         avg_loss = total_loss / num_batches
         avg_style_swd = total_style_swd / num_batches
         avg_mse = total_mse / num_batches
+        avg_smooth = total_smooth / num_batches
         avg_vel_reg = total_vel_reg / num_batches if self.use_velocity_reg else 0.0
         
         metrics = {
             'loss': avg_loss,
             'style_swd': avg_style_swd,
-            'mse': avg_mse
+            'mse': avg_mse,
+            'smooth': avg_smooth
         }
         if self.use_velocity_reg:
             metrics['velocity_reg'] = avg_vel_reg

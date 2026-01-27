@@ -16,6 +16,9 @@ All losses operate in FP32 for numerical stability.
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import os
+
+from structure_net import LearnableStructureExtractor  # 🔥 New import for Structure Lock
 
 
 class VelocityRegularizationLoss(nn.Module):
@@ -375,6 +378,126 @@ class GeometricFreeEnergyLoss(nn.Module):
         result.update(swd_dict)
         
         return result
+
+
+class VelocitySmoothnessLoss(nn.Module):
+    """
+    Velocity Field Smoothness (TV Loss).
+    
+    Physics: Penalizes high-frequency noise in the vector field.
+    Effect: Eliminates 'flying color blocks' and flickering artifacts.
+    
+    Implementation: Total Variation regularization on velocity field.
+    By forcing gradients (dv/dx, dv/dy) to be small, the velocity flow becomes smooth.
+    This removes tile boundary artifacts that occur when adjacent tiles have vastly
+    different velocity vectors.
+    
+    Trade-off: Too large weight → smooth but blurry motion vectors → featureless output
+    Recommended: weight ∈ [0.05, 0.3] for typical training
+    """
+    def __init__(self, weight=0.1):
+        super().__init__()
+        self.weight = weight
+
+    def forward(self, v_pred):
+        """
+        Args:
+            v_pred: [B, C, H, W] Predicted velocity field
+        
+        Returns:
+            loss: scalar TV loss
+        """
+        # Calculate spatial gradients (dv/dx, dv/dy)
+        # These represent how rapidly the velocity changes across space
+        diff_x = torch.abs(v_pred[:, :, :, 1:] - v_pred[:, :, :, :-1])
+        diff_y = torch.abs(v_pred[:, :, 1:, :] - v_pred[:, :, :-1, :])
+        
+        # Sum gradient magnitudes for all channels and average over batch
+        loss = torch.mean(diff_x) + torch.mean(diff_y)
+        return self.weight * loss
+
+
+class DistilledStructureLoss(nn.Module):
+    """
+    Distilled Structure Loss (The "Structure Anchor").
+    
+    Physics: Uses a pre-trained "Structure Proxy" neural network to identify
+    structural edges in Latent Space. High-frequency MSE constraint is applied
+    ONLY in structural regions (edges), while flat/texture regions are left free
+    for SWD to control.
+    
+    Architecture:
+    - Proxy: LearnableStructureExtractor (lightweight 4→1 CNN)
+    - Output: [0, 1] probability map (1=edge, 0=flat)
+    - Weight Map: base_weight + (prob * structure_weight)
+    - Result: High-constraint edges, low-constraint flats
+    
+    Effect:
+    - Keeps structure sharp and edge-aligned
+    - Allows SWD to paint freely in flat regions (no fighting)
+    - Frequency-domain interpretation: Only supervise low-freq at edges
+    
+    Critical dependency: 'structure_proxy.pt' must exist in working directory.
+    If missing, falls back to untrained proxy (random structure detection).
+    """
+    def __init__(self, proxy_path="structure_proxy.pt", base_weight=1.0, structure_weight=10.0, device='cuda'):
+        super().__init__()
+        self.base_weight = base_weight
+        self.structure_weight = structure_weight
+        self.device = device
+        
+        # Load Proxy
+        self.proxy = LearnableStructureExtractor().to(device)
+        
+        if os.path.exists(proxy_path):
+            state_dict = torch.load(proxy_path, map_location=device)
+            self.proxy.load_state_dict(state_dict)
+            print(f"✓ Loaded Structure Proxy from {proxy_path}")
+        else:
+            print(f"⚠️  WARNING: Proxy '{proxy_path}' not found! Structure lock will be random.")
+            
+        self.proxy.eval()
+        for p in self.proxy.parameters():
+            p.requires_grad = False
+
+    def forward(self, v_pred, x_0, x_target):
+        """
+        Args:
+            v_pred: [B, C, H, W] Predicted velocity field
+            x_0: [B, C, H, W] Starting noise (for computing v_target)
+            x_target: [B, C, H, W] Target state (content reference for structure detection)
+        
+        Returns:
+            loss: scalar weighted MSE loss
+        """
+        # 1. Ask Proxy: "Where is the structure in this target?"
+        with torch.no_grad():
+            # Output is [B, 1, H, W] probability map (Soft Mask)
+            # Values in [0, 1]: 1=strong edge, 0=flat region
+            structure_prob = self.proxy(x_target)
+            # Squeeze channel dimension to get [B, H, W] for weight_map computation
+            structure_prob = structure_prob.squeeze(1)  # [B, H, W]
+            
+        # 2. Build Frequency-Split Weight Map
+        # Structure areas (edges) -> High MSE weight (Lock structure tight)
+        # Flat areas -> Low MSE weight (Let SWD paint freely)
+        #
+        # weight_map = base_weight + (structure_prob * structure_weight)
+        # If structure_prob=0 (flat): weight = base_weight = 1.0 (low constraint)
+        # If structure_prob=1 (edge): weight = 1.0 + 10.0 = 11.0 (high constraint)
+        # This ratio ensures edges are 10x more constrained than flats
+        weight_map = self.base_weight + (structure_prob.unsqueeze(1) * self.structure_weight)  # [B, 1, H, W]
+        
+        # 3. Compute target velocity (OT direction)
+        v_target = x_target - x_0
+        
+        # 4. Weighted MSE (only penalize deviations in structural regions)
+        # Element-wise: weight_map * (v_pred - v_target)^2
+        # This forces the model to match v_target precisely at edges,
+        # but allows deviation in flat regions
+        loss = torch.mean(weight_map * (v_pred - v_target) ** 2)
+        
+        return loss
 
 if __name__ == "__main__":
     # Test loss functions (clean version)

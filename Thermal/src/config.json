@@ -62,7 +62,7 @@
     ]
   },
   "checkpoint": {
-    "save_dir": "../checkpoints-4_style-all_scales-fix_weights"
+    "save_dir": "../checkpoints-cnn_proxy"
   },
   "inference": {
     "num_steps": 15,
