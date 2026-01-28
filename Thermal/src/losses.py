@@ -125,10 +125,31 @@ class StructureAnchoredLoss(nn.Module):
         # - Errors > 0.1: Use linear (steady descent from plateau)
         weighted_diff = weight_map * (v_pred - v_target)
         
-        # Smooth L1 Loss: more robust to outliers than MSE at MSE=10
+        # Smooth L1 Loss: more robust to outliers than MSE
         loss = F.smooth_l1_loss(weighted_diff, torch.zeros_like(weighted_diff), beta=0.1, reduction='mean')
         
-        return self.weight * loss
+        return loss
+
+
+class TrajectoryMSELoss(nn.Module):
+    """
+    Trajectory Matching Loss (Flow Matching Objective).
+    Low-Pass MSE for structure-only supervision.
+    Only supervise LOW frequencies (structure/outline).
+    """
+    def __init__(self, weight=2.0, low_pass_kernel_size=5):
+        super().__init__()
+        self.weight = weight
+        self.kernel_size = low_pass_kernel_size
+    
+    def forward(self, v_pred, v_target):
+        # Low-Pass Filtering: extract low-frequency components
+        k = self.kernel_size
+        # Padding ensures output size matches input
+        v_pred_blur = F.avg_pool2d(v_pred, k, stride=1, padding=k//2)
+        v_target_blur = F.avg_pool2d(v_target, k, stride=1, padding=k//2)
+        
+        return F.mse_loss(v_pred_blur, v_target_blur)
 
 
 class VelocityRegularizationLoss(nn.Module):

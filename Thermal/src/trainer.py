@@ -9,8 +9,10 @@ from typing import Dict, Optional
 
 import numpy as np
 import torch
+import torch.nn.functional as F
 from PIL import Image
 from torch.utils.data import DataLoader
+from torch.optim.lr_scheduler import CosineAnnealingLR, LinearLR, SequentialLR
 
 from checkpoint import find_latest_checkpoint, load_checkpoint, save_checkpoint
 from dataset import LatentDataset
@@ -20,11 +22,25 @@ from losses import (
     StructureAnchoredLoss,
     VelocityRegularizationLoss,
     VelocitySmoothnessLoss,
+    TrajectoryMSELoss,
 )
 from model import LGTUNet, count_parameters
 from physics import generate_latent, get_dynamic_epsilon, integrate_ode, invert_latent
 
 logger = logging.getLogger(__name__)
+
+
+class RunningMean:
+    """Simple running mean for adaptive loss normalization."""
+    def __init__(self, momentum=0.99, device='cuda'):
+        self.mean = torch.tensor(1.0, device=device)
+        self.momentum = momentum
+
+    def update(self, val):
+        # Detach to prevent gradient tracking on the normalizer itself
+        val_detached = val.detach()
+        self.mean = self.momentum * self.mean + (1 - self.momentum) * val_detached
+        return max(self.mean.item(), 1e-6)  # Avoid division by zero
 
 
 class LGTTrainer:
@@ -35,6 +51,8 @@ class LGTTrainer:
         self.device = device
         self.config_path = Path(config_path) if config_path is not None else None
 
+        # 🔥 Infra Optimization: Enable Tensor Cores (Ampere+)
+        torch.set_float32_matmul_precision('high')
         torch.backends.cudnn.benchmark = True
 
         self.model = LGTUNet(
@@ -45,7 +63,7 @@ class LGTTrainer:
             num_styles=config['model']['num_styles'],
             num_encoder_blocks=config['model']['num_encoder_blocks'],
             num_decoder_blocks=config['model']['num_decoder_blocks'],
-        ).to(device)
+        ).to(device, memory_format=torch.channels_last)  # 🔥 Infra Optimization: Channels Last
         self.model.compute_avg_style_embedding()
 
         if config['training'].get('use_compile', False):
@@ -67,21 +85,24 @@ class LGTTrainer:
         ).to(device)
 
         # 找到这一段（约 53 行）并替换：
-
         # ✅ 修复：优先读取 'w_mse'，并将默认值降为 1.0
-        structure_weight = config['loss'].get('w_mse') or config['loss'].get('structure_weight', 1.0)
-        
+        self.structure_weight = config['loss'].get('w_mse') or config['loss'].get('structure_weight', 1.0)
+
         # ✅ 修复：将 edge_boost 默认值从 9.0 降为 1.5
         edge_boost = config['loss'].get('edge_boost', 1.5)
-        
+
         self.struc_loss = StructureAnchoredLoss(
-            weight=structure_weight,
+            weight=1.0,  # 🔥 Note: Weight is now applied in trainer, this is a dummy value
             edge_boost=edge_boost,
         ).to(device)
-        
+
         logger.info(
-            f"✓ Laplacian Structure Lock enabled (weight={structure_weight}, edge_boost={edge_boost})"
+            f"✓ Laplacian Structure Lock enabled (weight={self.structure_weight}, edge_boost={edge_boost})"
         )
+
+        self.layout_weight = config['loss'].get('w_layout', 2.0)
+        self.layout_loss = TrajectoryMSELoss(weight=1.0).to(device)  # 🔥 Note: Weight is now applied in trainer
+        logger.info(f"✓ Layout Preservation enabled (weight={self.layout_weight})")
 
         vel_smooth_weight = config['loss'].get('vel_smooth_weight', 0.2)
         self.vel_smooth_loss = VelocitySmoothnessLoss(weight=vel_smooth_weight).to(device)
@@ -96,23 +117,49 @@ class LGTTrainer:
         else:
             logger.info("Velocity Regularization disabled")
 
+        self.num_epochs = config['training']['num_epochs']
+
         self.optimizer = torch.optim.AdamW(
             self.model.parameters(),
             lr=config['training']['learning_rate'],
             weight_decay=config['training'].get('weight_decay', 1e-5),
             betas=(0.9, 0.999),
+            fused=False,  # 🔥 Fix: Fused AdamW conflicts with GradScaler.unscale_
         )
 
-        self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+        # 🔥 Scheduler Strategy: Linear Warmup -> Cosine Decay
+        # Replaces manual warmup loop for a global, holistic strategy
+        if 'warmup_epochs' in config['training']:
+            self.warmup_epochs = config['training']['warmup_epochs']
+        else:
+            p_cfg = config['training'].get('phased_training', {})
+            self.warmup_epochs = max(1, int(self.num_epochs * p_cfg.get('lr_warmup_ratio', 0.05)))
+        min_lr = config['training'].get('min_learning_rate', 1e-6)
+
+        scheduler_warmup = LinearLR(
+            self.optimizer, start_factor=0.1, end_factor=1.0, total_iters=self.warmup_epochs
+        )
+        scheduler_cosine = CosineAnnealingLR(
             self.optimizer,
-            T_max=config['training']['num_epochs'],
-            eta_min=config['training'].get('min_learning_rate', 1e-6),
+            T_max=max(1, self.num_epochs - self.warmup_epochs),
+            eta_min=min_lr
+        )
+        self.scheduler = SequentialLR(
+            self.optimizer,
+            schedulers=[scheduler_warmup, scheduler_cosine],
+            milestones=[self.warmup_epochs]
         )
 
         self.use_amp = config['training'].get('use_amp', True)
         self.scaler = torch.amp.GradScaler(enabled=self.use_amp)
 
-        self.num_epochs = config['training']['num_epochs']
+        # 🔥 Adaptive Loss Normalization (Self-Learning Scales)
+        self.use_adaptive_norm = config['training'].get('use_adaptive_loss_norm', False)
+        if self.use_adaptive_norm:
+            self.norm_mse = RunningMean(device=device)
+            self.norm_style = RunningMean(device=device)
+            logger.info("✓ Adaptive Loss Normalization enabled (Running Mean Scaling)")
+
         self.label_drop_prob = config['training'].get('label_drop_prob', 0.1)
         self.use_avg_for_uncond = config['training'].get('use_avg_style_for_uncond', True)
         self.accumulation_steps = config['training'].get('accumulation_steps', 1)
@@ -158,7 +205,7 @@ class LGTTrainer:
         self.log_dir.mkdir(exist_ok=True)
         self.log_file = self.log_dir / f"training_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
         with open(self.log_file, 'w') as f:
-            f.write('epoch,loss_total,loss_style_swd,loss_style_swd_weighted,loss_mse,loss_mse_weighted,learning_rate,epoch_time\n')
+            f.write('epoch,loss_total,loss_style_swd,loss_style_swd_weighted,loss_mse,loss_mse_weighted,loss_layout,loss_mse_raw,learning_rate,epoch_time\n')
 
         self.start_epoch = 1
         self._maybe_resume(config['training'].get('resume_checkpoint'))
@@ -201,6 +248,11 @@ class LGTTrainer:
             self.global_step = resume_info.get('global_step', 0)
         except Exception as exc:  # pragma: no cover - best effort
             logger.error(f"Failed to resume from {latest_ckpt}: {exc}")
+
+        # Note: We rely on the loaded scheduler state to determine the correct LR.
+        # Forcing LR to config['learning_rate'] here would reset it to max_lr,
+        # which is incorrect if resuming in the middle of training.
+        logger.info(f"✓ Resumed training state. Current LR will be determined by scheduler.")
 
     def build_style_indices_cache(self, dataset: LatentDataset) -> None:
         logger.info("Building style indices cache...")
@@ -249,13 +301,48 @@ class LGTTrainer:
         if global_step % 250 == 0 and global_step < self.alpha_warmup_steps:
             logger.debug(f"Alpha warmup: step {global_step}/{self.alpha_warmup_steps}, alpha={current_alpha:.4f}")
 
-    def compute_energy_loss(self, batch: Dict, epoch: int) -> Dict[str, torch.Tensor]:
+    def _get_thermodynamic_schedule(self, epoch: int):
+        """
+        🔥 Thermodynamic Cosine Schedule (Global & Smooth)
+        
+        Replaces the crude piecewise linear schedule with physics-inspired cosine curves.
+        - Structure (Solid Phase): Cosine Decay (High -> Low)
+        - Style (Liquid Phase): Cosine Warmup (Low -> High)
+        """
+        p_cfg = self.config['training'].get('phased_training', {})
+        if not p_cfg:
+            return 1.0, 1.0, 1.0
+
+        # Normalized time t in [0, 1]
+        t = min(epoch / self.num_epochs, 1.0)
+        
+        # 1. Structure Schedule: Cosine Decay
+        # Starts strong to lock content, decays to allow artistic deformation
+        mse_start = p_cfg.get('m_mse_start', 2.0)
+        mse_end = p_cfg.get('m_mse_end', 0.5)
+        m_mse = mse_end + 0.5 * (mse_start - mse_end) * (1 + np.cos(t * np.pi))
+        
+        # Layout follows MSE but usually stays a bit higher to keep composition
+        m_layout = m_mse * p_cfg.get('layout_ratio', 0.8)
+
+        # 2. Style Schedule: Cosine Warmup
+        # Starts weak to prevent noise overfitting, rises to dominate late training
+        style_start = p_cfg.get('m_style_start', 0.1)
+        style_end = p_cfg.get('m_style_end', 2.0)
+        m_style = style_start + 0.5 * (style_end - style_start) * (1 - np.cos(t * np.pi))
+
+        return m_mse, m_layout, m_style
+
+    def compute_energy_loss(self, batch: Dict, epoch: int, multipliers: tuple = (1.0, 1.0, 1.0)) -> Dict[str, torch.Tensor]:
         device = self.device
-        latent = batch['latent'].to(device, non_blocking=True)
+        m_mse, m_layout, m_style = multipliers
+
+        # 🔥 Infra Optimization: Channels Last for faster Convolutions
+        latent = batch['latent'].to(device, non_blocking=True, memory_format=torch.channels_last)
         style_id = batch['style_id'].to(device, non_blocking=True)
         latent_deformed = batch.get('latent_deformed')
         if latent_deformed is not None:
-            latent_deformed = latent_deformed.to(device, non_blocking=True)
+            latent_deformed = latent_deformed.to(device, non_blocking=True, memory_format=torch.channels_last)
 
         b = latent.shape[0]
         indices = torch.randperm(b, device=device)
@@ -305,30 +392,53 @@ class LGTTrainer:
             v_target = x_target_noisy - x0  # [B, C, H, W] 位移矢量
 
         # 从config读取structure_warmup_epochs，默认150个epoch缓慢施加结构锁，之后保持全强度
-        structure_warmup = self.config['training'].get('structure_warmup_epochs', 150)
-        loss_mse = self.struc_loss(v_pred, v_target, latent, current_epoch=epoch, total_warmup_epochs=structure_warmup)
+        structure_warmup = self.config['training'].get('structure_warmup_epochs') or self.config['loss'].get('structure_warmup_epochs', 150)
+        loss_mse_unweighted = self.struc_loss(v_pred, v_target, latent, current_epoch=epoch, total_warmup_epochs=structure_warmup)
+        
+        # Adaptive Normalization for MSE
+        norm_factor_mse = self.norm_mse.update(loss_mse_unweighted) if self.use_adaptive_norm else 1.0
+        loss_mse = (self.structure_weight * m_mse / norm_factor_mse) * loss_mse_unweighted
 
-        x_1 = integrate_ode(
-            model=self.model,
-            x_t=x_t,
-            t_start=t,
-            style_id=style_id_tgt,
-            steps=self.ode_steps,
-            use_checkpoint=self.config['training'].get('use_gradient_checkpointing', True),
-            use_amp=self.use_amp,
-            amp_dtype=torch.bfloat16,
-            training=self.model.training,
-        )
+        # Layout Loss (Low-frequency structure)
+        loss_layout_unweighted = self.layout_loss(v_pred, v_target)
+        loss_layout = self.layout_weight * m_layout * loss_layout_unweighted
+        loss_mse_raw = F.mse_loss(v_pred, v_target).detach()
+
+        # 🔥 Optimization: Reuse v_pred if steps=1 (Compute Reuse)
+        # If we are conditional (not dropping label), v_pred IS the velocity we want.
+        # Saves 1 full forward pass -> ~2x speedup for this step.
+        if self.ode_steps == 1 and not drop_label:
+            # Euler integration: x1 = xt + v * (1-t)
+            dt = (1.0 - t).view(-1, 1, 1, 1)
+            x_1 = x_t + v_pred * dt
+        else:
+            x_1 = integrate_ode(
+                model=self.model,
+                x_t=x_t,
+                t_start=t,
+                style_id=style_id_tgt,
+                steps=self.ode_steps,
+                use_checkpoint=self.config['training'].get('use_gradient_checkpointing', True),
+                use_amp=self.use_amp,
+                amp_dtype=torch.bfloat16,
+                training=self.model.training,
+            )
+            
         loss_dict = self.energy_loss(x_1, style_latents, style_ids=style_id_tgt)
 
         style_weight_batch = self.style_weights[style_id_tgt].mean()
         loss_smooth = self.vel_smooth_loss(v_pred)
 
-        loss_style_weighted = style_weight_batch * self.energy_loss.w_style * loss_dict['style_swd']
+        # Adaptive Normalization for Style
+        norm_factor_style = self.norm_style.update(loss_dict['style_swd']) if self.use_adaptive_norm else 1.0
+        
+        loss_style_weighted = style_weight_batch * (self.energy_loss.w_style * m_style / norm_factor_style) * loss_dict['style_swd']
         loss_dict['style_swd_weighted'] = loss_style_weighted
         loss_dict['mse_weighted'] = loss_mse
+        loss_dict['layout'] = loss_layout
+        loss_dict['mse_raw'] = loss_mse_raw
 
-        total = loss_style_weighted + loss_mse + loss_smooth
+        total = loss_style_weighted + loss_mse + loss_smooth + loss_layout
 
         if self.use_velocity_reg and self.vel_reg_loss is not None:
             loss_reg = self.vel_reg_loss(v_pred)
@@ -353,6 +463,8 @@ class LGTTrainer:
         total_style_swd_weighted = 0.0
         total_mse = 0.0
         total_mse_weighted = 0.0
+        total_layout = 0.0
+        total_mse_raw = 0.0
         total_smooth = 0.0
         total_vel_reg = 0.0
         num_batches = 0
@@ -366,11 +478,15 @@ class LGTTrainer:
         pbar = tqdm(dataloader, desc=f"Epoch {epoch}/{self.num_epochs}", disable=not use_tqdm, leave=use_tqdm)
         self.optimizer.zero_grad(set_to_none=True)
 
+        # 🔥 使用新的热力学调度器
+        multipliers = self._get_thermodynamic_schedule(epoch)
+        
+
         for step_idx, batch in enumerate(pbar, start=1):
             torch.compiler.cudagraph_mark_step_begin()
 
             with torch.amp.autocast('cuda', enabled=self.use_amp, dtype=torch.bfloat16):
-                loss_dict = self.compute_energy_loss(batch, epoch)
+                loss_dict = self.compute_energy_loss(batch, epoch, multipliers=multipliers)
                 loss = loss_dict['total'] / self.accumulation_steps
 
             self.scaler.scale(loss).backward()
@@ -391,6 +507,8 @@ class LGTTrainer:
             total_style_swd_weighted += loss_dict['style_swd_weighted'].item()
             total_mse += loss_dict['mse'].item()
             total_mse_weighted += loss_dict['mse_weighted'].item()
+            total_layout += loss_dict['layout'].item()
+            total_mse_raw += loss_dict['mse_raw'].item()
             if 'smooth' in loss_dict:
                 total_smooth += loss_dict['smooth'].item()
             if 'velocity_reg' in loss_dict:
@@ -404,6 +522,7 @@ class LGTTrainer:
                     'swd*w': f"{loss_dict['style_swd_weighted'].item():.4f}",
                     'mse': f"{loss_dict['mse'].item():.4f}",
                     'mse*w': f"{loss_dict['mse_weighted'].item():.4f}",
+                    'mse_raw': f"{loss_dict['mse_raw'].item():.4f}",
                     'α': f"{self._get_current_alpha():.3f}",
                 }
                 pbar.set_postfix(postfix_dict)
@@ -413,6 +532,8 @@ class LGTTrainer:
         avg_style_swd_weighted = total_style_swd_weighted / max(num_batches, 1)
         avg_mse = total_mse / max(num_batches, 1)
         avg_mse_weighted = total_mse_weighted / max(num_batches, 1)
+        avg_layout = total_layout / max(num_batches, 1)
+        avg_mse_raw = total_mse_raw / max(num_batches, 1)
         avg_smooth = total_smooth / max(num_batches, 1)
         avg_vel_reg = total_vel_reg / max(num_batches, 1) if self.use_velocity_reg else 0.0
 
@@ -422,6 +543,8 @@ class LGTTrainer:
             'style_swd_weighted': avg_style_swd_weighted,
             'mse': avg_mse,
             'mse_weighted': avg_mse_weighted,
+            'layout': avg_layout,
+            'mse_raw': avg_mse_raw,
             'smooth': avg_smooth,
             'num_batches': num_batches,
         }
@@ -635,7 +758,8 @@ class LGTTrainer:
         with open(self.log_file, 'a') as f:
             f.write(
                 f"{epoch},{metrics['loss']:.6f},{metrics['style_swd']:.6f},{metrics['style_swd_weighted']:.6f},"
-                f"{metrics['mse']:.6f},{metrics['mse_weighted']:.6f},{current_lr:.2e},{metrics.get('epoch_time', 0.0):.2f}\n"
+                f"{metrics['mse']:.6f},{metrics['mse_weighted']:.6f},{metrics['layout']:.6f},{metrics['mse_raw']:.6f},"
+                f"{current_lr:.2e},{metrics.get('epoch_time', 0.0):.2f}\n"
             )
 
         epoch_log_path = self.log_dir / 'epoch_logs.jsonl'
@@ -647,6 +771,8 @@ class LGTTrainer:
             'style_swd_weighted': float(metrics['style_swd_weighted']),
             'mse': float(metrics['mse']),
             'mse_weighted': float(metrics['mse_weighted']),
+            'layout': float(metrics['layout']),
+            'mse_raw': float(metrics['mse_raw']),
             'learning_rate': current_lr,
             'epoch_time': metrics.get('epoch_time', 0.0),
             'num_batches': metrics.get('num_batches'),

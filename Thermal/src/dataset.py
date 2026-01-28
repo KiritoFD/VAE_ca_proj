@@ -107,7 +107,7 @@ class LatentDataset(Dataset):
         
         # 虚拟长度：保证每个风格都充分覆盖
         max_len = max(len(x) for x in self.style_indices.values())
-        self.virtual_len = max_len * num_styles * num_styles
+        self.virtual_len = max_len * num_styles * num_styles * 2
 
     def set_epoch(self, epoch: int):
         """外部调用：更新增强强度"""
