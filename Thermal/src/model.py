@@ -630,7 +630,7 @@ class StyleGate(nn.Module):
         # Physics: Maxwell's Demon starts asleep - must learn to control entropy flow.
         with torch.no_grad():
             self.gate_mlp[-2].weight.zero_()
-            nn.init.constant_(self.gate_mlp[-2].bias, -3.0)  # Changed from 0.0
+            nn.init.constant_(self.gate_mlp[-2].bias, 0.0)  # Changed from 0.0
     
     def forward(self, x, style_emb):
         """

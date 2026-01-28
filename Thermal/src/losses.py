@@ -16,7 +16,11 @@ All losses operate in FP32 for numerical stability.
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import os# 🔥 New import for Structure Lock
+import os
+from typing import Dict, Optional
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class StructureAnchoredLoss(nn.Module):
@@ -371,101 +375,260 @@ class MultiScaleSWDLoss(nn.Module):
         return total_loss, loss_dict
 
 
-class TrajectoryMSELoss(nn.Module):
-    """
-    Trajectory Matching Loss (Flow Matching Objective) - CORRECTED VERSION.
-    
-    🔥 CRITICAL FIX: Target (v_target) is now provided by Scheduler, not computed locally.
-    
-    Low-Pass MSE for structure-only supervision.
-    Only supervise LOW frequencies (structure/outline).
-    HIGH frequencies are left free for SWD to control (texture/style).
-    
-    This is the 'Sculptor' component in Hybrid Dynamics:
-    - Sculpture (MSE, low-freq): Rough form, outlines, large color regions
-    - Painting (SWD, high-freq): Texture, brushstrokes, fine details
-    """
-    def __init__(self, weight=5.0, low_pass_kernel_size=5):
-        super().__init__()
-        self.weight = weight
-        self.kernel_size = low_pass_kernel_size  # Size of avg_pool kernel
-    
-    def forward(self, v_pred, v_target):
-        """
-        Args:
-            v_pred: [B, C, H, W] Predicted velocity field from model
-            v_target: [B, C, H, W] Target velocity (from noise scheduler)
-                      🔥 CRITICAL: This MUST come from noise_scheduler.get_*(),
-                      NOT computed locally!
-        
-        Returns:
-            loss: scalar MSE trajectory loss (low-frequency only)
-        """
-        # Low-Pass Filtering: extract low-frequency components
-        # This makes MSE supervision "blurry" - it only cares about structure,
-        # not texture details.
-        k = self.kernel_size
-        v_pred_blur = F.avg_pool2d(v_pred, k, stride=1, padding=k//2)
-        v_target_blur = F.avg_pool2d(v_target, k, stride=1, padding=k//2)
-        
-        # MSE only on blurred (low-frequency) signals
-        return self.weight * F.mse_loss(v_pred_blur, v_target_blur)
-
-
 class GeometricFreeEnergyLoss(nn.Module):
     """
-    Simplified Energy Loss - Style (SWD) Only.
+    [LGT-X Pro] Optimized Multi-Style SWD Loss with Style-Indexed Cache
     
-    Clean version: MSE handles structure + brightness, SWD handles texture only.
-    Content Loss (SSM/NML) completely removed.
+    🔥 Key Innovation: Style Look-Up Table (LUT)
+    - Pre-compute sorted projections for each style during initialization
+    - During training: O(1) target retrieval via index_select, only Input needs sorting
+    - 4070 Friendly: Fixed LUT is read-only, better L2 cache utilization
     
-    Physics principle:
-    - MSE: Supervisor (high-freq clarity, source brightness preservation)
-    - SWD: Artist (texture/brushstroke matching)
+    Performance:
+    - Traditional: Sort Input + Sort Target = 2 × O(N log N)
+    - LUT-based:  Sort Input only = O(N log N) + O(1) LUT retrieval
+    - Memory trade-off: ~10-50MB LUT for significant speedup
     
-    No overlap, no conflicts.
+    Architecture:
+    - Fixed orthogonal projections per scale
+    - Pre-sorted style distributions stored in GPU buffers
+    - Dynamic style routing during forward pass via style_ids
     """
     
     def __init__(
         self,
-        w_style=60.0,
-        swd_scales=[1, 3, 7],
-        swd_scale_weights=[1.0, 1.0, 1.0],
+        num_styles=4,
+        w_style=40.0,
+        swd_scales=[1, 3, 5, 7, 15],
+        swd_scale_weights=[1.0, 5.0, 5.0, 5.0, 3.0],
         num_projections=64,
         max_samples=4096,
         **kwargs  # Accept but ignore deprecated parameters for backward compatibility
     ):
         super().__init__()
         
+        self.num_styles = num_styles
         self.w_style = w_style
+        self.scales = swd_scales
+        self.scale_weights = swd_scale_weights
+        self.num_projections = num_projections
+        self.max_samples = max_samples
         
-        # Style potential: Multi-Scale SWD (mean-normalized)
-        self.swd_loss = MultiScaleSWDLoss(
-            scales=swd_scales,
-            scale_weights=swd_scale_weights,
-            num_projections=num_projections,
-            max_samples=max_samples,
-            use_fp32=True
+        # Register initialization flag
+        self.register_buffer('_is_initialized', torch.tensor(False, dtype=torch.bool))
+        
+        logger.info(
+            f"🎯 GeometricFreeEnergyLoss initialized (Multi-Style Mode)\n"
+            f"   Scales: {swd_scales}\n"
+            f"   Styles: {num_styles} | Max Samples: {max_samples}\n"
+            f"   Projections: {num_projections} | Memory: ~{self._estimate_memory():.1f}MB"
         )
     
-    def forward(self, x_pred, x_style):
+    def _estimate_memory(self) -> float:
+        """Estimate GPU memory usage for LUT in MB"""
+        # 每个尺度的 LUT: [num_styles, max_samples, num_projections]
+        bytes_per_scale = self.num_styles * self.max_samples * self.num_projections * 4  # float32
+        total_bytes = bytes_per_scale * len(self.scales)
+        
+        # 投影矩阵: [num_projections, C]，其中 C 因尺度而异
+        # 粗估：4 + 4 + 4 个通道（缩放后）
+        proj_bytes = self.num_projections * (4 + 4 + 4) * 4
+        
+        return (total_bytes + proj_bytes) / (1024 * 1024)
+    
+    def _get_orthogonal_projections(self, n_dims: int, n_projections: int, device: torch.device) -> torch.Tensor:
+        """使用 QR 分解生成正交投影矩阵（比随机高斯更稳定）"""
+        # 生成高斯随机矩阵并进行 QR 分解
+        mat = torch.randn(n_dims, n_projections, device=device, dtype=torch.float32)
+        q, _ = torch.linalg.qr(mat)
+        
+        # 返回 [n_projections, n_dims] 形状用于矩阵乘法
+        return q[:, :n_projections].t()  # [n_projections, n_dims]
+    
+    def initialize_cache(self, style_latents_dict: Dict[int, torch.Tensor], device: torch.device) -> None:
         """
+        初始化 Style LUT 缓存。必须在训练开始前调用一次。
+        
         Args:
-            x_pred: [B, 4, H, W] predicted terminal state
-            x_style: [B, 4, H, W] style reference
+            style_latents_dict: 字典 {style_id: latent_tensor [B, 4, H, W]}
+                               包含每个风格的代表性样本
+            device: 目标设备（通常是 'cuda'）
+        
+        Example:
+            swd_loss = GeometricFreeEnergyLoss(num_styles=4)
+            style_dict = {0: monet_latent, 1: photo_latent, 2: vangogh_latent, 3: cezanne_latent}
+            swd_loss.initialize_cache(style_dict, device='cuda')
+        """
+        if self._is_initialized:
+            logger.info("⚠️ Cache already initialized. Skipping re-initialization.")
+            return
+        
+        logger.info("🔥 Pre-computing SWD Style Cache (this may take a minute)...")
+        
+        with torch.no_grad():
+            for scale_idx, scale in enumerate(self.scales):
+                logger.info(f"  Processing scale {scale}×{scale} ({scale_idx + 1}/{len(self.scales)})...")
+                
+                # 1. 确定当前尺度的通道数（探测一个样本）
+                sample_latent = style_latents_dict[0].to(device, non_blocking=True)
+                
+                # 缩放采样（模拟多尺度）
+                if scale > 1:
+                    sample_latent = F.interpolate(sample_latent, scale_factor=1.0 / scale, mode='bilinear', align_corners=False)
+                
+                c_dim = sample_latent.shape[1]  # 通常是 4
+                
+                # 2. 生成固定的正交投影矩阵（一次性计算）
+                projections = self._get_orthogonal_projections(c_dim, self.num_projections, device)
+                self.register_buffer(f'_proj_{scale}', projections, persistent=False)
+                
+                # 3. 为每个风格构建 LUT 项
+                lut_list = []
+                
+                for style_id in range(self.num_styles):
+                    assert style_id in style_latents_dict, f"Style {style_id} not found in input dict"
+                    
+                    style_latent = style_latents_dict[style_id].to(device, non_blocking=True)
+                    
+                    # 缩放到当前尺度
+                    if scale > 1:
+                        style_latent = F.interpolate(style_latent, scale_factor=1.0 / scale, mode='bilinear', align_corners=False)
+                    
+                    # 展开为像素级特征：[B, C, H, W] → [N, C]
+                    b, c, h, w = style_latent.shape
+                    style_flat = style_latent.view(b, c, -1).permute(0, 2, 1).reshape(-1, c)  # [B*H*W, C]
+                    
+                    # 采样到固定大小（保证 LUT 维度固定）
+                    n_pixels = style_flat.shape[0]
+                    if n_pixels > self.max_samples:
+                        idx = torch.randperm(n_pixels, device=device)[:self.max_samples]
+                        style_flat = style_flat[idx]
+                    else:
+                        # 如果样本不足，进行循环复制填充
+                        repeat_times = (self.max_samples // max(n_pixels, 1)) + 1
+                        style_flat = style_flat.repeat(repeat_times, 1)[:self.max_samples]
+                    
+                    # 投影：[max_samples, C] @ [C, num_projections] → [max_samples, num_projections]
+                    proj_style = torch.matmul(style_flat, projections.t())
+                    
+                    # 排序（这是 LUT 初始化时的唯一开销，之后就不再做）
+                    proj_style_sorted, _ = torch.sort(proj_style, dim=0)
+                    
+                    lut_list.append(proj_style_sorted)
+                
+                # 4. 堆叠所有风格的排序结果：[num_styles, max_samples, num_projections]
+                lut_tensor = torch.stack(lut_list, dim=0)
+                self.register_buffer(f'_lut_{scale}', lut_tensor, persistent=False)
+                
+                logger.info(f"    ✓ Scale {scale}: LUT shape {lut_tensor.shape}")
+        
+        self._is_initialized.fill_(True)
+        logger.info("✅ SWD Cache Initialization Complete")
+    
+    def forward(self, x_pred: torch.Tensor, x_style: torch.Tensor, style_ids: Optional[torch.Tensor] = None) -> Dict[str, torch.Tensor]:
+        """
+        计算多尺度 SWD 损失（使用预计算的 Style LUT）
+        
+        Args:
+            x_pred: [B, 4, H, W] 模型预测的终端状态
+            x_style: [B, 4, H, W] 风格参考（用于旧式直接计算，仅在未初始化缓存时使用）
+            style_ids: [B] 每个样本的目标风格 ID（与 LUT 索引对应）
         
         Returns:
-            loss_dict: dictionary with total loss and components
+            loss_dict: {
+                'style_swd': scalar 总 SWD 损失,
+                'swd_scale_1': 尺度 1 的损失,
+                'swd_scale_3': 尺度 3 的损失,
+                ...
+            }
         """
-        # Compute style potential only (texture matching)
-        style_potential, swd_dict = self.swd_loss(x_pred, x_style)
+        # Fallback：如果没有初始化缓存，降级到旧式多尺度 SWD（兼容性保证）
+        if not self._is_initialized:
+            logger.warning(
+                "⚠️ Style LUT not initialized. Falling back to traditional SWD "
+                "(slower, but backward compatible). Call loss.initialize_cache() before training."
+            )
+            return self._forward_traditional(x_pred, x_style)
+        
+        # 推理路径：使用 LUT 加速
+        device = x_pred.device
+        dtype = x_pred.dtype
+        
+        total_loss = torch.tensor(0.0, device=device, dtype=dtype)
+        loss_dict = {}
+        
+        # 如果没有提供 style_ids，假设所有样本都是第一个风格（用于评估）
+        if style_ids is None:
+            style_ids = torch.zeros(x_pred.shape[0], device=device, dtype=torch.long)
+        
+        with torch.autocast('cuda', enabled=False):  # 强制 FP32 以保证数值稳定性
+            x_pred_fp32 = x_pred.float()
+            
+            for scale_idx, scale in enumerate(self.scales):
+                # 1. 尺度缩放
+                if scale > 1:
+                    x_scaled = F.interpolate(x_pred_fp32, scale_factor=1.0 / scale, mode='bilinear', align_corners=False)
+                else:
+                    x_scaled = x_pred_fp32
+                
+                b, c, h, w = x_scaled.shape
+                
+                # 2. 读取固定投影矩阵
+                projections = getattr(self, f'_proj_{scale}')  # [num_projections, C]
+                
+                # 3. 投影 Input（每次 Forward 都要排序 Input）
+                x_flat = x_scaled.view(b, c, -1).permute(0, 2, 1)  # [B, H*W, C]
+                
+                n_pixels = x_flat.shape[1]
+                if n_pixels > self.max_samples:
+                    # 随机采样（保持随机性以增强数据多样性）
+                    idx = torch.randperm(n_pixels, device=device)[:self.max_samples]
+                    x_sampled = x_flat[:, idx, :]  # [B, max_samples, C]
+                else:
+                    # 如果像素不足，填充到 max_samples
+                    pad_size = self.max_samples - n_pixels
+                    x_sampled = F.pad(x_flat, (0, 0, 0, pad_size), mode='constant', value=0)
+                
+                # 投影：[B, max_samples, C] @ [C, num_projections] → [B, max_samples, num_projections]
+                proj_input = torch.matmul(x_sampled, projections.t())  # [B, max_samples, num_projections]
+                
+                # 4. 排序 Input（唯一的排序操作）
+                proj_input_sorted, _ = torch.sort(proj_input, dim=1)
+                
+                # 5. 从 LUT 中检索对应风格的目标分布（这是 O(1) 操作）
+                lut = getattr(self, f'_lut_{scale}')  # [num_styles, max_samples, num_projections]
+                
+                # index_select：高效地从 LUT 中根据 style_id 提取目标
+                # [num_styles, max_samples, num_projections] → [B, max_samples, num_projections]
+                proj_target_sorted = lut.index_select(0, style_ids)
+                
+                # 6. 计算 SWD 损失（L2 距离）
+                scale_loss = F.mse_loss(proj_input_sorted.float(), proj_target_sorted.float())
+                
+                total_loss = total_loss + self.scale_weights[scale_idx] * scale_loss
+                loss_dict[f'swd_scale_{scale}'] = scale_loss.detach()
+        
+        loss_dict['style_swd'] = total_loss
+        
+        return loss_dict
+    
+    def _forward_traditional(self, x_pred: torch.Tensor, x_style: torch.Tensor) -> Dict[str, torch.Tensor]:
+        """降级方案：不使用 LUT，直接计算（兼容性保证）"""
+        # 使用原来的 MultiScaleSWDLoss 进行计算
+        if not hasattr(self, '_fallback_loss'):
+            self._fallback_loss = MultiScaleSWDLoss(
+                scales=self.scales,
+                scale_weights=self.scale_weights,
+                num_projections=self.num_projections,
+                max_samples=self.max_samples,
+                use_fp32=True
+            ).to(x_pred.device)
+        
+        style_potential, swd_dict = self._fallback_loss(x_pred, x_style)
         
         result = {
-            'total': self.w_style * style_potential,
-            'style_swd': style_potential
+            'style_swd': style_potential,
         }
-        
-        # Add per-scale losses
         result.update(swd_dict)
         
         return result
@@ -508,88 +671,6 @@ class VelocitySmoothnessLoss(nn.Module):
         return self.weight * loss
 
 
-class DistilledStructureLoss(nn.Module):
-    """
-    Distilled Structure Loss (The "Structure Anchor").
-    
-    Physics: Uses a pre-trained "Structure Proxy" neural network to identify
-    structural edges in Latent Space. High-frequency MSE constraint is applied
-    ONLY in structural regions (edges), while flat/texture regions are left free
-    for SWD to control.
-    
-    Architecture:
-    - Proxy: LearnableStructureExtractor (lightweight 4→1 CNN)
-    - Output: [0, 1] probability map (1=edge, 0=flat)
-    - Weight Map: base_weight + (prob * structure_weight)
-    - Result: High-constraint edges, low-constraint flats
-    
-    Effect:
-    - Keeps structure sharp and edge-aligned
-    - Allows SWD to paint freely in flat regions (no fighting)
-    - Frequency-domain interpretation: Only supervise low-freq at edges
-    
-    Critical dependency: 'structure_proxy.pt' must exist in working directory.
-    If missing, falls back to untrained proxy (random structure detection).
-    """
-    def __init__(self, proxy_path="structure_proxy.pt", base_weight=1.0, structure_weight=10.0, device='cuda'):
-        super().__init__()
-        self.base_weight = base_weight
-        self.structure_weight = structure_weight
-        self.device = device
-        
-        # Load Proxy
-        self.proxy = LearnableStructureExtractor().to(device)
-        
-        if os.path.exists(proxy_path):
-            state_dict = torch.load(proxy_path, map_location=device)
-            self.proxy.load_state_dict(state_dict)
-            print(f"✓ Loaded Structure Proxy from {proxy_path}")
-        else:
-            print(f"⚠️  WARNING: Proxy '{proxy_path}' not found! Structure lock will be random.")
-            
-        self.proxy.eval()
-        for p in self.proxy.parameters():
-            p.requires_grad = False
-
-    def forward(self, v_pred, x_0, x_target):
-        """
-        Args:
-            v_pred: [B, C, H, W] Predicted velocity field
-            x_0: [B, C, H, W] Starting noise (for computing v_target)
-            x_target: [B, C, H, W] Target state (content reference for structure detection)
-        
-        Returns:
-            loss: scalar weighted MSE loss
-        """
-        # 1. Ask Proxy: "Where is the structure in this target?"
-        with torch.no_grad():
-            # Output is [B, 1, H, W] probability map (Soft Mask)
-            # Values in [0, 1]: 1=strong edge, 0=flat region
-            structure_prob = self.proxy(x_target)
-            # Squeeze channel dimension to get [B, H, W] for weight_map computation
-            structure_prob = structure_prob.squeeze(1)  # [B, H, W]
-            
-        # 2. Build Frequency-Split Weight Map
-        # Structure areas (edges) -> High MSE weight (Lock structure tight)
-        # Flat areas -> Low MSE weight (Let SWD paint freely)
-        #
-        # weight_map = base_weight + (structure_prob * structure_weight)
-        # If structure_prob=0 (flat): weight = base_weight = 1.0 (low constraint)
-        # If structure_prob=1 (edge): weight = 1.0 + 10.0 = 11.0 (high constraint)
-        # This ratio ensures edges are 10x more constrained than flats
-        weight_map = self.base_weight + (structure_prob.unsqueeze(1) * self.structure_weight)  # [B, 1, H, W]
-        
-        # 3. Compute target velocity (OT direction)
-        v_target = x_target - x_0
-        
-        # 4. Weighted MSE (only penalize deviations in structural regions)
-        # Element-wise: weight_map * (v_pred - v_target)^2
-        # This forces the model to match v_target precisely at edges,
-        # but allows deviation in flat regions
-        loss = torch.mean(weight_map * (v_pred - v_target) ** 2)
-        
-        return loss
-
 if __name__ == "__main__":
     # Test loss functions (clean version)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -618,17 +699,13 @@ if __name__ == "__main__":
     print("\nTesting Geometric Free Energy Loss (SWD only)...")
     energy_loss = GeometricFreeEnergyLoss(w_style=60.0).to(device)
     loss_dict = energy_loss(x_pred, x_style)
-    print(f"  Total Energy: {loss_dict['total'].item():.6f}")
-    print(f"  Style SWD: {loss_dict['style_swd'].item():.6f}")
-    
-    print("\nTesting Trajectory MSE Loss...")
-    mse_loss = TrajectoryMSELoss(weight=5.0).to(device)
-    mse_value = mse_loss(v_pred, x_0, x_1)
-    print(f"  MSE Loss: {mse_value.item():.6f}")
+    print(f"  Total Energy: {loss_dict['style_swd']:.6f}")
+    print(f"  Style SWD: {loss_dict['style_swd']:.6f}")
     
     print("\nTesting Structure Anchored Loss (Laplacian)...")
     struct_loss = StructureAnchoredLoss(weight=5.0, edge_boost=3.0).to(device)  # 🔥 Fixed: 9.0 -> 3.0
-    struct_value = struct_loss(v_pred, x_0, x_1)
+    v_target = x_style - x_0
+    struct_value = struct_loss(v_pred, v_target, x_0)
     print(f"  Structure Anchored Loss: {struct_value.item():.6f}")
     
     print("\n✓ All loss functions tested successfully!")

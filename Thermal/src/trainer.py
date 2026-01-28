@@ -16,7 +16,6 @@ from checkpoint import find_latest_checkpoint, load_checkpoint, save_checkpoint
 from dataset import LatentDataset
 from inference import decode_latent, encode_image, load_vae
 from losses import (
-    DistilledStructureLoss,
     GeometricFreeEnergyLoss,
     StructureAnchoredLoss,
     VelocityRegularizationLoss,
@@ -59,37 +58,30 @@ class LGTTrainer:
         logger.info(f"Model parameters: {count_parameters(self.model):,}")
 
         self.energy_loss = GeometricFreeEnergyLoss(
+            num_styles=config['model']['num_styles'],
             w_style=config['loss']['w_style'],
-            swd_scales=config['loss'].get('swd_scales', [2, 4, 8]),
-            swd_scale_weights=config['loss'].get('swd_scale_weights', [2.0, 5.0, 5.0]),
+            swd_scales=config['loss'].get('swd_scales', [1, 3, 5, 7, 15]),
+            swd_scale_weights=config['loss'].get('swd_scale_weights', [1.0, 5.0, 5.0, 5.0, 3.0]),
+            num_projections=config['loss'].get('num_projections', 64),
+            max_samples=config['loss'].get('max_samples', 4096),
         ).to(device)
 
         # 找到这一段（约 53 行）并替换：
 
-        use_laplacian_lock = config['loss'].get('use_laplacian_structure_lock', True)
-        if use_laplacian_lock:
-            # ✅ 修复：优先读取 'w_mse'，并将默认值降为 1.0
-            structure_weight = config['loss'].get('w_mse') or config['loss'].get('structure_weight', 1.0)
-            
-            # ✅ 修复：将 edge_boost 默认值从 9.0 降为 1.5
-            edge_boost = config['loss'].get('edge_boost', 1.5)
-            
-            self.struc_loss = StructureAnchoredLoss(
-                weight=structure_weight,
-                edge_boost=edge_boost,
-            ).to(device)
-            
-            logger.info(
-                f"✓ Laplacian Structure Lock enabled (weight={structure_weight}, edge_boost={edge_boost})"
-            )
-        else:
-            self.struc_loss = DistilledStructureLoss(
-                proxy_path="structure_proxy.pt",
-                base_weight=config['loss'].get('structure_base_weight', 1.0),
-                structure_weight=config['loss'].get('structure_weight', 15.0),
-                device=device,
-            ).to(device)
-            logger.info("✓ Distilled Structure Loss enabled (CNN proxy)")
+        # ✅ 修复：优先读取 'w_mse'，并将默认值降为 1.0
+        structure_weight = config['loss'].get('w_mse') or config['loss'].get('structure_weight', 1.0)
+        
+        # ✅ 修复：将 edge_boost 默认值从 9.0 降为 1.5
+        edge_boost = config['loss'].get('edge_boost', 1.5)
+        
+        self.struc_loss = StructureAnchoredLoss(
+            weight=structure_weight,
+            edge_boost=edge_boost,
+        ).to(device)
+        
+        logger.info(
+            f"✓ Laplacian Structure Lock enabled (weight={structure_weight}, edge_boost={edge_boost})"
+        )
 
         vel_smooth_weight = config['loss'].get('vel_smooth_weight', 0.2)
         self.vel_smooth_loss = VelocitySmoothnessLoss(weight=vel_smooth_weight).to(device)
@@ -307,17 +299,14 @@ class LGTTrainer:
             v_pred = self.model(x_t, t, style_id_tgt, use_avg_style=drop_label)
 
         with torch.no_grad():
-            pred_type = self.noise_scheduler.config.prediction_type
-            if pred_type == "epsilon":
-                v_target = x0
-            elif pred_type == "v_prediction":
-                v_target = x0
-            elif pred_type == "sample":
-                v_target = x_src_target
-            else:
-                v_target = x0
+            # 🔥 修复：Flow Matching 的真实目标是位移矢量，而非噪声本身
+            # v_target = (x_target_noisy - x0) 是从初始噪声到目标艺术风格的向量场
+            # 这与 Diffusion（预测噪声）的范式本质不同，解决"色块"的根本原因
+            v_target = x_target_noisy - x0  # [B, C, H, W] 位移矢量
 
-        loss_mse = self.struc_loss(v_pred, v_target, latent, current_epoch=epoch, total_warmup_epochs=20)
+        # 从config读取structure_warmup_epochs，默认150个epoch缓慢施加结构锁，之后保持全强度
+        structure_warmup = self.config['training'].get('structure_warmup_epochs', 150)
+        loss_mse = self.struc_loss(v_pred, v_target, latent, current_epoch=epoch, total_warmup_epochs=structure_warmup)
 
         x_1 = integrate_ode(
             model=self.model,
@@ -330,7 +319,7 @@ class LGTTrainer:
             amp_dtype=torch.bfloat16,
             training=self.model.training,
         )
-        loss_dict = self.energy_loss(x_1, style_latents)
+        loss_dict = self.energy_loss(x_1, style_latents, style_ids=style_id_tgt)
 
         style_weight_batch = self.style_weights[style_id_tgt].mean()
         loss_smooth = self.vel_smooth_loss(v_pred)
@@ -671,6 +660,28 @@ class LGTTrainer:
     def on_training_start(self, dataloader: DataLoader) -> None:
         if self.style_indices_cache is None:
             self.build_style_indices_cache(dataloader.dataset)
+        
+        # 🔥 Initialize Style LUT Cache for Multi-Style SWD Loss
+        logger.info("🔥 Initializing Style LUT Cache for Multi-Style SWD...")
+        style_prototypes = {}
+        
+        # Collect representative latent for each style
+        for style_id in range(self.config['model']['num_styles']):
+            if hasattr(dataloader.dataset, 'style_indices') and style_id in self.style_indices_cache:
+                # Take first sample of this style
+                idx = self.style_indices_cache[style_id][0]
+                latent_sample = dataloader.dataset.latents_tensor[idx].unsqueeze(0)  # [1, 4, 32, 32]
+            else:
+                # Fallback: random initialization
+                logger.warning(f"⚠️  No style {style_id} samples found, using random init")
+                latent_sample = torch.randn(1, 4, 32, 32)
+            
+            style_prototypes[style_id] = latent_sample
+        
+        # Initialize LUT cache (this pre-computes all sorted projections)
+        self.energy_loss.initialize_cache(style_prototypes, self.device)
+        
+        # Save originals
         orig_dir = self.inference_dir / 'epoch_-1'
         if not orig_dir.exists() or not any(orig_dir.iterdir()):
             logger.info("Saving original test images to inference/epoch_-1")

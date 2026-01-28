@@ -21,8 +21,13 @@ def integrate_ode(
     use_amp: bool = True,
     amp_dtype: torch.dtype = torch.bfloat16,
     training: bool = True,
+    clip_range: float = 6.0,
 ) -> torch.Tensor:
-    """Euler integration of dx/dt = v(x, t, style)."""
+    """Euler integration of dx/dt = v(x, t, style) with numerical safeguards.
+    
+    Args:
+        clip_range: VAE latent space range to clip to (standard VAE uses ~±3σ, we use 6.0 for safety)
+    """
     x = x_t.clone()
     t = t_start.clone()
     num_steps = max(steps, 1)
@@ -39,6 +44,12 @@ def integrate_ode(
         else:
             v = step_fn(x, t, style_id)
         x = x + v * dt.view(-1, 1, 1, 1)
+        
+        # 🔥 数值安全阀：限制在VAE的线性响应区间
+        # Cross-Attention检索出的艺术特征会导致极强的速度场，必须截断
+        # 防止色块/爆炸的最后一公里
+        x = torch.clamp(x, -clip_range, clip_range)
+        
         t = t + dt
 
     return x
@@ -51,8 +62,13 @@ def invert_latent(
     num_steps: int = 15,
     use_amp: bool = True,
     amp_dtype: torch.dtype = torch.bfloat16,
+    clip_range: float = 6.0,
 ) -> torch.Tensor:
-    """Reverse ODE integration from terminal state to noise."""
+    """Reverse ODE integration from terminal state to noise with numerical safeguards.
+    
+    Args:
+        clip_range: VAE latent space range to clip to (prevents explosion during inversion)
+    """
     b = latent.shape[0]
     device = latent.device
     if isinstance(style_id, int):
@@ -67,6 +83,9 @@ def invert_latent(
         with torch.amp.autocast('cuda', enabled=use_amp, dtype=amp_dtype):
             v = model(x, t, style_id, use_avg_style=False)
         x = x - v * dt
+        
+        # 🔥 数值安全阀：防止反演过程中的爆炸
+        x = torch.clamp(x, -clip_range, clip_range)
 
     return x
 
@@ -80,8 +99,13 @@ def generate_latent(
     amp_dtype: torch.dtype = torch.bfloat16,
     langevin_sigma: float = 0.1,
     langevin_threshold: float = 0.5,
+    clip_range: float = 6.0,
 ) -> torch.Tensor:
-    """Forward ODE integration with optional Langevin noise."""
+    """Forward ODE integration with optional Langevin noise and numerical safeguards.
+    
+    Args:
+        clip_range: VAE latent space range to clip to (prevents color blocks)
+    """
     b = latent.shape[0]
     device = latent.device
     if isinstance(style_id, int):
@@ -96,6 +120,11 @@ def generate_latent(
         with torch.amp.autocast('cuda', enabled=use_amp, dtype=amp_dtype):
             v = model(x, t, style_id, use_avg_style=False)
         x = x + v * dt
+        
+        # 🔥 数值安全阀：限制在VAE的线性响应区间，消灭色块
+        # Cross-Attention检索出的强艺术特征可能导致速度场爆炸
+        x = torch.clamp(x, -clip_range, clip_range)
+        
         if t_current > langevin_threshold:
             noise = torch.randn_like(x)
             x = x + langevin_sigma * (dt ** 0.5) * noise
