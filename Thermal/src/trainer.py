@@ -64,15 +64,23 @@ class LGTTrainer:
             swd_scale_weights=config['loss'].get('swd_scale_weights', [2.0, 5.0, 5.0]),
         ).to(device)
 
+        # 找到这一段（约 53 行）并替换：
+
         use_laplacian_lock = config['loss'].get('use_laplacian_structure_lock', True)
         if use_laplacian_lock:
+            # ✅ 修复：优先读取 'w_mse'，并将默认值降为 1.0
+            structure_weight = config['loss'].get('w_mse') or config['loss'].get('structure_weight', 1.0)
+            
+            # ✅ 修复：将 edge_boost 默认值从 9.0 降为 1.5
+            edge_boost = config['loss'].get('edge_boost', 1.5)
+            
             self.struc_loss = StructureAnchoredLoss(
-                weight=config['loss'].get('structure_weight', 5.0),
-                edge_boost=config['loss'].get('edge_boost', 9.0),
+                weight=structure_weight,
+                edge_boost=edge_boost,
             ).to(device)
+            
             logger.info(
-                "✓ Laplacian Structure Lock enabled "
-                f"(weight={config['loss'].get('structure_weight', 5.0)}, edge_boost={config['loss'].get('edge_boost', 9.0)})"
+                f"✓ Laplacian Structure Lock enabled (weight={structure_weight}, edge_boost={edge_boost})"
             )
         else:
             self.struc_loss = DistilledStructureLoss(
@@ -204,10 +212,8 @@ class LGTTrainer:
 
     def build_style_indices_cache(self, dataset: LatentDataset) -> None:
         logger.info("Building style indices cache...")
-        self.style_indices_cache = {}
-        for style_id in range(self.config['model']['num_styles']):
-            indices = (dataset.styles_tensor == style_id).nonzero(as_tuple=True)[0]
-            self.style_indices_cache[style_id] = indices
+        self.style_indices_cache = dataset.style_indices
+        for style_id, indices in self.style_indices_cache.items():
             logger.info(f"  Style {style_id}: {len(indices)} samples")
         self.dataset_ref = dataset
         logger.info("✓ Style indices cache built")
@@ -229,7 +235,9 @@ class LGTTrainer:
             count = int(mask.sum().item())
             if count == 0:
                 continue
-            rand_indices = indices[torch.randint(len(indices), (count,))]
+            # Convert list to tensor for random indexing
+            indices_tensor = torch.tensor(indices, dtype=torch.long)
+            rand_indices = indices_tensor[torch.randint(len(indices), (count,))]
             selected = self.dataset_ref.latents_tensor[rand_indices]
             style_latents[mask.to(device)] = selected.to(device, non_blocking=True)
 
