@@ -24,14 +24,14 @@
     "vel_reg_weight": 1
   },
   "training": {
-    "batch_size": 128,
+    "batch_size": 96,
     "accumulation_steps": 1,
     "learning_rate": 1e-4,
     "min_learning_rate": 1e-6,
     "weight_decay": 1e-5,
     "num_epochs": 600,
     
-    "label_drop_prob": 0.25,
+    "label_drop_prob": 0.1,
     
     "use_avg_style_for_uncond": true,
     "epsilon": 0.01,
@@ -62,7 +62,7 @@
     ]
   },
   "checkpoint": {
-    "save_dir": "../checkpoints-lora"
+    "save_dir": "../ckpt-cross_attn"
   },
   "inference": {
     "num_steps": 15,
