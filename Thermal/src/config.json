@@ -9,15 +9,15 @@
     "num_decoder_blocks": 5
   },
   "loss": {
-    "w_style": 4.0,
+    "w_style": 5.0,
     "w_mse": 1.0,
-    "w_layout": 2.0,
+    "w_layout": 0.5,
     "patch_size": 5, 
     "num_projections": 64,
     "max_samples": 4096,
     "use_multiscale_swd": true,
     "swd_scales": [1, 3, 5, 7, 15],
-    "swd_scale_weights": [1.0, 2.0, 2.0, 2.0, 1.5],
+    "swd_scale_weights": [1.0, 5.0, 5.0, 5.0, 2.0],
     "edge_boost": 1.5,
     "style_weights": [1.0, 1.0, 1.0, 1.0],
     "use_velocity_reg": true,
@@ -29,18 +29,21 @@
     "learning_rate": 2e-4,
     "min_learning_rate": 1e-6,
     "weight_decay":5e-5,
-    "num_epochs": 600,
+    "num_epochs": 1000,
     "warmup_epochs": 12,
     "use_adaptive_loss_norm": true,
     
     "phased_training": {
-      "lr_warmup_ratio": 0.02,
+      "phase_step_size": 50,
+      "use_adaptive_phases": true,
+      "adaptive_patience": 15,
+      "adaptive_factor": 0.5,
       
       "m_mse_start": 2.0,
       "m_mse_end": 0.5,
       
       "m_style_start": 0.1,
-      "m_style_end": 2.5,
+      "m_style_end": 5.0,
       
       "layout_ratio": 0.8
     },
@@ -81,7 +84,7 @@
   },
   "inference": {
     "num_steps": 15,
-    "temperature_lambda": 0.1,
+    "temperature_lambda": 0.3,
     "temperature_threshold": 0.5,
     "use_cfg": true,
     "cfg_scale": 4.0,

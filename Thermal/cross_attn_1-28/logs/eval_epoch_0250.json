@@ -1,0 +1,147 @@
+{
+  "checkpoint": "../cross_attn_1-28/epoch_0250.pt",
+  "timestamp": "2026-01-29 04:57:07",
+  "matrix_breakdown": {
+    "monet": {
+      "monet": {
+        "count": 50,
+        "clip_style": 0.7050678683757782,
+        "clip_content": 0.7873990440368652,
+        "style_lpips": 0.694808269071579,
+        "content_lpips": 0.4798736596107483
+      },
+      "photo": {
+        "count": 50,
+        "clip_style": 0.6058881823778153,
+        "clip_content": 0.7505803442001343,
+        "style_lpips": 0.8067534478902817,
+        "content_lpips": 0.5501157218217849
+      },
+      "vangogh": {
+        "count": 50,
+        "clip_style": 0.6713737498283386,
+        "clip_content": 0.7567298126220703,
+        "style_lpips": 0.7401080784797669,
+        "content_lpips": 0.5208640944957733
+      },
+      "cezanne": {
+        "count": 50,
+        "clip_style": 0.6327125485062599,
+        "clip_content": 0.728205738067627,
+        "style_lpips": 0.7343624728918076,
+        "content_lpips": 0.5463980126380921
+      }
+    },
+    "photo": {
+      "monet": {
+        "count": 50,
+        "clip_style": 0.6340352718234062,
+        "clip_content": 0.6831530022621155,
+        "style_lpips": 0.7226353811025619,
+        "content_lpips": 0.52661252617836
+      },
+      "photo": {
+        "count": 50,
+        "clip_style": 0.6210287906169891,
+        "clip_content": 0.7379262363910675,
+        "style_lpips": 0.7728929509639739,
+        "content_lpips": 0.5050813567638397
+      },
+      "vangogh": {
+        "count": 50,
+        "clip_style": 0.6170508612632751,
+        "clip_content": 0.6903868067264557,
+        "style_lpips": 0.7706467622041703,
+        "content_lpips": 0.5391389238834381
+      },
+      "cezanne": {
+        "count": 50,
+        "clip_style": 0.5916413966774939,
+        "clip_content": 0.6820081937313079,
+        "style_lpips": 0.7542890880584717,
+        "content_lpips": 0.5464406079053878
+      }
+    },
+    "vangogh": {
+      "monet": {
+        "count": 50,
+        "clip_style": 0.6639469166994096,
+        "clip_content": 0.7622730267047882,
+        "style_lpips": 0.711532246851921,
+        "content_lpips": 0.5098649799823761
+      },
+      "photo": {
+        "count": 50,
+        "clip_style": 0.5921001392960548,
+        "clip_content": 0.7327947402000428,
+        "style_lpips": 0.8489777961492538,
+        "content_lpips": 0.5443803304433823
+      },
+      "vangogh": {
+        "count": 50,
+        "clip_style": 0.6795186727643012,
+        "clip_content": 0.7624187922477722,
+        "style_lpips": 0.7313620802402496,
+        "content_lpips": 0.5151017165184021
+      },
+      "cezanne": {
+        "count": 50,
+        "clip_style": 0.6403347494721412,
+        "clip_content": 0.7298312592506409,
+        "style_lpips": 0.750160062074661,
+        "content_lpips": 0.5433968067169189
+      }
+    },
+    "cezanne": {
+      "monet": {
+        "count": 50,
+        "clip_style": 0.657665831696987,
+        "clip_content": 0.7504026234149933,
+        "style_lpips": 0.7071366478204727,
+        "content_lpips": 0.507472014427185
+      },
+      "photo": {
+        "count": 50,
+        "clip_style": 0.5741203813076019,
+        "clip_content": 0.7095220100879669,
+        "style_lpips": 0.8306979022026063,
+        "content_lpips": 0.5422543358802795
+      },
+      "vangogh": {
+        "count": 50,
+        "clip_style": 0.6579976792454719,
+        "clip_content": 0.7292115533351898,
+        "style_lpips": 0.7356645231485368,
+        "content_lpips": 0.5153002905845642
+      },
+      "cezanne": {
+        "count": 50,
+        "clip_style": 0.6380269441843033,
+        "clip_content": 0.7046027100086212,
+        "style_lpips": 0.725592002081871,
+        "content_lpips": 0.5289943182468414
+      }
+    }
+  },
+  "analysis": {
+    "style_transfer_ability": {
+      "clip_style": 0.6282389756828547,
+      "clip_content": 0.725424925883611,
+      "note": "Metrics for Off-Diagonal pairs (Source != Target)"
+    },
+    "identity_reconstruction": {
+      "clip_content": 0.7480866956710815,
+      "note": "Metrics for Diagonal pairs (Source == Target)"
+    },
+    "photo_to_art_performance": {
+      "clip_style": 0.6142425099213917,
+      "valid": true
+    }
+  },
+  "target_style_ranking": {
+    "monet": 0.6651789721488953,
+    "photo": 0.5982843733996153,
+    "vangogh": 0.6564852407753468,
+    "cezanne": 0.6256789097100496
+  }
+}

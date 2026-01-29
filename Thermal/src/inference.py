@@ -43,7 +43,7 @@ class LangevinSampler:
     
     def __init__(
         self,
-        temperature_lambda=0.1,
+        temperature_lambda=0.3,
         temperature_threshold=0.5,
         use_cfg=True,
         cfg_scale=12.0,
@@ -308,7 +308,7 @@ class LGTInference:
         self,
         model_path,
         device='cuda',
-        temperature_lambda=0.1,
+        temperature_lambda=0.3,
         temperature_threshold=0.5,
         use_cfg=True,
         cfg_scale=5.0,

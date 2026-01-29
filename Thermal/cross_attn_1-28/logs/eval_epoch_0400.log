@@ -1,0 +1,89 @@
+STDOUT
+Loading Models...
+
+Pre-computing Reference Features...
+
+Starting Transfer & Evaluation...
+
+Generating Structured Summary...
+✓ Structured summary saved to ../cross_attn_1-28/full_eval/epoch_0400/summary.json
+
+[Quick Diagnosis]
+Transfer Capability (CLIP Style): 0.6285
+Photo->Art Capability (CLIP Style): 0.6170
+
+
+STDERR
+/home/xy/miniconda3/envs/cu128/lib/python3.12/site-packages/torchvision/models/_utils.py:208: UserWarning: The parameter 'pretrained' is deprecated since 0.13 and may be removed in the future, please use 'weights' instead.
+  warnings.warn(
+/home/xy/miniconda3/envs/cu128/lib/python3.12/site-packages/torchvision/models/_utils.py:223: UserWarning: Arguments other than a weight enum or `None` for 'weights' are deprecated since 0.13 and may be removed in the future. The current behavior is equivalent to passing `weights=VGG16_Weights.IMAGENET1K_V1`. You can also use `weights=VGG16_Weights.DEFAULT` to get the most up-to-date weights.
+  warnings.warn(msg)
+Using a slow image processor as `use_fast` is unset and a slow processor was saved with this model. `use_fast=True` will be the default behavior in v4.52, even if the model was saved with a slow processor. This will result in minor differences in outputs. You'll still be able to use a slow processor with `use_fast=False`.
+
+Caching monet:   0%|          | 0/50 [00:00<?, ?it/s]
+Caching monet:   2%|▏         | 1/50 [00:00<00:25,  1.89it/s]
+Caching monet:   4%|▍         | 2/50 [00:00<00:13,  3.46it/s]
+Caching monet:   8%|▊         | 4/50 [00:00<00:07,  6.40it/s]
+Caching monet:  12%|█▏        | 6/50 [00:00<00:04,  8.83it/s]
+Caching monet:  16%|█▌        | 8/50 [00:01<00:03, 10.83it/s]
+Caching monet:  22%|██▏       | 11/50 [00:01<00:02, 15.30it/s]
+Caching monet:  30%|███       | 15/50 [00:01<00:01, 19.88it/s]
+Caching monet:  36%|███▌      | 18/50 [00:01<00:01, 22.33it/s]
+Caching monet:  44%|████▍     | 22/50 [00:01<00:01, 24.83it/s]
+Caching monet:  50%|█████     | 25/50 [00:01<00:00, 26.12it/s]
+Caching monet:  58%|█████▊    | 29/50 [00:01<00:00, 27.50it/s]
+Caching monet:  66%|██████▌   | 33/50 [00:01<00:00, 28.38it/s]
+Caching monet:  74%|███████▍  | 37/50 [00:02<00:00, 28.92it/s]
+Caching monet:  80%|████████  | 40/50 [00:02<00:00, 29.12it/s]
+Caching monet:  86%|████████▌ | 43/50 [00:02<00:00, 29.10it/s]
+Caching monet:  92%|█████████▏| 46/50 [00:02<00:00, 29.22it/s]
+Caching monet:  98%|█████████▊| 49/50 [00:02<00:00, 29.30it/s]
+Caching monet: 100%|██████████| 50/50 [00:02<00:00, 20.28it/s]
+
+Caching photo:   0%|          | 0/50 [00:00<?, ?it/s]
+Caching photo:   8%|▊         | 4/50 [00:00<00:01, 30.03it/s]
+Caching photo:  16%|█▌        | 8/50 [00:00<00:01, 30.27it/s]
+Caching photo:  24%|██▍       | 12/50 [00:00<00:01, 30.32it/s]
+Caching photo:  32%|███▏      | 16/50 [00:00<00:01, 29.79it/s]
+Caching photo:  40%|████      | 20/50 [00:00<00:01, 29.95it/s]
+Caching photo:  48%|████▊     | 24/50 [00:00<00:00, 29.91it/s]
+Caching photo:  56%|█████▌    | 28/50 [00:00<00:00, 30.07it/s]
+Caching photo:  64%|██████▍   | 32/50 [00:01<00:00, 29.86it/s]
+Caching photo:  70%|███████   | 35/50 [00:01<00:00, 29.82it/s]
+Caching photo:  78%|███████▊  | 39/50 [00:01<00:00, 29.93it/s]
+Caching photo:  84%|████████▍ | 42/50 [00:01<00:00, 29.94it/s]
+Caching photo:  92%|█████████▏| 46/50 [00:01<00:00, 30.01it/s]
+Caching photo: 100%|██████████| 50/50 [00:01<00:00, 29.94it/s]
+Caching photo: 100%|██████████| 50/50 [00:01<00:00, 29.96it/s]
+
+Caching vangogh:   0%|          | 0/50 [00:00<?, ?it/s]
+Caching vangogh:   8%|▊         | 4/50 [00:00<00:01, 30.31it/s]
+Caching vangogh:  16%|█▌        | 8/50 [00:00<00:01, 29.89it/s]
+Caching vangogh:  24%|██▍       | 12/50 [00:00<00:01, 29.95it/s]
+Caching vangogh:  32%|███▏      | 16/50 [00:00<00:01, 30.25it/s]
+Caching vangogh:  40%|████      | 20/50 [00:00<00:00, 30.20it/s]
+Caching vangogh:  48%|████▊     | 24/50 [00:00<00:00, 30.27it/s]
+Caching vangogh:  56%|█████▌    | 28/50 [00:00<00:00, 29.98it/s]
+Caching vangogh:  62%|██████▏   | 31/50 [00:01<00:00, 29.87it/s]
+Caching vangogh:  68%|██████▊   | 34/50 [00:01<00:00, 29.79it/s]
+Caching vangogh:  74%|███████▍  | 37/50 [00:01<00:00, 29.47it/s]
+Caching vangogh:  80%|████████  | 40/50 [00:01<00:00, 29.41it/s]
+Caching vangogh:  86%|████████▌ | 43/50 [00:01<00:00, 29.32it/s]
+Caching vangogh:  92%|█████████▏| 46/50 [00:01<00:00, 29.26it/s]
+Caching vangogh:  98%|█████████▊| 49/50 [00:01<00:00, 29.44it/s]
+Caching vangogh: 100%|██████████| 50/50 [00:01<00:00, 29.76it/s]
+
+Caching cezanne:   0%|          | 0/50 [00:00<?, ?it/s]
+Caching cezanne:   8%|▊         | 4/50 [00:00<00:01, 30.52it/s]
+Caching cezanne:  16%|█▌        | 8/50 [00:00<00:01, 30.22it/s]
+Caching cezanne:  24%|██▍       | 12/50 [00:00<00:01, 30.37it/s]
+Caching cezanne:  32%|███▏      | 16/50 [00:00<00:01, 30.68it/s]
+Caching cezanne:  40%|████      | 20/50 [00:00<00:00, 30.56it/s]
+Caching cezanne:  48%|████▊     | 24/50 [00:00<00:00, 30.39it/s]
+Caching cezanne:  56%|█████▌    | 28/50 [00:00<00:00, 30.69it/s]
+Caching cezanne:  64%|██████▍   | 32/50 [00:01<00:00, 30.81it/s]
+Caching cezanne:  72%|███████▏  | 36/50 [00:01<00:00, 30.65it/s]
+Caching cezanne:  80%|████████  | 40/50 [00:01<00:00, 30.36it/s]
+Caching cezanne:  88%|████████▊ | 44/50 [00:01<00:00, 30.23it/s]
+Caching cezanne:  96%|█████████▌| 48/50 [00:01<00:00, 30.08it/s]
+Caching cezanne: 100%|██████████| 50/50 [00:01<00:00, 30.37it/s]

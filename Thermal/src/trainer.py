@@ -3,6 +3,7 @@ import logging
 import shutil
 import subprocess
 import sys
+import math
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Optional
@@ -12,7 +13,7 @@ import torch
 import torch.nn.functional as F
 from PIL import Image
 from torch.utils.data import DataLoader
-from torch.optim.lr_scheduler import CosineAnnealingLR, LinearLR, SequentialLR
+from torch.optim.lr_scheduler import LinearLR, MultiStepLR, SequentialLR, ReduceLROnPlateau
 
 from checkpoint import find_latest_checkpoint, load_checkpoint, save_checkpoint
 from dataset import LatentDataset
@@ -40,7 +41,7 @@ class RunningMean:
         # Detach to prevent gradient tracking on the normalizer itself
         val_detached = val.detach()
         self.mean = self.momentum * self.mean + (1 - self.momentum) * val_detached
-        return max(self.mean.item(), 1e-6)  # Avoid division by zero
+        return max(self.mean.item(), 1e-4)  # 🔥 提高 epsilon，防止 Loss 在极小时因分母过小而爆炸
 
 
 class LGTTrainer:
@@ -127,28 +128,10 @@ class LGTTrainer:
             fused=False,  # 🔥 Fix: Fused AdamW conflicts with GradScaler.unscale_
         )
 
-        # 🔥 Scheduler Strategy: Linear Warmup -> Cosine Decay
-        # Replaces manual warmup loop for a global, holistic strategy
-        if 'warmup_epochs' in config['training']:
-            self.warmup_epochs = config['training']['warmup_epochs']
-        else:
-            p_cfg = config['training'].get('phased_training', {})
-            self.warmup_epochs = max(1, int(self.num_epochs * p_cfg.get('lr_warmup_ratio', 0.05)))
-        min_lr = config['training'].get('min_learning_rate', 1e-6)
-
-        scheduler_warmup = LinearLR(
-            self.optimizer, start_factor=0.1, end_factor=1.0, total_iters=self.warmup_epochs
-        )
-        scheduler_cosine = CosineAnnealingLR(
-            self.optimizer,
-            T_max=max(1, self.num_epochs - self.warmup_epochs),
-            eta_min=min_lr
-        )
-        self.scheduler = SequentialLR(
-            self.optimizer,
-            schedulers=[scheduler_warmup, scheduler_cosine],
-            milestones=[self.warmup_epochs]
-        )
+        # Scheduler will be initialized in on_training_start once we know dataloader length
+        self.scheduler = None
+        self.warmup_scheduler = None  # For adaptive mode manual warmup
+        self.total_training_steps = 0
 
         self.use_amp = config['training'].get('use_amp', True)
         self.scaler = torch.amp.GradScaler(enabled=self.use_amp)
@@ -303,18 +286,38 @@ class LGTTrainer:
 
     def _get_thermodynamic_schedule(self, epoch: int):
         """
-        🔥 Thermodynamic Cosine Schedule (Global & Smooth)
+        🔥 Staircase Thermodynamic Schedule (Moves every 100 epochs)
         
-        Replaces the crude piecewise linear schedule with physics-inspired cosine curves.
+        Calculates multipliers that stay constant for 100-epoch blocks.
         - Structure (Solid Phase): Cosine Decay (High -> Low)
         - Style (Liquid Phase): Cosine Warmup (Low -> High)
         """
         p_cfg = self.config['training'].get('phased_training', {})
         if not p_cfg:
             return 1.0, 1.0, 1.0
-
-        # Normalized time t in [0, 1]
-        t = min(epoch / self.num_epochs, 1.0)
+        
+        # 🔥 Adaptive vs Fixed Schedule
+        if p_cfg.get('use_adaptive_phases', False):
+            # Adaptive: Progress 't' is derived from Learning Rate decay
+            # As LR drops from base_lr -> min_lr, t goes from 0.0 -> 1.0
+            current_lr = self.optimizer.param_groups[0]['lr']
+            base_lr = self.config['training']['learning_rate']
+            min_lr = self.config['training']['min_learning_rate']
+            
+            if current_lr >= base_lr:
+                t = 0.0
+            elif current_lr <= min_lr:
+                t = 1.0
+            else:
+                # Logarithmic progress (since LR decays exponentially)
+                # t = (log(base) - log(curr)) / (log(base) - log(min))
+                progress = (math.log(base_lr) - math.log(current_lr)) / (math.log(base_lr) - math.log(min_lr))
+                t = max(0.0, min(1.0, progress))
+        else:
+            # Fixed Staircase: Quantize progress to 'phase_step_size' blocks
+            step_size = p_cfg.get('phase_step_size', 100)
+            quantized_epoch = ((epoch - 1) // step_size) * step_size
+            t = min(quantized_epoch / self.num_epochs, 1.0)
         
         # 1. Structure Schedule: Cosine Decay
         # Starts strong to lock content, decays to allow artistic deformation
@@ -452,6 +455,26 @@ class LGTTrainer:
 
         return loss_dict
 
+    def step_scheduler(self, metric=None, end_of_epoch=False):
+        """Unified scheduler stepper handling both Fixed (Step-based) and Adaptive (Epoch-based) modes."""
+        p_cfg = self.config['training'].get('phased_training', {})
+        use_adaptive = p_cfg.get('use_adaptive_phases', False)
+
+        if use_adaptive:
+            # Adaptive Mode: Manual Warmup -> ReduceLROnPlateau
+            if self.global_step < self.warmup_steps:
+                # Warmup is step-based
+                if not end_of_epoch and self.warmup_scheduler:
+                    self.warmup_scheduler.step()
+            else:
+                # Plateau check is epoch-based
+                if end_of_epoch and metric is not None:
+                    self.scheduler.step(metric)
+        else:
+            # Fixed Mode: SequentialLR (Step-based)
+            if not end_of_epoch and self.scheduler:
+                self.scheduler.step()
+
     def train_epoch(self, dataloader: DataLoader, epoch: int) -> Dict[str, float]:
         self.model.train()
 
@@ -478,12 +501,11 @@ class LGTTrainer:
         pbar = tqdm(dataloader, desc=f"Epoch {epoch}/{self.num_epochs}", disable=not use_tqdm, leave=use_tqdm)
         self.optimizer.zero_grad(set_to_none=True)
 
-        # 🔥 使用新的热力学调度器
-        multipliers = self._get_thermodynamic_schedule(epoch)
-        
-
         for step_idx, batch in enumerate(pbar, start=1):
             torch.compiler.cudagraph_mark_step_begin()
+            
+            # 🔥 Staircase multipliers (constant for 100 epochs)
+            multipliers = self._get_thermodynamic_schedule(epoch)
 
             with torch.amp.autocast('cuda', enabled=self.use_amp, dtype=torch.bfloat16):
                 loss_dict = self.compute_energy_loss(batch, epoch, multipliers=multipliers)
@@ -499,6 +521,7 @@ class LGTTrainer:
                 self.scaler.update()
                 self.optimizer.zero_grad(set_to_none=True)
                 accum_counter = 0
+                self.step_scheduler(end_of_epoch=False)  # 🔥 Unified Step Update
                 self._update_lora_alpha(self.global_step)
                 self.global_step += 1
 
@@ -786,6 +809,50 @@ class LGTTrainer:
     def on_training_start(self, dataloader: DataLoader) -> None:
         if self.style_indices_cache is None:
             self.build_style_indices_cache(dataloader.dataset)
+            
+        # 🔥 Initialize Step-based Scheduler
+        steps_per_epoch = len(dataloader)
+        self.total_training_steps = self.num_epochs * steps_per_epoch
+        
+        # Calculate warmup steps from epochs if not explicit
+        if 'warmup_steps' in self.config['training']:
+            self.warmup_steps = self.config['training']['warmup_steps']
+        else:
+            self.warmup_steps = self.config['training'].get('warmup_epochs', 10) * steps_per_epoch
+
+        p_cfg = self.config['training'].get('phased_training', {})
+        use_adaptive = p_cfg.get('use_adaptive_phases', False)
+
+        if use_adaptive:
+            logger.info(f"🔥 Initializing ADAPTIVE Scheduler (ReduceLROnPlateau)")
+            # Manual Warmup Scheduler
+            self.warmup_scheduler = LinearLR(
+                self.optimizer, start_factor=0.1, end_factor=1.0, total_iters=self.warmup_steps
+            )
+            # Main Scheduler
+            self.scheduler = ReduceLROnPlateau(
+                self.optimizer, 
+                mode='min', 
+                factor=p_cfg.get('adaptive_factor', 0.5), 
+                patience=p_cfg.get('adaptive_patience', 10)
+            )
+        else:
+            step_size = p_cfg.get('phase_step_size', 100)
+            logger.info(f"Initializing Fixed Staircase Scheduler: step_size={step_size} epochs")
+            
+            scheduler_warmup = LinearLR(
+                self.optimizer, start_factor=0.1, end_factor=1.0, total_iters=self.warmup_steps
+            )
+            milestones = [i * step_size * steps_per_epoch for i in range(1, 10)]
+            rel_milestones = [max(1, m - self.warmup_steps) for m in milestones]
+            
+            scheduler_step = MultiStepLR(self.optimizer, milestones=rel_milestones, gamma=0.5)
+            self.scheduler = SequentialLR(
+                self.optimizer, schedulers=[scheduler_warmup, scheduler_step], milestones=[self.warmup_steps]
+            )
+
+        # If we resumed, the scheduler state was already loaded into a dummy or needs to be re-applied
+        # (In this implementation, we assume fresh start or handle state loading in _maybe_resume)
         
         # 🔥 Initialize Style LUT Cache for Multi-Style SWD Loss
         logger.info("🔥 Initializing Style LUT Cache for Multi-Style SWD...")
@@ -814,9 +881,6 @@ class LGTTrainer:
             self.evaluate_and_infer(-1)
         else:
             logger.info("Original test images already saved in inference/epoch_-1; skipping.")
-
-    def step_scheduler(self) -> None:
-        self.scheduler.step()
 
     def set_train(self) -> None:
         self.model.train()
